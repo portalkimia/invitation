@@ -91,11 +91,15 @@
         </div>
         <div>
           <h1 class="text-sm font-bold text-white">Usher Check-in</h1>
-          <p class="text-[10px] text-slate-400">Romeo & Juliet Wedding</p>
+          <p id="reception-event-subtitle" class="text-[10px] text-slate-400">Romeo & Juliet Wedding</p>
         </div>
       </div>
 
       <div class="flex items-center space-x-2">
+        <a href="index.html" class="py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-xs font-medium inline-flex items-center space-x-1 transition-colors">
+          <i data-lucide="mail-open" class="w-3.5 h-3.5"></i>
+          <span>Lihat Undangan</span>
+        </a>
         <a href="dashboard.html" target="_blank" class="py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-xs font-medium inline-flex items-center space-x-1 transition-colors">
           <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
           <span>Dashboard</span>
@@ -566,8 +570,9 @@
 
       document.getElementById('success-guest-greeting').textContent = `Selamat Datang, ${currentGuest.name}!`;
 
-      // Generate Pocket Cam QR Code linking to pocket-cam.html?code=[Code]
-      const pocketCamUrl = WeddingApi.buildInviteUrl(currentGuest.code, currentGuest.name).replace('index.html', 'pocket-cam.html');
+      // Generate Pocket Cam QR Code linking to pocket-cam.html?code=[Code]&unlock=true
+      const rawInviteUrl = WeddingApi.buildInviteUrl(currentGuest.code, currentGuest.name);
+      const pocketCamUrl = rawInviteUrl.replace(/(index|invitation)\.html/, 'pocket-cam.html') + '&unlock=true';
       const pocketQrContainer = document.getElementById('pocket-qrcode');
       pocketQrContainer.innerHTML = '';
       new QRCode(pocketQrContainer, {
@@ -601,6 +606,13 @@
       setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 3000);
+    }
+
+    // Sync title/couple subtitle from cached or live settings
+    const cachedSettings = WeddingApi.getCachedSettings();
+    if (cachedSettings && cachedSettings.EVENT_TITLE) {
+      const subEl = document.getElementById('reception-event-subtitle');
+      if (subEl) subEl.textContent = cachedSettings.EVENT_TITLE;
     }
 
     // Initialize check

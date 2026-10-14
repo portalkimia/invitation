@@ -92,6 +92,10 @@
             <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Tata Database Sheet</span>
           </button>
+          <a href="index.html" target="_blank" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="mail-open" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Lihat Undangan</span>
+          </a>
           <a href="reception.html" target="_blank" class="py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
             <i data-lucide="scan" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Meja Resepsi</span>
@@ -105,8 +109,28 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-      <!-- ==================== STATS OVERVIEW CARDS ==================== -->
-      <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <!-- Navigation Tabs: Guest Manager vs Event Customizer -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div class="flex items-center space-x-2">
+          <button id="nav-tab-guests" class="py-2.5 px-5 rounded-xl font-bold text-xs bg-slate-900 text-white shadow-sm flex items-center space-x-2 transition-all">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>Daftar Tamu & WA Sender</span>
+          </button>
+          <button id="nav-tab-settings" class="py-2.5 px-5 rounded-xl font-bold text-xs bg-white text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center space-x-2 transition-all">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <span>Pengaturan Undangan & Acara</span>
+          </button>
+        </div>
+        <div class="text-xs text-slate-500 italic hidden sm:block">
+          💡 Ubah nama, tanggal, lokasi, atau rekening tanpa edit kode HTML
+        </div>
+      </div>
+
+      <!-- ==================== TAB 1: GUESTS & WA SENDER ==================== -->
+      <div id="section-guests" class="space-y-8">
+
+        <!-- ==================== STATS OVERVIEW CARDS ==================== -->
+        <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- Total Guests -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between mb-2">
@@ -302,6 +326,307 @@
           </table>
         </div>
       </section>
+      </div> <!-- /#section-guests -->
+
+      <!-- ==================== TAB 2: EVENT CUSTOMIZER & SETTINGS ==================== -->
+      <div id="section-settings" class="space-y-8 hidden">
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold mb-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Live Customizer Tanpa Edit Kode HTML</span>
+            </div>
+            <h2 class="text-2xl font-bold">Pengaturan Acara & Undangan</h2>
+            <p class="text-xs text-amber-100 mt-1 max-w-xl">
+              Ubah data pengantin, tanggal, lokasi akad/resepsi, Google Maps, nomor rekening, dan lagu langsung dari sini. Perubahan otomatis tersimpan ke Google Sheets dan langsung tampil di undangan.
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="btn-load-settings" type="button" class="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/30 flex items-center space-x-1.5 transition-all">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="load-settings-icon"></i>
+              <span>Muat Ulang</span>
+            </button>
+            <a href="index.html" target="_blank" class="py-2.5 px-4 rounded-xl bg-white text-slate-900 text-xs font-bold shadow-md hover:bg-amber-50 flex items-center space-x-1.5 transition-all">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              <span>Lihat Undangan</span>
+            </a>
+          </div>
+        </div>
+
+        <form id="form-event-settings" class="space-y-6">
+
+          <!-- 1. Couple Information -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Identitas Kedua Mempelai</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Groom -->
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                <span class="inline-block px-2.5 py-1 rounded bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider">
+                  Mempelai Pria
+                </span>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                  <input type="text" id="cfg-groom-name" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Romeo Montague">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Panggilan</label>
+                  <input type="text" id="cfg-groom-short" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Romeo">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ayah</label>
+                    <input type="text" id="cfg-groom-father" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Bpk. Montague">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ibu</label>
+                    <input type="text" id="cfg-groom-mother" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Ibu Montague">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Bio Singkat</label>
+                  <input type="text" id="cfg-groom-bio" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Putra pertama dari Bpk. Montague & Ibu Montague">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">URL Foto Pria (Opsional)</label>
+                  <input type="url" id="cfg-groom-photo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="https://example.com/foto-groom.jpg">
+                </div>
+              </div>
+
+              <!-- Bride -->
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                <span class="inline-block px-2.5 py-1 rounded bg-rose-100 text-rose-800 text-xs font-bold uppercase tracking-wider">
+                  Mempelai Wanita
+                </span>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                  <input type="text" id="cfg-bride-name" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Juliet Capulet">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Panggilan</label>
+                  <input type="text" id="cfg-bride-short" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Juliet">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ayah</label>
+                    <input type="text" id="cfg-bride-father" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Bpk. Capulet">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ibu</label>
+                    <input type="text" id="cfg-bride-mother" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Ibu Capulet">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Bio Singkat</label>
+                  <input type="text" id="cfg-bride-bio" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Putri bungsu dari Bpk. Capulet & Ibu Capulet">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">URL Foto Wanita (Opsional)</label>
+                  <input type="url" id="cfg-bride-photo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="https://example.com/foto-bride.jpg">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Waktu, Tanggal & Jadwal -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Waktu & Tanggal Acara</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Undangan</label>
+                <input type="text" id="cfg-event-title" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="The Wedding of Romeo & Juliet">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Teks Tanggal Ditampilkan</label>
+                <input type="text" id="cfg-event-date-formatted" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="Minggu, 25 Oktober 2026">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Waktu Target Hitung Mundur</label>
+                <input type="text" id="cfg-countdown-target" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 font-mono" placeholder="2026-10-25T08:00">
+                <span class="text-[10px] text-slate-400">Format: YYYY-MM-DDTHH:mm (contoh: 2026-10-25T08:00)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <!-- Akad -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span>Akad Nikah</span>
+                </h4>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Waktu Akad</label>
+                  <input type="text" id="cfg-akad-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="08:00 - 10:00 WIB">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Tempat / Gedung / Masjid</label>
+                  <input type="text" id="cfg-akad-venue" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Masjid Agung Al-Azhar">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
+                  <input type="text" id="cfg-akad-address" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Catatan Akad</label>
+                  <input type="text" id="cfg-akad-note" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Khusus Keluarga & Kerabat Dekat">
+                </div>
+              </div>
+
+              <!-- Resepsi -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span>Resepsi Pernikahan</span>
+                </h4>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Waktu Resepsi</label>
+                  <input type="text" id="cfg-resepsi-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="11:00 - 14:00 WIB">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Tempat / Gedung</label>
+                  <input type="text" id="cfg-resepsi-venue" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Grand Ballroom Hotel Mulia Senayan">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
+                  <input type="text" id="cfg-resepsi-address" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Jl. Asia Afrika No.6, Gelora, Senayan, Jakarta Pusat">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Link Google Maps</label>
+                  <input type="url" id="cfg-maps-url" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="https://maps.google.com/?q=Hotel+Mulia+Senayan+Jakarta">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Foto Sampul, Background & Lagu -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
+                <i data-lucide="music" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Foto Sampul, Background & Musik Lagu</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL Foto Sampul / Prewedding</label>
+                <input type="url" id="cfg-cover-photo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="https://example.com/cover.jpg">
+                <span class="text-[10px] text-slate-400">Tampil di lingkaran amplop pembuka</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL Latar Belakang (Background)</label>
+                <input type="url" id="cfg-bg-image" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="https://example.com/bg.jpg">
+                <span class="text-[10px] text-slate-400">Kosongkan jika ingin latar krem lembut default</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL Musik Lagu Undangan (.mp3)</label>
+                <input type="url" id="cfg-music-url" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="https://...romantic-wedding.mp3">
+                <span class="text-[10px] text-slate-400">File MP3 langsung yang berputar otomatis</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Rekening Amplop Digital & Kado Fisik -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Rekening Amplop Digital & Pengiriman Kado</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Rekening 1 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Rekening Amplop Digital 1</span>
+                <div class="grid grid-cols-3 gap-2">
+                  <input type="text" id="cfg-bank1-name" placeholder="Bank (BCA)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-bank1-number" placeholder="No Rekening" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white font-mono">
+                  <input type="text" id="cfg-bank1-holder" placeholder="Atas Nama" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+              </div>
+
+              <!-- Rekening 2 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Rekening Amplop Digital 2</span>
+                <div class="grid grid-cols-3 gap-2">
+                  <input type="text" id="cfg-bank2-name" placeholder="Bank (Mandiri)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-bank2-number" placeholder="No Rekening" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white font-mono">
+                  <input type="text" id="cfg-bank2-holder" placeholder="Atas Nama" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- Kado Fisik -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <span class="text-xs font-bold text-slate-800">Alamat Pengiriman Kado Fisik</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Penerima</label>
+                  <input type="text" id="cfg-gift-recipient" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Romeo & Juliet">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">No. WhatsApp / Telepon</label>
+                  <input type="text" id="cfg-gift-phone" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="08123456789">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Alamat Lengkap Pengiriman</label>
+                <input type="text" id="cfg-gift-address" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="Jl. Kebahagiaan No. 10, Kebayoran Baru, Jakarta Selatan, 12180">
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Keamanan PIN -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center font-bold">
+                <i data-lucide="shield" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Keamanan & PIN Akses</h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Admin Dashboard</label>
+                <input type="text" id="cfg-admin-pin" maxlength="10" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold bg-white" placeholder="1234">
+                <span class="text-[10px] text-slate-400">PIN untuk membuka dashboard.html</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Meja Resepsi (Usher)</label>
+                <input type="text" id="cfg-reception-pin" maxlength="10" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold bg-white" placeholder="5678">
+                <span class="text-[10px] text-slate-400">PIN untuk membuka scanner reception.html</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons Sticky Bar -->
+          <div class="sticky bottom-6 z-30 p-4 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+              <span class="text-xs text-slate-300">Data tersimpan di tab <code class="text-amber-400 font-mono">Settings</code> Google Sheets.</span>
+            </div>
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <button type="submit" id="btn-save-all-settings" class="w-full sm:w-auto py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-all">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Simpan Semua Pengaturan ke Spreadsheet</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div> <!-- /#section-settings -->
 
     </div>
   </div>
@@ -810,6 +1135,194 @@
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 3000);
     }
+
+    // ==================== TAB NAVIGATION (GUESTS vs SETTINGS) ====================
+    const navTabGuests = document.getElementById('nav-tab-guests');
+    const navTabSettings = document.getElementById('nav-tab-settings');
+    const sectionGuests = document.getElementById('section-guests');
+    const sectionSettings = document.getElementById('section-settings');
+
+    function switchDashboardTab(activeTab) {
+      if (activeTab === 'settings') {
+        navTabSettings.className = 'py-2.5 px-5 rounded-xl font-bold text-xs bg-slate-900 text-white shadow-sm flex items-center space-x-2 transition-all';
+        navTabGuests.className = 'py-2.5 px-5 rounded-xl font-bold text-xs bg-white text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center space-x-2 transition-all';
+        sectionGuests.classList.add('hidden');
+        sectionSettings.classList.remove('hidden');
+        loadEventSettingsForm();
+      } else {
+        navTabGuests.className = 'py-2.5 px-5 rounded-xl font-bold text-xs bg-slate-900 text-white shadow-sm flex items-center space-x-2 transition-all';
+        navTabSettings.className = 'py-2.5 px-5 rounded-xl font-bold text-xs bg-white text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center space-x-2 transition-all';
+        sectionSettings.classList.add('hidden');
+        sectionGuests.classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    navTabGuests.addEventListener('click', () => switchDashboardTab('guests'));
+    navTabSettings.addEventListener('click', () => switchDashboardTab('settings'));
+
+    // ==================== EVENT CUSTOMIZER (SETTINGS CONTROLLER) ====================
+    let currentRawSettings = {};
+
+    async function loadEventSettingsForm(forceRefresh = false) {
+      const loadIcon = document.getElementById('load-settings-icon');
+      if (loadIcon) loadIcon.classList.add('animate-spin');
+
+      try {
+        const settings = await WeddingApi.getSettings();
+        currentRawSettings = settings || {};
+        const cfg = (typeof WEDDING_CONFIG !== 'undefined') ? WEDDING_CONFIG : {};
+
+        // Populate Form Inputs
+        document.getElementById('cfg-event-title').value = currentRawSettings.EVENT_TITLE || cfg.event?.title || 'The Wedding of Romeo & Juliet';
+        document.getElementById('cfg-event-date-formatted').value = currentRawSettings.EVENT_DATE_FORMATTED || cfg.event?.dateFormatted || 'Minggu, 25 Oktober 2026';
+        document.getElementById('cfg-countdown-target').value = currentRawSettings.COUNTDOWN_TARGET || cfg.event?.countdownTarget || '2026-10-25T08:00';
+
+        // Groom
+        document.getElementById('cfg-groom-name').value = currentRawSettings.GROOM_NAME || cfg.couple?.groom?.name || '';
+        document.getElementById('cfg-groom-short').value = currentRawSettings.GROOM_SHORT || cfg.couple?.groom?.shortName || '';
+        document.getElementById('cfg-groom-father').value = currentRawSettings.GROOM_FATHER || cfg.couple?.groom?.father || '';
+        document.getElementById('cfg-groom-mother').value = currentRawSettings.GROOM_MOTHER || cfg.couple?.groom?.mother || '';
+        document.getElementById('cfg-groom-bio').value = currentRawSettings.GROOM_BIO || cfg.couple?.groom?.bio || '';
+        document.getElementById('cfg-groom-photo').value = currentRawSettings.GROOM_PHOTO || cfg.couple?.groom?.photo || '';
+
+        // Bride
+        document.getElementById('cfg-bride-name').value = currentRawSettings.BRIDE_NAME || cfg.couple?.bride?.name || '';
+        document.getElementById('cfg-bride-short').value = currentRawSettings.BRIDE_SHORT || cfg.couple?.bride?.shortName || '';
+        document.getElementById('cfg-bride-father').value = currentRawSettings.BRIDE_FATHER || cfg.couple?.bride?.father || '';
+        document.getElementById('cfg-bride-mother').value = currentRawSettings.BRIDE_MOTHER || cfg.couple?.bride?.mother || '';
+        document.getElementById('cfg-bride-bio').value = currentRawSettings.BRIDE_BIO || cfg.couple?.bride?.bio || '';
+        document.getElementById('cfg-bride-photo').value = currentRawSettings.BRIDE_PHOTO || cfg.couple?.bride?.photo || '';
+
+        // Media
+        document.getElementById('cfg-cover-photo').value = currentRawSettings.COVER_PHOTO || cfg.couple?.coverPhoto || '';
+        document.getElementById('cfg-bg-image').value = currentRawSettings.BG_IMAGE || cfg.event?.backgroundImage || '';
+        document.getElementById('cfg-music-url').value = currentRawSettings.MUSIC_URL || cfg.music?.audioUrl || '';
+
+        // Akad
+        document.getElementById('cfg-akad-time').value = currentRawSettings.AKAD_TIME || cfg.event?.akadTime || '08:00 - 10:00 WIB';
+        document.getElementById('cfg-akad-venue').value = currentRawSettings.AKAD_VENUE || cfg.event?.akadVenue || 'Masjid Agung Al-Azhar';
+        document.getElementById('cfg-akad-address').value = currentRawSettings.AKAD_ADDRESS || cfg.event?.akadAddress || '';
+        document.getElementById('cfg-akad-note').value = currentRawSettings.AKAD_NOTE || cfg.event?.akadNote || 'Khusus Keluarga & Kerabat Dekat';
+
+        // Resepsi
+        document.getElementById('cfg-resepsi-time').value = currentRawSettings.RESEPSI_TIME || cfg.event?.resepsiTime || '11:00 - 14:00 WIB';
+        document.getElementById('cfg-resepsi-venue').value = currentRawSettings.RESEPSI_VENUE || cfg.event?.resepsiVenue || 'Grand Ballroom Hotel Mulia Senayan';
+        document.getElementById('cfg-resepsi-address').value = currentRawSettings.RESEPSI_ADDRESS || cfg.event?.resepsiAddress || '';
+        document.getElementById('cfg-maps-url').value = currentRawSettings.MAPS_URL || cfg.event?.mapsUrl || '';
+
+        // Bank Accounts
+        const b1 = (cfg.bankAccounts && cfg.bankAccounts[0]) || {};
+        const b2 = (cfg.bankAccounts && cfg.bankAccounts[1]) || {};
+        document.getElementById('cfg-bank1-name').value = currentRawSettings.BANK1_NAME || b1.bank || 'BCA';
+        document.getElementById('cfg-bank1-number').value = currentRawSettings.BANK1_NUMBER || b1.accountNumber || '';
+        document.getElementById('cfg-bank1-holder').value = currentRawSettings.BANK1_HOLDER || b1.holderName || '';
+
+        document.getElementById('cfg-bank2-name').value = currentRawSettings.BANK2_NAME || b2.bank || 'Bank Mandiri';
+        document.getElementById('cfg-bank2-number').value = currentRawSettings.BANK2_NUMBER || b2.accountNumber || '';
+        document.getElementById('cfg-bank2-holder').value = currentRawSettings.BANK2_HOLDER || b2.holderName || '';
+
+        // Gift
+        document.getElementById('cfg-gift-recipient').value = currentRawSettings.GIFT_RECIPIENT || cfg.giftAddress?.recipient || '';
+        document.getElementById('cfg-gift-phone').value = currentRawSettings.GIFT_PHONE || cfg.giftAddress?.phone || '';
+        document.getElementById('cfg-gift-address').value = currentRawSettings.GIFT_ADDRESS || cfg.giftAddress?.address || '';
+
+        // PINs
+        document.getElementById('cfg-admin-pin').value = currentRawSettings.ADMIN_PIN || cfg.ADMIN_PIN || '1234';
+        document.getElementById('cfg-reception-pin').value = currentRawSettings.RECEPTION_PIN || cfg.RECEPTION_PIN || '5678';
+
+        if (forceRefresh) {
+          showToast('Data pengaturan berhasil dimuat ulang!');
+        }
+      } catch (err) {
+        console.error('loadEventSettingsForm error:', err);
+      } finally {
+        if (loadIcon) loadIcon.classList.remove('animate-spin');
+      }
+    }
+
+    document.getElementById('btn-load-settings').addEventListener('click', () => {
+      loadEventSettingsForm(true);
+    });
+
+    // Handle Settings Form Submit
+    const formEventSettings = document.getElementById('form-event-settings');
+    const btnSaveAllSettings = document.getElementById('btn-save-all-settings');
+
+    formEventSettings.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      btnSaveAllSettings.disabled = true;
+      btnSaveAllSettings.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Google Sheets...`;
+
+      const settingsPayload = {
+        EVENT_TITLE: document.getElementById('cfg-event-title').value.trim(),
+        EVENT_DATE_FORMATTED: document.getElementById('cfg-event-date-formatted').value.trim(),
+        COUNTDOWN_TARGET: document.getElementById('cfg-countdown-target').value.trim(),
+
+        GROOM_NAME: document.getElementById('cfg-groom-name').value.trim(),
+        GROOM_SHORT: document.getElementById('cfg-groom-short').value.trim(),
+        GROOM_FATHER: document.getElementById('cfg-groom-father').value.trim(),
+        GROOM_MOTHER: document.getElementById('cfg-groom-mother').value.trim(),
+        GROOM_BIO: document.getElementById('cfg-groom-bio').value.trim(),
+        GROOM_PHOTO: document.getElementById('cfg-groom-photo').value.trim(),
+
+        BRIDE_NAME: document.getElementById('cfg-bride-name').value.trim(),
+        BRIDE_SHORT: document.getElementById('cfg-bride-short').value.trim(),
+        BRIDE_FATHER: document.getElementById('cfg-bride-father').value.trim(),
+        BRIDE_MOTHER: document.getElementById('cfg-bride-mother').value.trim(),
+        BRIDE_BIO: document.getElementById('cfg-bride-bio').value.trim(),
+        BRIDE_PHOTO: document.getElementById('cfg-bride-photo').value.trim(),
+
+        COVER_PHOTO: document.getElementById('cfg-cover-photo').value.trim(),
+        BG_IMAGE: document.getElementById('cfg-bg-image').value.trim(),
+        MUSIC_URL: document.getElementById('cfg-music-url').value.trim(),
+
+        AKAD_TIME: document.getElementById('cfg-akad-time').value.trim(),
+        AKAD_VENUE: document.getElementById('cfg-akad-venue').value.trim(),
+        AKAD_ADDRESS: document.getElementById('cfg-akad-address').value.trim(),
+        AKAD_NOTE: document.getElementById('cfg-akad-note').value.trim(),
+
+        RESEPSI_TIME: document.getElementById('cfg-resepsi-time').value.trim(),
+        RESEPSI_VENUE: document.getElementById('cfg-resepsi-venue').value.trim(),
+        RESEPSI_ADDRESS: document.getElementById('cfg-resepsi-address').value.trim(),
+        MAPS_URL: document.getElementById('cfg-maps-url').value.trim(),
+
+        BANK1_NAME: document.getElementById('cfg-bank1-name').value.trim(),
+        BANK1_NUMBER: document.getElementById('cfg-bank1-number').value.trim(),
+        BANK1_HOLDER: document.getElementById('cfg-bank1-holder').value.trim(),
+
+        BANK2_NAME: document.getElementById('cfg-bank2-name').value.trim(),
+        BANK2_NUMBER: document.getElementById('cfg-bank2-number').value.trim(),
+        BANK2_HOLDER: document.getElementById('cfg-bank2-holder').value.trim(),
+
+        GIFT_RECIPIENT: document.getElementById('cfg-gift-recipient').value.trim(),
+        GIFT_PHONE: document.getElementById('cfg-gift-phone').value.trim(),
+        GIFT_ADDRESS: document.getElementById('cfg-gift-address').value.trim(),
+
+        ADMIN_PIN: document.getElementById('cfg-admin-pin').value.trim() || '1234',
+        RECEPTION_PIN: document.getElementById('cfg-reception-pin').value.trim() || '5678'
+      };
+
+      try {
+        const res = await WeddingApi.saveSettings(settingsPayload);
+        if (res && res.success) {
+          if (settingsPayload.ADMIN_PIN) {
+            WeddingApi.saveStoredPin('admin', settingsPayload.ADMIN_PIN);
+          }
+          WeddingApi.playSuccessChime();
+          showToast('🎉 Pengaturan berhasil disimpan ke Google Sheets! Tampilan undangan langsung terupdate.');
+        } else {
+          showToast('Gagal menyimpan: ' + (res?.error || 'Koneksi bermasalah'));
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      } finally {
+        btnSaveAllSettings.disabled = false;
+        btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Simpan Semua Pengaturan ke Spreadsheet</span>`;
+        lucide.createIcons();
+      }
+    });
 
     // Initialize check
     checkAuth();

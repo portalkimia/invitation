@@ -66,6 +66,41 @@
 </head>
 <body class="bg-stone-900 text-stone-100 font-sans antialiased min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
 
+  <!-- ==================== CAMERA LOCKED MODAL (OPTION A) ==================== -->
+  <div id="cam-locked-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-stone-900 rounded-3xl max-w-sm w-full p-6 border border-amber-500/30 shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <span class="inline-block px-3 py-1 rounded-full bg-stone-800 text-amber-300 border border-stone-700 text-[10px] font-bold uppercase tracking-wider mb-2">
+          Akses Belum Terbuka
+        </span>
+        <h2 class="text-xl font-bold text-white mb-1.5">Pocket Camera Terkunci</h2>
+        <p class="text-xs text-stone-300 leading-relaxed">
+          Kamera 18 jepretan ini hanya dapat digunakan oleh tamu yang telah hadir dan melakukan check-in di meja resepsi.
+        </p>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-stone-800/80 border border-stone-700 text-left text-xs">
+        <p class="text-[11px] text-stone-400">Tamu Terdeteksi:</p>
+        <p id="locked-guest-name" class="font-bold text-white text-sm">Romeo & Juliet Guest</p>
+        <p id="locked-guest-code" class="text-[11px] font-mono text-amber-400 mt-0.5">Kode: G001</p>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <a id="btn-back-to-invitation" href="index.html" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs inline-flex items-center justify-center space-x-1.5 transition-all">
+          <i data-lucide="qr-code" class="w-4 h-4"></i>
+          <span>Buka Undangan & Barcode Saya</span>
+        </a>
+        <button id="btn-recheck-cam-lock" class="w-full py-2.5 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 font-semibold text-xs inline-flex items-center justify-center space-x-1.5 transition-all">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="recheck-cam-icon"></i>
+          <span>Cek Ulang Status Kehadiran</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== GUEST SELECTION MODAL (IF NO CODE IN URL/SESSION) ==================== -->
   <div id="guest-id-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
     <div class="bg-stone-900 rounded-3xl max-w-sm w-full p-6 border border-stone-800 shadow-2xl text-center">
@@ -108,6 +143,9 @@
     </div>
 
     <div class="flex items-center space-x-2">
+      <a href="index.html" class="p-1 rounded-lg bg-stone-800 text-stone-400 hover:text-stone-200" title="Kembali ke Portal">
+        <i data-lucide="home" class="w-3.5 h-3.5"></i>
+      </a>
       <button id="btn-open-reel" class="py-1 px-2.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-[11px] inline-flex items-center space-x-1 transition-colors">
         <i data-lucide="film" class="w-3.5 h-3.5"></i>
         <span>Roll Foto (<span id="reel-count">0</span>)</span>
@@ -275,6 +313,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const codeParam = urlParams.get('code');
       const nameParam = urlParams.get('to');
+      const unlockParam = urlParams.get('unlock') === 'true';
 
       if (codeParam) {
         currentGuest = { code: codeParam.toUpperCase(), name: nameParam || 'Tamu Undangan' };
@@ -286,8 +325,14 @@
         }
       }
 
+      if (currentGuest && unlockParam) {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('wedding_cam_unlocked_' + currentGuest.code, 'true');
+        }
+      }
+
       if (currentGuest) {
-        setupGuestCamera();
+        verifyGuestUnlockAndSetup();
       } else {
         showGuestSelectionModal();
       }
@@ -343,7 +388,7 @@
       WeddingApi.saveGuestSession(code, name);
       guestIdModal.classList.add('hidden');
       guestIdModal.classList.remove('flex');
-      setupGuestCamera();
+      verifyGuestUnlockAndSetup();
     };
 
     document.getElementById('btn-submit-manual-code').addEventListener('click', () => {
@@ -360,18 +405,80 @@
       }
     });
 
-    // 3. Setup Camera & Sync Photo Count
-    async function setupGuestCamera() {
-      headerGuestInfo.textContent = `${currentGuest.name} (${currentGuest.code})`;
+    // Option A: Verification & Lock Enforcement
+    async function verifyGuestUnlockAndSetup() {
+      const unlockKey = 'wedding_cam_unlocked_' + currentGuest.code;
+      const isLocallyUnlocked = (typeof localStorage !== 'undefined') && localStorage.getItem(unlockKey) === 'true';
 
-      // Fetch latest guest count from GAS
+      if (isLocallyUnlocked) {
+        hideCamLockModal();
+        setupGuestCamera();
+        return;
+      }
+
+      // Check attendance status in Google Sheets
+      const recheckIcon = document.getElementById('recheck-cam-icon');
+      if (recheckIcon) recheckIcon.classList.add('animate-spin');
+
       try {
         const res = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
-        if (res.success && res.guest) {
-          pocketPhotoCount = Number(res.guest.pocketPhotoCount || 0);
+        if (res && res.success && res.guest) {
+          if (res.guest.attendedAt) {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(unlockKey, 'true');
+            }
+            hideCamLockModal();
+            setupGuestCamera(res.guest.pocketPhotoCount);
+            return;
+          }
         }
-      } catch (e) {
-        console.warn('Sync count error:', e);
+      } catch (err) {
+        console.warn('Verify lock error:', err);
+      } finally {
+        if (recheckIcon) recheckIcon.classList.remove('animate-spin');
+      }
+
+      // Not attended yet -> Block with Cam Lock Modal
+      showCamLockModal();
+    }
+
+    function showCamLockModal() {
+      stopCamera();
+      const modal = document.getElementById('cam-locked-modal');
+      document.getElementById('locked-guest-name').textContent = currentGuest.name || 'Tamu Undangan';
+      document.getElementById('locked-guest-code').textContent = `Kode: ${currentGuest.code}`;
+      document.getElementById('btn-back-to-invitation').href = `index.html?code=${encodeURIComponent(currentGuest.code)}&to=${encodeURIComponent(currentGuest.name)}`;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function hideCamLockModal() {
+      const modal = document.getElementById('cam-locked-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('btn-recheck-cam-lock').addEventListener('click', () => {
+      verifyGuestUnlockAndSetup();
+    });
+
+    // 3. Setup Camera & Sync Photo Count
+    async function setupGuestCamera(preloadedCount = null) {
+      headerGuestInfo.textContent = `${currentGuest.name} (${currentGuest.code})`;
+
+      if (preloadedCount !== null && !isNaN(preloadedCount)) {
+        pocketPhotoCount = Number(preloadedCount);
+      } else {
+        // Fetch latest guest count from GAS
+        try {
+          const res = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
+          if (res.success && res.guest) {
+            pocketPhotoCount = Number(res.guest.pocketPhotoCount || 0);
+          }
+        } catch (e) {
+          console.warn('Sync count error:', e);
+        }
       }
 
       updateFilmCounter();

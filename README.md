@@ -6,7 +6,12 @@ A zero-cost, static wedding web application ready for GitHub Pages hosting, powe
 
 ## 🌟 Fitur Utama
 
-1. **Digital Invitation (`index.html`)**:
+1. **Portal Utama & Hub Layanan (`index.html`)**:
+   - Halaman utama ketika pengunjung membuka alamat dasar situs (`https://portalkimia.github.io/invitation/`).
+   - Menyediakan navigasi lengkap ke: **Undangan Digital**, **Pocket Camera (18 Jepretan)**, **Meja Resepsi Usher**, dan **Admin Dashboard**.
+   - Dilengkapi *Smart Auto-Redirect*: Jika tautan diakses dengan parameter kode tamu (misal `?code=G001&to=Nama`), sistem langsung otomatis mengarahkan tamu ke `invitation.html?code=G001&to=Nama` tanpa merusak tautan undangan lama.
+
+2. **Digital Invitation (`invitation.html`)**:
    - Tampilan undangan mobile-first responsif, elegan & bernuansa pernikahan (cream/gold).
    - Membaca parameter tautan `?code=G001&to=Nama%20Tamu`.
    - **Check-in Digital Pass**: Barcode/QR unik per tamu (`qrcodejs`) yang dapat diunduh ke galeri ponsel tamu.
@@ -14,7 +19,7 @@ A zero-cost, static wedding web application ready for GitHub Pages hosting, powe
    - **Amplop Digital**: Salin nomor rekening BCA/Mandiri 1-klik dengan notifikasi toast.
    - Menyimpan otomatis sesi tamu (`guestCode`) di `localStorage` untuk membuka Pocket Camera tanpa login ulang.
 
-2. **Admin Dashboard & WhatsApp Sender (`dashboard.html`)**:
+3. **Admin Dashboard & WhatsApp Sender (`dashboard.html`)**:
    - Dilindungi PIN keamanan (`ADMIN_PIN: '1234'`).
    - Kartu ringkasan live: Total Tamu, Undangan Terkirim, Tamu Hadir, Total Pax RSVP, & Foto Drive.
    - **Import Tamu Massal**: Input CSV atau teks fleksibel (`Nama, No_HP`) dengan auto-generate kode tamu `G001..G999`.
@@ -23,14 +28,14 @@ A zero-cost, static wedding web application ready for GitHub Pages hosting, powe
    - Filter tab: *Semua*, *Belum Kirim WA*, *Sudah Kirim WA*, dan *Hadir*.
    - Tabel rekap kehadiran beserta tautan langsung ke foto check-in di Google Drive.
 
-3. **Meja Resepsi Usher Scanner (`reception.html`)**:
+4. **Meja Resepsi Usher Scanner (`reception.html`)**:
    - Dilindungi PIN keamanan (`RECEPTION_PIN: '5678'`).
    - **Barcode / QR Scanner**: Pemindaian kamera langsung via `html5-qrcode` + fallback pencarian manual kode tamu.
    - **WebRTC Check-in Camera**: Mengambil foto kedatangan tamu, kompresi `<canvas>` JPEG (1280px, 0.75), dan mengunggah ke Google Drive sebagai `[Nama_Tamu]_[Code].jpg`.
    - **Pola Non-Blocking Drive**: Foto diunggah ke Google Drive sebelum mengunci Google Sheets via `LockService`, memastikan pemindaian di meja resepsi tetap instan tanpa jeda antrean.
    - **Modal Pocket Camera QR**: Menampilkan QR Code tautan `pocket-cam.html?code=[Code]` untuk di-scan oleh tamu saat tiba di meja resepsi.
 
-4. **18-Shot Pocket Camera (`pocket-cam.html`)**:
+5. **18-Shot Pocket Camera (`pocket-cam.html`)**:
    - Kamera sekali pakai vintage retro 35mm (desain disposable camera klasik).
    - Identifikasi tamu otomatis: URL `?code=`, `localStorage` (dari undangan), atau dropdown pencarian nama tamu (untuk scan QR akrilik meja).
    - Viewfinder WebRTC kamera depan/belakang, flash simulator, dan efek suara klik mekanis shutter (Web Audio API tanpa file audio eksternal).
@@ -45,13 +50,16 @@ A zero-cost, static wedding web application ready for GitHub Pages hosting, powe
 ```
 wedding-app/
 ├── assets/
+│   ├── images/             # Folder foto cover, pengantin, dan background
+│   ├── audio/              # Folder lagu pernikahan (.mp3)
 │   ├── js/
 │   │   ├── config.js       # Konfigurasi acara, PIN, rekening, template WA, dan GAS URL
 │   │   └── api.js          # CORS fetch, normalisasi HP (08xx -> 628xx), kompresi canvas, audio Web API
 │   └── css/                # Custom CSS styling
 ├── backend/
-│   └── Code.gs             # Unified Google Apps Script Web App (doGet, doPost, LockService, DriveApp)
-├── index.html              # Undangan Digital Tamu (Ticket QR, RSVP, Amplop Digital)
+│   └── Code.gs             # Unified Google Apps Script Web App (setupDatabase, LockService, DriveApp)
+├── index.html              # Landing Page Portal Utama (Hub navigasi semua layanan)
+├── invitation.html         # Undangan Digital Tamu (Ticket QR, RSVP, Amplop Digital)
 ├── dashboard.html          # Admin Portal & 1-Click WhatsApp Sender
 ├── reception.html          # Usher Check-in Barcode Scanner & Drive Photo Snap
 ├── pocket-cam.html         # 18-Shot Retro Disposable Pocket Camera

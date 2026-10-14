@@ -298,13 +298,133 @@ const WeddingApi = {
     }
   },
 
-  clearStoredPin(role) {
-    if (typeof localStorage === 'undefined') return;
+  /**
+   * Fetch event settings from Google Sheets backend
+   */
+  async getSettings() {
     try {
-      localStorage.removeItem('wedding_' + role + '_pin');
+      const res = await this.postToGas('getSettings');
+      if (res && res.success && res.settings) {
+        this.saveCachedSettings(res.settings);
+        return res.settings;
+      }
     } catch (e) {
-      console.warn('Gagal menghapus PIN dari localStorage:', e);
+      console.warn('[WeddingApi] Gagal memuat settings dari GAS:', e);
     }
+    return this.getCachedSettings() || {};
+  },
+
+  /**
+   * Save event settings to Google Sheets backend
+   */
+  async saveSettings(settingsObj) {
+    try {
+      const res = await this.postToGas('saveSettings', { settings: settingsObj });
+      if (res && res.success) {
+        this.saveCachedSettings(res.settings || settingsObj);
+      }
+      return res;
+    } catch (e) {
+      console.error('[WeddingApi] Gagal menyimpan settings:', e);
+      return { success: false, error: e.message || e.toString() };
+    }
+  },
+
+  getCachedSettings() {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const str = localStorage.getItem('wedding_cached_settings');
+      return str ? JSON.parse(str) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  saveCachedSettings(settings) {
+    if (typeof localStorage === 'undefined' || !settings) return;
+    try {
+      localStorage.setItem('wedding_cached_settings', JSON.stringify(settings));
+    } catch (e) {
+      console.warn('Gagal menyimpan cache settings:', e);
+    }
+  },
+
+  /**
+   * Maps flat settings dictionary from Sheets into structured config object
+   */
+  mapSettingsToConfig(settings, baseConfig = {}) {
+    if (!settings || typeof settings !== 'object') return baseConfig;
+    const cfg = JSON.parse(JSON.stringify(baseConfig));
+    cfg.couple = cfg.couple || {};
+    cfg.couple.groom = cfg.couple.groom || {};
+    cfg.couple.bride = cfg.couple.bride || {};
+    cfg.event = cfg.event || {};
+    cfg.music = cfg.music || {};
+    cfg.giftAddress = cfg.giftAddress || {};
+
+    if (settings.EVENT_TITLE) cfg.event.title = settings.EVENT_TITLE;
+    if (settings.EVENT_DATE_FORMATTED) cfg.event.dateFormatted = settings.EVENT_DATE_FORMATTED;
+    if (settings.COUNTDOWN_TARGET) cfg.event.countdownTarget = settings.COUNTDOWN_TARGET;
+    if (settings.COVER_PHOTO !== undefined && settings.COVER_PHOTO !== '') cfg.couple.coverPhoto = settings.COVER_PHOTO;
+    if (settings.BG_IMAGE !== undefined && settings.BG_IMAGE !== '') cfg.event.backgroundImage = settings.BG_IMAGE;
+    if (settings.MUSIC_URL !== undefined && settings.MUSIC_URL !== '') cfg.music.audioUrl = settings.MUSIC_URL;
+
+    // Groom
+    if (settings.GROOM_NAME) cfg.couple.groom.name = settings.GROOM_NAME;
+    if (settings.GROOM_SHORT) cfg.couple.groom.shortName = settings.GROOM_SHORT;
+    if (settings.GROOM_FATHER) cfg.couple.groom.father = settings.GROOM_FATHER;
+    if (settings.GROOM_MOTHER) cfg.couple.groom.mother = settings.GROOM_MOTHER;
+    if (settings.GROOM_BIO) cfg.couple.groom.bio = settings.GROOM_BIO;
+    if (settings.GROOM_PHOTO !== undefined && settings.GROOM_PHOTO !== '') cfg.couple.groom.photo = settings.GROOM_PHOTO;
+
+    // Bride
+    if (settings.BRIDE_NAME) cfg.couple.bride.name = settings.BRIDE_NAME;
+    if (settings.BRIDE_SHORT) cfg.couple.bride.shortName = settings.BRIDE_SHORT;
+    if (settings.BRIDE_FATHER) cfg.couple.bride.father = settings.BRIDE_FATHER;
+    if (settings.BRIDE_MOTHER) cfg.couple.bride.mother = settings.BRIDE_MOTHER;
+    if (settings.BRIDE_BIO) cfg.couple.bride.bio = settings.BRIDE_BIO;
+    if (settings.BRIDE_PHOTO !== undefined && settings.BRIDE_PHOTO !== '') cfg.couple.bride.photo = settings.BRIDE_PHOTO;
+
+    // Akad & Resepsi
+    if (settings.AKAD_TIME) cfg.event.akadTime = settings.AKAD_TIME;
+    if (settings.AKAD_VENUE) cfg.event.akadVenue = settings.AKAD_VENUE;
+    if (settings.AKAD_ADDRESS) cfg.event.akadAddress = settings.AKAD_ADDRESS;
+    if (settings.AKAD_NOTE) cfg.event.akadNote = settings.AKAD_NOTE;
+
+    if (settings.RESEPSI_TIME) cfg.event.resepsiTime = settings.RESEPSI_TIME;
+    if (settings.RESEPSI_VENUE) cfg.event.resepsiVenue = settings.RESEPSI_VENUE;
+    if (settings.RESEPSI_ADDRESS) cfg.event.resepsiAddress = settings.RESEPSI_ADDRESS;
+    if (settings.MAPS_URL) cfg.event.mapsUrl = settings.MAPS_URL;
+
+    // Bank Accounts
+    const bankAccounts = [];
+    if (settings.BANK1_NAME && settings.BANK1_NUMBER) {
+      bankAccounts.push({
+        bank: settings.BANK1_NAME,
+        accountNumber: settings.BANK1_NUMBER,
+        holderName: settings.BANK1_HOLDER || ''
+      });
+    }
+    if (settings.BANK2_NAME && settings.BANK2_NUMBER) {
+      bankAccounts.push({
+        bank: settings.BANK2_NAME,
+        accountNumber: settings.BANK2_NUMBER,
+        holderName: settings.BANK2_HOLDER || ''
+      });
+    }
+    if (bankAccounts.length > 0) {
+      cfg.bankAccounts = bankAccounts;
+    }
+
+    // Gift Address
+    if (settings.GIFT_RECIPIENT) cfg.giftAddress.recipient = settings.GIFT_RECIPIENT;
+    if (settings.GIFT_PHONE) cfg.giftAddress.phone = settings.GIFT_PHONE;
+    if (settings.GIFT_ADDRESS) cfg.giftAddress.address = settings.GIFT_ADDRESS;
+
+    // WA Template
+    if (settings.WA_TEMPLATE) cfg.defaultWaTemplate = settings.WA_TEMPLATE;
+
+    return cfg;
   },
 
   /**
