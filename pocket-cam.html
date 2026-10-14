@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pocket Camera 18-Shot - The Wedding of Romeo & Juliet</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=VT323&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            lcd: ['"VT323"', 'monospace'],
+            marker: ['"Permanent Marker"', 'cursive'],
+          },
+          colors: {
+            kodak: {
+              yellow: '#FFCA00',
+              darkYellow: '#E5B500',
+              red: '#ED1C24',
+              black: '#1A1A1A'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Flash animation */
+    @keyframes flashEffect {
+      0% { opacity: 0; }
+      20% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+    .screen-flash {
+      animation: flashEffect 0.35s ease-out forwards;
+    }
+
+    /* LCD Screen Glow */
+    .lcd-display {
+      background: #8FA279;
+      color: #17240E;
+      text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+      box-shadow: inset 1px 1px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Vintage camera textured grain */
+    .camera-body {
+      background-color: #242424;
+      background-image: radial-gradient(#2F2F2F 15%, transparent 16%);
+      background-size: 8px 8px;
+    }
+  </style>
+</head>
+<body class="bg-stone-900 text-stone-100 font-sans antialiased min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
+
+  <!-- ==================== GUEST SELECTION MODAL (IF NO CODE IN URL/SESSION) ==================== -->
+  <div id="guest-id-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-stone-900 rounded-3xl max-w-sm w-full p-6 border border-stone-800 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="camera" class="w-7 h-7"></i>
+      </div>
+      <h2 class="text-xl font-bold text-white mb-1">Identifikasi Tamu</h2>
+      <p class="text-xs text-stone-400 mb-4">Pilih nama Anda untuk mulai menggunakan 18 jepretan Pocket Camera</p>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-400 mb-1">Cari Nama Tamu</label>
+          <input type="text" id="guest-search-input" placeholder="Ketik nama Anda..."
+                 class="w-full py-2.5 px-3 rounded-xl bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div id="guest-search-results" class="max-h-48 overflow-y-auto space-y-1.5 divide-y divide-stone-800">
+          <p class="text-xs text-stone-500 py-3 text-center">Memuat daftar tamu...</p>
+        </div>
+
+        <div class="pt-2 border-t border-stone-800">
+          <p class="text-[11px] text-stone-400 mb-1">Atau masukkan Kode Tamu:</p>
+          <div class="flex gap-2">
+            <input type="text" id="manual-code-input" placeholder="G001" uppercase
+                   class="flex-1 py-2 px-3 rounded-xl bg-stone-800 border border-stone-700 text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <button id="btn-submit-manual-code" class="py-2 px-4 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs hover:bg-amber-400">
+              Pilih
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <header class="p-3 bg-stone-950/80 backdrop-blur-md border-b border-stone-800 flex items-center justify-between text-xs">
+    <div class="flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+      <span id="header-guest-info" class="font-bold text-stone-200">Pocket Camera</span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <button id="btn-open-reel" class="py-1 px-2.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-[11px] inline-flex items-center space-x-1 transition-colors">
+        <i data-lucide="film" class="w-3.5 h-3.5"></i>
+        <span>Roll Foto (<span id="reel-count">0</span>)</span>
+      </button>
+      <button id="btn-switch-user" class="p-1 rounded-lg bg-stone-800 text-stone-400 hover:text-stone-200" title="Ganti Profil Tamu">
+        <i data-lucide="user-cog" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== RETRO DISPOSABLE CAMERA BODY ==================== -->
+  <main class="flex-1 max-w-sm w-full mx-auto p-4 flex flex-col justify-center">
+
+    <!-- CAMERA CHASSIS -->
+    <div class="camera-body rounded-3xl p-5 border-4 border-stone-800 shadow-2xl relative overflow-hidden">
+      <!-- Decorative Retro Color Stripes (Kodak / Fuji inspired) -->
+      <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-amber-500 via-amber-400 to-rose-500"></div>
+
+      <!-- Top Plate: LCD Counter & Flash Indicator -->
+      <div class="flex items-center justify-between mb-4 mt-2">
+        <!-- Brand logo -->
+        <div>
+          <span class="font-marker text-amber-400 text-lg tracking-wider">MOMENT-35</span>
+          <span class="text-[9px] uppercase tracking-widest text-stone-400 block -mt-1">Single Use Digital Cam</span>
+        </div>
+
+        <!-- LCD Remaining Shots Counter -->
+        <div class="flex items-center space-x-2">
+          <div class="text-right">
+            <span class="text-[9px] uppercase tracking-wider text-stone-400 font-bold block">Sisa Foto</span>
+            <span class="text-[9px] text-stone-500 block">Maks 18</span>
+          </div>
+          <div class="lcd-display px-3 py-1 rounded-lg border-2 border-stone-900 font-lcd text-3xl font-bold tracking-widest leading-none">
+            <span id="shots-remaining">18</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera Viewfinder Window -->
+      <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-black border-4 border-stone-950 shadow-inner flex items-center justify-center">
+        <!-- Live WebRTC Video -->
+        <video id="cam-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        
+        <!-- Viewfinder Crosshairs Overlay -->
+        <div class="absolute inset-0 pointer-events-none border border-white/20 m-3 rounded-xl flex items-center justify-center">
+          <div class="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center">
+            <div class="w-1.5 h-1.5 bg-amber-400/80 rounded-full"></div>
+          </div>
+          <!-- Corner crop lines -->
+          <div class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-white/60"></div>
+          <div class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-white/60"></div>
+          <div class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-white/60"></div>
+          <div class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-white/60"></div>
+        </div>
+
+        <!-- Fullscreen Flash Overlay -->
+        <div id="flash-overlay" class="absolute inset-0 bg-white pointer-events-none opacity-0"></div>
+
+        <!-- Film Exhausted Lock Screen -->
+        <div id="film-exhausted-overlay" class="absolute inset-0 bg-black/90 backdrop-blur-sm hidden flex-col items-center justify-center p-6 text-center z-20">
+          <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mb-2">
+            <i data-lucide="check-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-marker text-2xl text-amber-400 mb-1">FILM HABIS!</h3>
+          <p class="text-xs text-stone-300 leading-relaxed mb-4">
+            Semua 18 jepretan Anda telah diunggah ke Google Drive Romeo & Juliet. Terima kasih telah mengabadikan momen ini!
+          </p>
+          <button id="btn-view-roll-completed" class="py-2 px-4 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs">
+            Lihat Roll Foto Saya
+          </button>
+        </div>
+
+        <!-- Hidden canvas for capturing frame -->
+        <canvas id="cam-canvas" class="hidden"></canvas>
+      </div>
+
+      <!-- Bottom Controls: Flip Camera & Big Shutter Button -->
+      <div class="mt-5 flex items-center justify-between px-2">
+        <!-- Camera Switch (Front / Back) -->
+        <button id="btn-flip-cam" class="w-12 h-12 rounded-2xl bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center border border-stone-700 active:scale-95 transition-all shadow-md" title="Putar Kamera">
+          <i data-lucide="switch-camera" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Big Shutter Button -->
+        <div class="relative">
+          <button id="btn-shutter" class="w-20 h-20 rounded-full bg-gradient-to-b from-rose-500 to-rose-700 text-white font-bold border-4 border-stone-800 shadow-xl active:scale-90 active:from-rose-600 active:to-rose-800 transition-transform flex items-center justify-center">
+            <div class="w-14 h-14 rounded-full border-2 border-white/40 flex items-center justify-center">
+              <i data-lucide="camera" class="w-7 h-7 fill-white"></i>
+            </div>
+          </button>
+        </div>
+
+        <!-- Flash Simulator Toggle -->
+        <button id="btn-flash-toggle" class="w-12 h-12 rounded-2xl bg-stone-800 hover:bg-stone-700 text-amber-400 flex items-center justify-center border border-stone-700 active:scale-95 transition-all shadow-md" title="Flash Otomatis">
+          <i data-lucide="zap" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <!-- Upload Status Pill -->
+      <div id="upload-status" class="mt-4 py-1.5 px-3 rounded-full bg-stone-800/80 border border-stone-700 text-[11px] text-stone-300 text-center flex items-center justify-center space-x-2">
+        <i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span id="upload-status-text">Kamera siap mengambil momen</span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== FILM REEL DRAWER / MODAL ==================== -->
+  <div id="reel-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-stone-900 rounded-3xl max-w-md w-full p-6 border border-stone-800 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-800">
+        <div>
+          <h3 class="font-bold text-white text-base">Roll Foto Saya</h3>
+          <p class="text-xs text-stone-400"><span id="modal-shots-taken">0</span> dari 18 foto terabadikan</p>
+        </div>
+        <button id="btn-close-reel" class="p-1 rounded-lg text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div id="reel-grid" class="flex-1 overflow-y-auto py-4 grid grid-cols-3 gap-2">
+        <!-- Thumbnails populated dynamically -->
+        <p class="col-span-3 text-center text-xs text-stone-500 py-8">Belum ada foto yang diambil.</p>
+      </div>
+
+      <div class="pt-3 border-t border-stone-800 flex justify-between items-center text-[11px] text-stone-400">
+        <span>Tersimpan otomatis ke Google Drive</span>
+        <button id="btn-back-to-cam" class="py-1.5 px-3 rounded-lg bg-amber-500 text-stone-950 font-bold">
+          Kembali ke Kamera
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // 1. State Management
+    let currentGuest = null;
+    let pocketPhotoCount = 0;
+    const MAX_SHOTS = 18;
+    let cameraStream = null;
+    let currentFacing = 'environment'; // environment or user
+    const localReelPhotos = []; // { shotNumber, dataUrl, timestamp }
+
+    // Elements
+    const camVideo = document.getElementById('cam-video');
+    const camCanvas = document.getElementById('cam-canvas');
+    const btnShutter = document.getElementById('btn-shutter');
+    const btnFlip = document.getElementById('btn-flip-cam');
+    const flashOverlay = document.getElementById('flash-overlay');
+    const shotsRemainingEl = document.getElementById('shots-remaining');
+    const filmExhaustedOverlay = document.getElementById('film-exhausted-overlay');
+    const uploadStatusText = document.getElementById('upload-status-text');
+    const headerGuestInfo = document.getElementById('header-guest-info');
+    const guestIdModal = document.getElementById('guest-id-modal');
+
+    // 2. Identify Guest: URL param -> LocalStorage -> Identification Modal
+    async function initGuest() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const codeParam = urlParams.get('code');
+      const nameParam = urlParams.get('to');
+
+      if (codeParam) {
+        currentGuest = { code: codeParam.toUpperCase(), name: nameParam || 'Tamu Undangan' };
+        WeddingApi.saveGuestSession(currentGuest.code, currentGuest.name);
+      } else {
+        const session = WeddingApi.getGuestSession();
+        if (session && session.code) {
+          currentGuest = session;
+        }
+      }
+
+      if (currentGuest) {
+        setupGuestCamera();
+      } else {
+        showGuestSelectionModal();
+      }
+    }
+
+    // Modal for selecting guest when opening generic standee QR
+    async function showGuestSelectionModal() {
+      guestIdModal.classList.remove('hidden');
+      guestIdModal.classList.add('flex');
+
+      const resultsContainer = document.getElementById('guest-search-results');
+      try {
+        const res = await WeddingApi.postToGas('listGuests');
+        let guests = res.guests || [];
+        if (guests.length === 0 && res.mock) {
+          guests = [
+            { code: 'G001', name: 'Budi Santoso' },
+            { code: 'G002', name: 'Siti Rahma' },
+            { code: 'G003', name: 'dr. Andi Wijaya' }
+          ];
+        }
+
+        renderGuestSearchResults(guests);
+
+        document.getElementById('guest-search-input').addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          const filtered = guests.filter(g => (g.name || '').toLowerCase().includes(q) || (g.code || '').toLowerCase().includes(q));
+          renderGuestSearchResults(filtered);
+        });
+      } catch (e) {
+        resultsContainer.innerHTML = `<p class="text-xs text-rose-400 py-2">Gagal memuat daftar tamu.</p>`;
+      }
+    }
+
+    function renderGuestSearchResults(list) {
+      const resultsContainer = document.getElementById('guest-search-results');
+      if (list.length === 0) {
+        resultsContainer.innerHTML = `<p class="text-xs text-stone-500 py-2 text-center">Nama tidak ditemukan.</p>`;
+        return;
+      }
+
+      resultsContainer.innerHTML = list.slice(0, 15).map(g => `
+        <button onclick="selectGuest('${g.code}', '${encodeURIComponent(g.name)}')" class="w-full text-left py-2 px-3 rounded-lg hover:bg-stone-800 flex items-center justify-between text-xs text-stone-200">
+          <span class="font-semibold">${g.name}</span>
+          <span class="font-mono text-[10px] text-amber-400 bg-stone-900 px-1.5 py-0.5 rounded border border-stone-700">${g.code}</span>
+        </button>
+      `).join('');
+    }
+
+    window.selectGuest = function(code, rawName) {
+      const name = decodeURIComponent(rawName);
+      currentGuest = { code, name };
+      WeddingApi.saveGuestSession(code, name);
+      guestIdModal.classList.add('hidden');
+      guestIdModal.classList.remove('flex');
+      setupGuestCamera();
+    };
+
+    document.getElementById('btn-submit-manual-code').addEventListener('click', () => {
+      const code = document.getElementById('manual-code-input').value.trim().toUpperCase();
+      if (code) {
+        selectGuest(code, 'Tamu ' + code);
+      }
+    });
+
+    document.getElementById('btn-switch-user').addEventListener('click', () => {
+      if (confirm('Ganti identitas tamu?')) {
+        WeddingApi.clearGuestSession();
+        window.location.search = '';
+      }
+    });
+
+    // 3. Setup Camera & Sync Photo Count
+    async function setupGuestCamera() {
+      headerGuestInfo.textContent = `${currentGuest.name} (${currentGuest.code})`;
+
+      // Fetch latest guest count from GAS
+      try {
+        const res = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
+        if (res.success && res.guest) {
+          pocketPhotoCount = Number(res.guest.pocketPhotoCount || 0);
+        }
+      } catch (e) {
+        console.warn('Sync count error:', e);
+      }
+
+      updateFilmCounter();
+      startWebRtcCamera();
+    }
+
+    function updateFilmCounter() {
+      const remaining = Math.max(0, MAX_SHOTS - pocketPhotoCount);
+      shotsRemainingEl.textContent = String(remaining).padStart(2, '0');
+      document.getElementById('reel-count').textContent = pocketPhotoCount;
+      document.getElementById('modal-shots-taken').textContent = pocketPhotoCount;
+
+      if (remaining <= 0) {
+        btnShutter.disabled = true;
+        btnShutter.classList.add('opacity-40', 'cursor-not-allowed');
+        filmExhaustedOverlay.classList.remove('hidden');
+        filmExhaustedOverlay.classList.add('flex');
+      } else {
+        btnShutter.disabled = false;
+        btnShutter.classList.remove('opacity-40', 'cursor-not-allowed');
+        filmExhaustedOverlay.classList.add('hidden');
+        filmExhaustedOverlay.classList.remove('flex');
+      }
+    }
+
+    // 4. WebRTC Video Feed
+    async function startWebRtcCamera() {
+      stopCamera();
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: currentFacing,
+            width: { ideal: 1280 },
+            height: { ideal: 960 }
+          },
+          audio: false
+        });
+        camVideo.srcObject = cameraStream;
+      } catch (err) {
+        console.error('Camera init error:', err);
+        uploadStatusText.textContent = 'Akses kamera tidak diizinkan';
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+    }
+
+    btnFlip.addEventListener('click', () => {
+      currentFacing = (currentFacing === 'environment') ? 'user' : 'environment';
+      startWebRtcCamera();
+    });
+
+    // 5. Shutter Action & Upload Flow
+    let isUploading = false;
+    btnShutter.addEventListener('click', async () => {
+      if (pocketPhotoCount >= MAX_SHOTS || isUploading) return;
+
+      // Mechanical sound & Screen Flash
+      WeddingApi.playShutterSound();
+      flashOverlay.classList.remove('screen-flash');
+      void flashOverlay.offsetWidth; // Trigger reflow
+      flashOverlay.classList.add('screen-flash');
+
+      // Capture frame to canvas
+      camCanvas.width = camVideo.videoWidth || 1280;
+      camCanvas.height = camVideo.videoHeight || 960;
+      const ctx = camCanvas.getContext('2d');
+      ctx.drawImage(camVideo, 0, 0, camCanvas.width, camCanvas.height);
+
+      const rawDataUrl = camCanvas.toDataURL('image/jpeg', 0.85);
+
+      // Decrement shot counter immediately (Optimistic UI)
+      pocketPhotoCount++;
+      updateFilmCounter();
+
+      // Compress JPEG
+      const compressedDataUrl = await WeddingApi.compressImage(rawDataUrl, 1280, 0.75);
+
+      // Save to local reel
+      localReelPhotos.unshift({
+        shotNumber: pocketPhotoCount,
+        dataUrl: compressedDataUrl,
+        timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      });
+      renderReel();
+
+      // Upload in background to Google Drive
+      uploadShotToDrive(compressedDataUrl, pocketPhotoCount);
+    });
+
+    async function uploadShotToDrive(photoBase64, shotNum) {
+      isUploading = true;
+      uploadStatusText.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Mengunggah foto #${shotNum} ke Drive...`;
+
+      try {
+        const payload = {
+          code: currentGuest.code,
+          photoBase64: photoBase64,
+          mimeType: 'image/jpeg'
+        };
+
+        const res = await WeddingApi.postToGas('uploadPocketPhoto', payload);
+        if (res.success || res.mock) {
+          uploadStatusText.innerHTML = `Foto #${shotNum} tersimpan di album Drive!`;
+        } else {
+          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}</span>`;
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu</span>`;
+      } finally {
+        isUploading = false;
+      }
+    }
+
+    // 6. Film Reel Gallery Modal
+    const reelModal = document.getElementById('reel-modal');
+    const reelGrid = document.getElementById('reel-grid');
+
+    document.getElementById('btn-open-reel').addEventListener('click', openReel);
+    document.getElementById('btn-view-roll-completed').addEventListener('click', openReel);
+
+    function openReel() {
+      renderReel();
+      reelModal.classList.remove('hidden');
+      reelModal.classList.add('flex');
+    }
+
+    function closeReel() {
+      reelModal.classList.add('hidden');
+      reelModal.classList.remove('flex');
+    }
+
+    document.getElementById('btn-close-reel').addEventListener('click', closeReel);
+    document.getElementById('btn-back-to-cam').addEventListener('click', closeReel);
+
+    function renderReel() {
+      if (localReelPhotos.length === 0) {
+        reelGrid.innerHTML = `<p class="col-span-3 text-center text-xs text-stone-500 py-8">Belum ada foto yang diambil pada sesi ini.</p>`;
+        return;
+      }
+
+      reelGrid.innerHTML = localReelPhotos.map(photo => `
+        <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-800 border border-stone-700 shadow-md group">
+          <img src="${photo.dataUrl}" class="w-full h-full object-cover">
+          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 text-right">
+            <span class="font-lcd text-amber-400 text-xs font-bold">#${String(photo.shotNumber).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Initialize
+    initGuest();
+  </script>
+</body>
+</html>

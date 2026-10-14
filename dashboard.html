@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard & WhatsApp Sender - Wedding App</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            gold: {
+              50: '#FBF9F3',
+              100: '#F5EEDB',
+              200: '#EBDEBC',
+              500: '#C5A880',
+              600: '#B08E58',
+              700: '#8A6D3B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
+
+  <!-- ==================== PIN PROTECTION MODAL ==================== -->
+  <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-slate-100 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <h2 class="text-xl font-bold text-slate-900 mb-1">Admin Dashboard</h2>
+      <p id="auth-subtitle" class="text-xs text-slate-500 mb-6">Masukkan PIN keamanan untuk mengakses data tamu</p>
+
+      <div id="auth-loading-indicator" class="hidden py-4 text-center">
+        <span class="inline-block animate-spin mr-2">⏳</span>
+        <span class="text-xs font-semibold text-slate-600">Memverifikasi PIN dengan database...</span>
+      </div>
+
+      <form id="auth-form" class="space-y-4">
+        <input type="password" id="admin-pin-input" maxlength="10" placeholder="PIN Admin (Default: 1234)" autofocus
+               class="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <button type="submit" id="btn-submit-pin" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all flex items-center justify-center space-x-2">
+          <span>Masuk Dashboard</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+        <p id="auth-error" class="text-xs text-rose-600 font-medium hidden">PIN tidak sesuai. Silakan coba lagi.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN DASHBOARD ==================== -->
+  <div id="main-content" class="hidden">
+    <!-- Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
+            <i data-lucide="heart" class="w-5 h-5 fill-white"></i>
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 leading-tight">Admin & WhatsApp Sender</h1>
+            <p class="text-[11px] text-slate-500">The Wedding of Romeo & Juliet</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button id="btn-refresh" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-icon"></i>
+            <span class="hidden sm:inline">Refresh Data</span>
+          </button>
+          <button id="btn-init-sheets" class="py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Tata Database Sheet</span>
+          </button>
+          <a href="reception.html" target="_blank" class="py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Meja Resepsi</span>
+          </a>
+          <button id="btn-logout" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+      <!-- ==================== STATS OVERVIEW CARDS ==================== -->
+      <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Total Guests -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-500 uppercase">Total Tamu</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <i data-lucide="users" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="stat-total-guests" class="text-2xl font-bold text-slate-900">0</span>
+            <span class="text-xs text-slate-400">kontak</span>
+          </div>
+        </div>
+
+        <!-- WA Sent -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-500 uppercase">WA Terkirim</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="stat-wa-sent" class="text-2xl font-bold text-emerald-600">0</span>
+            <span id="stat-wa-pending" class="text-xs text-slate-400">/ 0 belum</span>
+          </div>
+        </div>
+
+        <!-- Attended / Check-in -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-500 uppercase">Tamu Hadir</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="stat-attended" class="text-2xl font-bold text-amber-600">0</span>
+            <span id="stat-attendance-rate" class="text-xs text-slate-400">(0%)</span>
+          </div>
+        </div>
+
+        <!-- RSVP Status -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-500 uppercase">Konfirmasi RSVP</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="calendar-check" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="stat-rsvp-yes" class="text-2xl font-bold text-blue-600">0</span>
+            <span id="stat-rsvp-pax" class="text-xs text-slate-400">pax hadir</span>
+          </div>
+        </div>
+
+        <!-- Photos Captured -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-500 uppercase">Foto Drive</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              <i data-lucide="camera" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span id="stat-photos-count" class="text-2xl font-bold text-purple-600">0</span>
+            <span class="text-xs text-slate-400">foto tersimpan</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ACTIONS: IMPORT & WA TEMPLATE ==================== -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- BULK GUEST IMPORT CARD -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                </div>
+                <h2 class="text-base font-bold text-slate-900">Import Tamu Massal (CSV / Teks)</h2>
+              </div>
+              <label class="cursor-pointer py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center space-x-1 transition-colors">
+                <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                <span>Upload CSV</span>
+                <input type="file" id="csv-file-input" accept=".csv,.txt" class="hidden">
+              </label>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-2">
+              Format baris per baris: <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-700">Nama, No_HP</code> (Kode auto-generate G001, G002... jika dikosongkan).
+            </p>
+
+            <textarea id="bulk-import-input" rows="5" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Budi Santoso, 08123456789&#10;Siti Rahma, 08987654321&#10;dr. Andi Wijaya, 085211223344"></textarea>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span id="import-preview-count" class="text-xs text-slate-500">0 tamu terdeteksi</span>
+            <button id="btn-submit-import" class="py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs inline-flex items-center space-x-1.5 transition-colors">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>Simpan ke Google Sheets</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- WA TEMPLATE EDITOR CARD -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <i data-lucide="message-square" class="w-4 h-4"></i>
+                </div>
+                <h2 class="text-base font-bold text-slate-900">Template Pesan WhatsApp</h2>
+              </div>
+              <button id="btn-reset-template" class="text-xs text-slate-500 hover:text-slate-800 inline-flex items-center space-x-1">
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                <span>Reset Default</span>
+              </button>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-2">
+              Placeholder otomatis: <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{nama}</span>, <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{link}</span>, <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{kode}</span>.
+            </p>
+
+            <textarea id="wa-template-input" rows="5" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400">1-Click kirim membuka wa.me di tab khusus</span>
+            <button id="btn-save-template" class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs inline-flex items-center space-x-1.5 transition-colors">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Simpan Template</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== GUEST LIST & WA SENDER QUEUE ==================== -->
+      <section class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        <!-- Table Toolbar -->
+        <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <!-- Filter Tabs -->
+          <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold overflow-x-auto">
+            <button data-filter="all" class="filter-tab px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm">
+              Semua (<span id="count-all">0</span>)
+            </button>
+            <button data-filter="pending_wa" class="filter-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
+              Belum Kirim WA (<span id="count-pending-wa" class="text-rose-600 font-bold">0</span>)
+            </button>
+            <button data-filter="sent_wa" class="filter-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
+              Sudah Kirim WA (<span id="count-sent-wa">0</span>)
+            </button>
+            <button data-filter="attended" class="filter-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
+              Hadir (<span id="count-attended">0</span>)
+            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative w-full md:w-72">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="guest-search" placeholder="Cari nama, nomor HP, kode..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                <th class="py-3 px-4">Kode</th>
+                <th class="py-3 px-4">Nama Tamu</th>
+                <th class="py-3 px-4">No. WhatsApp</th>
+                <th class="py-3 px-4">RSVP & Pax</th>
+                <th class="py-3 px-4">Kehadiran</th>
+                <th class="py-3 px-4">Foto Check-in</th>
+                <th class="py-3 px-4">Status WA</th>
+                <th class="py-3 px-4 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="guests-table-body" class="divide-y divide-slate-100 text-xs">
+              <!-- Rendered via JS -->
+              <tr>
+                <td colspan="8" class="py-8 text-center text-slate-400">
+                  <div class="inline-block animate-spin mr-2">⏳</div>
+                  Memuat data tamu dari Google Sheets...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ==================== QR MODAL ==================== -->
+  <div id="qr-preview-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center border border-slate-200 shadow-2xl relative">
+      <button id="btn-close-qr-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <h3 id="modal-qr-name" class="font-bold text-base text-slate-900 mb-1">Nama Tamu</h3>
+      <p id="modal-qr-code" class="text-xs text-amber-700 font-mono font-semibold mb-4">G001</p>
+      
+      <div class="p-4 bg-white border-2 border-slate-100 rounded-2xl inline-block mb-4 shadow-inner">
+        <div id="modal-qrcode" class="flex justify-center"></div>
+      </div>
+      
+      <a id="btn-modal-open-link" href="#" target="_blank" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white font-medium text-xs inline-flex items-center justify-center space-x-1.5">
+        <span>Buka Undangan Tamu</span>
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl flex items-center space-x-2">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message">Berhasil disimpan!</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // 1. Authentication via Database-validated PIN
+    const authModal = document.getElementById('auth-modal');
+    const mainContent = document.getElementById('main-content');
+    const authForm = document.getElementById('auth-form');
+    const authPinInput = document.getElementById('admin-pin-input');
+    const authError = document.getElementById('auth-error');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authLoading = document.getElementById('auth-loading-indicator');
+    const btnSubmitPin = document.getElementById('btn-submit-pin');
+
+    async function checkAuth() {
+      const savedPin = WeddingApi.getStoredPin('admin');
+
+      if (!savedPin) {
+        // No saved pin, prompt user
+        authModal.classList.remove('hidden');
+        mainContent.classList.add('hidden');
+        authForm.classList.remove('hidden');
+        authLoading.classList.add('hidden');
+        authPinInput.focus();
+        return;
+      }
+
+      // Saved PIN exists: Validate against database
+      authModal.classList.remove('hidden');
+      authForm.classList.add('hidden');
+      authLoading.classList.remove('hidden');
+      authSubtitle.textContent = 'Memvalidasi sesi login sebelumnya...';
+
+      try {
+        const res = await WeddingApi.verifyPin('admin', savedPin);
+        if (res.valid) {
+          // PIN is valid! Auto login without prompting
+          authModal.classList.add('hidden');
+          mainContent.classList.remove('hidden');
+          loadDashboardData();
+        } else {
+          // PIN was changed in database! Invalidate stored PIN and prompt
+          WeddingApi.clearStoredPin('admin');
+          authModal.classList.remove('hidden');
+          mainContent.classList.add('hidden');
+          authLoading.classList.add('hidden');
+          authForm.classList.remove('hidden');
+          authSubtitle.textContent = 'PIN di database telah diubah. Silakan masukkan PIN terbaru.';
+          authError.textContent = 'PIN di database telah diperbarui. Silakan masukkan PIN terbaru.';
+          authError.classList.remove('hidden');
+          authPinInput.value = '';
+          authPinInput.focus();
+        }
+      } catch (err) {
+        console.error('Check auth error:', err);
+        authLoading.classList.add('hidden');
+        authForm.classList.remove('hidden');
+      }
+    }
+
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const enteredPin = authPinInput.value.trim();
+      if (!enteredPin) return;
+
+      btnSubmitPin.disabled = true;
+      btnSubmitPin.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Memverifikasi...`;
+      authError.classList.add('hidden');
+
+      try {
+        const res = await WeddingApi.verifyPin('admin', enteredPin);
+        if (res.valid) {
+          WeddingApi.saveStoredPin('admin', enteredPin);
+          authModal.classList.add('hidden');
+          mainContent.classList.remove('hidden');
+          loadDashboardData();
+        } else {
+          authError.textContent = res.error || 'PIN tidak sesuai dengan database. Silakan coba lagi.';
+          authError.classList.remove('hidden');
+          authPinInput.value = '';
+          authPinInput.focus();
+        }
+      } catch (err) {
+        authError.textContent = 'Terjadi kesalahan jaringan: ' + err.message;
+        authError.classList.remove('hidden');
+      } finally {
+        btnSubmitPin.disabled = false;
+        btnSubmitPin.innerHTML = `<span>Masuk Dashboard</span><i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>`;
+        lucide.createIcons();
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      WeddingApi.clearStoredPin('admin');
+      window.location.reload();
+    });
+
+    // 2. State & Variables
+    let allGuests = [];
+    let currentFilter = 'all';
+
+    // WA Template Management
+    const waTemplateInput = document.getElementById('wa-template-input');
+    const savedTemplate = localStorage.getItem('wedding_custom_wa_template');
+    waTemplateInput.value = savedTemplate || WEDDING_CONFIG?.defaultWaTemplate || '';
+
+    document.getElementById('btn-save-template').addEventListener('click', () => {
+      localStorage.setItem('wedding_custom_wa_template', waTemplateInput.value);
+      showToast('Template pesan WhatsApp berhasil disimpan.');
+    });
+
+    document.getElementById('btn-reset-template').addEventListener('click', () => {
+      if (confirm('Kembalikan template ke default?')) {
+        waTemplateInput.value = WEDDING_CONFIG?.defaultWaTemplate || '';
+        localStorage.removeItem('wedding_custom_wa_template');
+        showToast('Template direset ke default.');
+      }
+    });
+
+    // 3. Load & Refresh Guests Data from GAS
+    async function loadDashboardData() {
+      const refreshIcon = document.getElementById('refresh-icon');
+      refreshIcon.classList.add('animate-spin');
+
+      try {
+        const res = await WeddingApi.postToGas('listGuests');
+        if (res.success && Array.isArray(res.guests)) {
+          allGuests = res.guests;
+        } else if (res.mock) {
+          // Provide mock guests if GAS URL is not yet connected
+          allGuests = [
+            { code: 'G001', name: 'Budi Santoso', phone: '08123456789', waSentAt: '', rsvpStatus: 'Hadir', pax: 2, wishes: 'Selamat ya Romeo & Juliet!', attendedAt: '', checkInPhotoUrl: '', pocketPhotoCount: 3 },
+            { code: 'G002', name: 'Siti Rahma', phone: '08987654321', waSentAt: '2026-10-14T10:00:00Z', rsvpStatus: 'Hadir', pax: 1, wishes: 'Barakallah!', attendedAt: '2026-10-14T11:15:00Z', checkInPhotoUrl: '', pocketPhotoCount: 1 },
+            { code: 'G003', name: 'dr. Andi Wijaya', phone: '085211223344', waSentAt: '', rsvpStatus: 'Tidak Hadir', pax: 0, wishes: 'Mohon maaf belum bisa hadir', attendedAt: '', checkInPhotoUrl: '', pocketPhotoCount: 0 }
+          ];
+        } else {
+          console.error('Failed to list guests:', res);
+        }
+      } catch (err) {
+        console.error('Load data error:', err);
+      } finally {
+        refreshIcon.classList.remove('animate-spin');
+        renderDashboard();
+      }
+    }
+
+    document.getElementById('btn-refresh').addEventListener('click', loadDashboardData);
+
+    // Initialize and format Database Sheets button
+    document.getElementById('btn-init-sheets').addEventListener('click', async () => {
+      if (!confirm('Tata dan format seluruh database Google Sheets (Guests, PocketLogs, Settings)?')) return;
+      showToast('Menata seluruh database spreadsheet...');
+      const res = await WeddingApi.postToGas('setupDatabase');
+      if (res.success) {
+        showToast('Database spreadsheet berhasil ditata dan diformat!');
+        loadDashboardData();
+      } else {
+        showToast('Gagal: ' + (res.error || 'Terjadi kesalahan'));
+      }
+    });
+
+    // 4. Render Stats & Table
+    function renderDashboard() {
+      // Calculate Stats
+      const total = allGuests.length;
+      const waSent = allGuests.filter(g => !!g.waSentAt).length;
+      const waPending = total - waSent;
+      const attended = allGuests.filter(g => !!g.attendedAt).length;
+      const rsvpYes = allGuests.filter(g => g.rsvpStatus === 'Hadir').length;
+      const totalPax = allGuests
+        .filter(g => g.rsvpStatus === 'Hadir')
+        .reduce((sum, g) => sum + (Number(g.pax) || 1), 0);
+      const totalPhotos = allGuests.reduce((sum, g) => sum + (Number(g.pocketPhotoCount) || 0) + (g.checkInPhotoUrl ? 1 : 0), 0);
+
+      document.getElementById('stat-total-guests').textContent = total;
+      document.getElementById('stat-wa-sent').textContent = waSent;
+      document.getElementById('stat-wa-pending').textContent = `/ ${waPending} belum`;
+      document.getElementById('stat-attended').textContent = attended;
+      document.getElementById('stat-attendance-rate').textContent = total > 0 ? `(${Math.round((attended / total) * 100)}%)` : '(0%)';
+      document.getElementById('stat-rsvp-yes').textContent = rsvpYes;
+      document.getElementById('stat-rsvp-pax').textContent = `${totalPax} pax hadir`;
+      document.getElementById('stat-photos-count').textContent = totalPhotos;
+
+      // Filter Counts
+      document.getElementById('count-all').textContent = total;
+      document.getElementById('count-pending-wa').textContent = waPending;
+      document.getElementById('count-sent-wa').textContent = waSent;
+      document.getElementById('count-attended').textContent = attended;
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('guests-table-body');
+      const searchTerm = document.getElementById('guest-search').value.toLowerCase().trim();
+
+      let filtered = allGuests.filter(g => {
+        // Filter by tab
+        if (currentFilter === 'pending_wa' && !!g.waSentAt) return false;
+        if (currentFilter === 'sent_wa' && !g.waSentAt) return false;
+        if (currentFilter === 'attended' && !g.attendedAt) return false;
+
+        // Filter by search
+        if (searchTerm) {
+          const matchName = (g.name || '').toLowerCase().includes(searchTerm);
+          const matchCode = (g.code || '').toLowerCase().includes(searchTerm);
+          const matchPhone = (g.phone || '').includes(searchTerm);
+          return matchName || matchCode || matchPhone;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-8 text-center text-slate-400">
+              Tidak ada data tamu yang sesuai dengan filter.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((g, index) => {
+        const sanitizedPhone = WeddingApi.sanitizePhone(g.phone);
+        const inviteUrl = WeddingApi.buildInviteUrl(g.code, g.name);
+
+        // RSVP Badge
+        let rsvpBadge = '<span class="text-slate-400 italic">Belum RSVP</span>';
+        if (g.rsvpStatus === 'Hadir') {
+          rsvpBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold"><i data-lucide="check" class="w-3 h-3 mr-1"></i> Hadir (${g.pax || 1} pax)</span>`;
+        } else if (g.rsvpStatus === 'Tidak Hadir') {
+          rsvpBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-semibold"><i data-lucide="x" class="w-3 h-3 mr-1"></i> Tidak Hadir</span>`;
+        } else if (g.rsvpStatus === 'Masih Ragu') {
+          rsvpBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Ragu-ragu</span>`;
+        }
+
+        // Attendance Badge
+        let attendBadge = '<span class="text-slate-400 italic">Belum Datang</span>';
+        if (g.attendedAt) {
+          const time = new Date(g.attendedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          attendBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold"><i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Hadir (${time})</span>`;
+        }
+
+        // Check-in Photo
+        let photoCell = '<span class="text-slate-300">-</span>';
+        if (g.checkInPhotoUrl) {
+          photoCell = `<a href="${g.checkInPhotoUrl}" target="_blank" class="inline-flex items-center space-x-1 text-purple-600 hover:text-purple-800 font-semibold"><i data-lucide="image" class="w-3.5 h-3.5"></i> <span>Lihat</span></a>`;
+        }
+
+        // WA Status Badge
+        let waBadge = `<span id="wa-badge-${g.code}" class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-medium">Belum</span>`;
+        if (g.waSentAt) {
+          const sentDate = new Date(g.waSentAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+          waBadge = `<span id="wa-badge-${g.code}" class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium"><i data-lucide="check" class="w-3 h-3 mr-1"></i> ${sentDate}</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors" id="row-${g.code}">
+            <td class="py-3 px-4 font-mono font-bold text-amber-800">${g.code}</td>
+            <td class="py-3 px-4 font-semibold text-slate-900">${g.name}</td>
+            <td class="py-3 px-4 font-mono text-slate-600">${g.phone || '-'}</td>
+            <td class="py-3 px-4">${rsvpBadge}</td>
+            <td class="py-3 px-4">${attendBadge}</td>
+            <td class="py-3 px-4">${photoCell}</td>
+            <td class="py-3 px-4">${waBadge}</td>
+            <td class="py-3 px-4 text-right">
+              <div class="inline-flex items-center space-x-1">
+                <!-- 1-Click Send WA -->
+                <button onclick="sendWa('${g.code}', '${encodeURIComponent(g.name)}', '${g.phone}')" class="py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-[11px] inline-flex items-center space-x-1 transition-colors" title="Kirim Pesan WhatsApp">
+                  <i data-lucide="send" class="w-3 h-3"></i>
+                  <span>Kirim WA</span>
+                </button>
+                <!-- Copy Link -->
+                <button onclick="copyInviteLink('${inviteUrl}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" title="Salin Tautan Undangan">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+                <!-- Show QR -->
+                <button onclick="openQrModal('${g.code}', '${encodeURIComponent(g.name)}')" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 transition-colors" title="Lihat Barcode / QR">
+                  <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // 5. 1-Click WhatsApp Launcher (Reuses single 'wa_sender' tab)
+    window.sendWa = function(code, rawName, phone) {
+      const name = decodeURIComponent(rawName);
+      const customTemplate = waTemplateInput.value;
+      const waLink = WeddingApi.buildWaMeLink(phone, name, code, customTemplate);
+
+      // Reusable window name prevents tab clutter
+      window.open(waLink, 'wa_sender');
+
+      // Optimistically update UI badge
+      const badge = document.getElementById(`wa-badge-${code}`);
+      if (badge) {
+        badge.className = 'inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium';
+        badge.innerHTML = `<i data-lucide="check" class="w-3 h-3 mr-1"></i> Terkirim`;
+        lucide.createIcons();
+      }
+
+      // Update local state
+      const guest = allGuests.find(g => g.code === code);
+      if (guest) {
+        guest.waSentAt = new Date().toISOString();
+      }
+      renderDashboard();
+
+      // Asynchronously sync to Google Sheets
+      WeddingApi.postToGas('markWaSent', { code: code }).then(res => {
+        if (res.success) {
+          console.log(`[WA] Status sent saved for ${code}`);
+        }
+      }).catch(err => {
+        console.error(`[WA] Failed to mark sent for ${code}:`, err);
+      });
+    };
+
+    window.copyInviteLink = function(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Tautan undangan berhasil disalin!');
+      });
+    };
+
+    // QR Preview Modal
+    let modalQrInstance = null;
+    window.openQrModal = function(code, rawName) {
+      const name = decodeURIComponent(rawName);
+      document.getElementById('modal-qr-name').textContent = name;
+      document.getElementById('modal-qr-code').textContent = code;
+      document.getElementById('btn-modal-open-link').href = WeddingApi.buildInviteUrl(code, name);
+
+      const qrContainer = document.getElementById('modal-qrcode');
+      qrContainer.innerHTML = '';
+      modalQrInstance = new QRCode(qrContainer, {
+        text: code,
+        width: 160,
+        height: 160,
+        colorDark: "#1E293B",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      const modal = document.getElementById('qr-preview-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    document.getElementById('btn-close-qr-modal').addEventListener('click', () => {
+      const modal = document.getElementById('qr-preview-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+
+    // 6. Bulk Guest Import
+    const bulkImportInput = document.getElementById('bulk-import-input');
+    const importPreviewCount = document.getElementById('import-preview-count');
+    const btnSubmitImport = document.getElementById('btn-submit-import');
+    const csvFileInput = document.getElementById('csv-file-input');
+
+    function parseImportInput(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      let nextCodeNum = 1;
+
+      // Find max existing code number (e.g. G005 -> 5)
+      allGuests.forEach(g => {
+        const m = (g.code || '').match(/G(\d+)/i);
+        if (m) {
+          const num = parseInt(m[1], 10);
+          if (num >= nextCodeNum) nextCodeNum = num + 1;
+        }
+      });
+
+      const parsed = [];
+      lines.forEach(line => {
+        // Supports CSV format: Code, Name, Phone OR Name, Phone
+        const parts = line.split(/[,;\t]/).map(p => p.trim());
+        if (parts.length >= 2) {
+          let code = '';
+          let name = '';
+          let phone = '';
+
+          if (parts[0].match(/^G\d+/i) && parts.length >= 3) {
+            code = parts[0].toUpperCase();
+            name = parts[1];
+            phone = parts[2];
+          } else {
+            code = 'G' + String(nextCodeNum++).padStart(3, '0');
+            name = parts[0];
+            phone = parts[1];
+          }
+
+          if (name) {
+            parsed.push({ code, name, phone });
+          }
+        }
+      });
+
+      return parsed;
+    }
+
+    bulkImportInput.addEventListener('input', () => {
+      const parsed = parseImportInput(bulkImportInput.value);
+      importPreviewCount.textContent = `${parsed.length} tamu terdeteksi`;
+    });
+
+    csvFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        bulkImportInput.value = event.target.result;
+        const parsed = parseImportInput(bulkImportInput.value);
+        importPreviewCount.textContent = `${parsed.length} tamu terdeteksi`;
+      };
+      reader.readAsText(file);
+    });
+
+    btnSubmitImport.addEventListener('click', async () => {
+      const guestsToImport = parseImportInput(bulkImportInput.value);
+      if (guestsToImport.length === 0) {
+        alert('Tidak ada data tamu yang valid untuk diimport. Format per baris: Nama, No_HP');
+        return;
+      }
+
+      btnSubmitImport.disabled = true;
+      btnSubmitImport.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan...`;
+
+      try {
+        const res = await WeddingApi.postToGas('addGuestsBulk', { guests: guestsToImport });
+        if (res.success) {
+          showToast(`Berhasil menyimpan ${res.total || guestsToImport.length} tamu ke Google Sheets!`);
+          bulkImportInput.value = '';
+          importPreviewCount.textContent = '0 tamu terdeteksi';
+          loadDashboardData();
+        } else {
+          showToast('Gagal: ' + (res.error || 'Terjadi kesalahan'));
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      } finally {
+        btnSubmitImport.disabled = false;
+        btnSubmitImport.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> <span>Simpan ke Google Sheets</span>`;
+        lucide.createIcons();
+      }
+    });
+
+    // 7. Search & Filter Tabs
+    document.querySelectorAll('.filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(b => {
+          b.className = 'filter-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900';
+        });
+        btn.className = 'filter-tab px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm';
+        currentFilter = btn.getAttribute('data-filter');
+        renderTable();
+      });
+    });
+
+    document.getElementById('guest-search').addEventListener('input', renderTable);
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // Initialize check
+    checkAuth();
+  </script>
+</body>
+</html>
