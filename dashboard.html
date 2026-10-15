@@ -223,10 +223,10 @@
             </div>
 
             <p class="text-xs text-slate-500 mb-2">
-              Format baris per baris: <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-700">Nama, No_HP</code> (Kode auto-generate G001, G002... jika dikosongkan).
+              Format baris per baris: <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-700">Nama, No_HP, Kategori</code> (Kategori opsional: <span class="font-semibold text-amber-700">Reguler</span>, <span class="font-semibold text-amber-700">VIP</span>, <span class="font-semibold text-amber-700">VVIP</span>, <span class="font-semibold text-amber-700">Keluarga</span>. Default: Reguler).
             </p>
 
-            <textarea id="bulk-import-input" rows="5" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Budi Santoso, 08123456789&#10;Siti Rahma, 08987654321&#10;dr. Andi Wijaya, 085211223344"></textarea>
+            <textarea id="bulk-import-input" rows="5" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Budi Santoso, 08123456789, VIP&#10;Siti Rahma, 08987654321, Reguler&#10;dr. Andi Wijaya, 085211223344, Keluarga"></textarea>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -306,6 +306,7 @@
               <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                 <th class="py-3 px-4">Kode</th>
                 <th class="py-3 px-4">Nama Tamu</th>
+                <th class="py-3 px-4">Kategori</th>
                 <th class="py-3 px-4">No. WhatsApp</th>
                 <th class="py-3 px-4">RSVP & Pax</th>
                 <th class="py-3 px-4">Kehadiran</th>
@@ -317,7 +318,7 @@
             <tbody id="guests-table-body" class="divide-y divide-slate-100 text-xs">
               <!-- Rendered via JS -->
               <tr>
-                <td colspan="8" class="py-8 text-center text-slate-400">
+                <td colspan="9" class="py-8 text-center text-slate-400">
                   <div class="inline-block animate-spin mr-2">⏳</div>
                   Memuat data tamu dari Google Sheets...
                 </td>
@@ -510,7 +511,146 @@
             </div>
           </div>
 
-          <!-- 3. Foto Sampul, Background & Lagu -->
+          <!-- 3. Kutipan & Ayat Suci -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Kutipan Ayat Suci / Kalimat Mutiara</h3>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Teks Kutipan / Terjemahan Ayat</label>
+                <textarea id="cfg-quote-text" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="Dan di antara tanda-tanda kebesaran-Nya..."></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Kutipan / Surat</label>
+                <input type="text" id="cfg-quote-source" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white" placeholder="QS. Ar-Rum: 21">
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Kisah Perjalanan Cinta (Love Story) -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-800 flex items-center justify-center font-bold">
+                <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Kisah Perjalanan Cinta (Love Story)</h3>
+            </div>
+            <p class="text-xs text-slate-500">Sesuaikan 3 momen penting perjalanan cinta Anda. Anda bebas mengganti judul, tanggal, cerita, serta URL foto masing-masing momen.</p>
+
+            <div class="space-y-4">
+              <!-- Milestone 1 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Milestone 1 • Pertama Bertemu</span>
+                  <input type="text" id="cfg-story1-tag" placeholder="Tag Lokasi (cth: Sudut Kampus)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] bg-white">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-story1-date" placeholder="Waktu (cth: September 2021)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-story1-title" placeholder="Judul (cth: Pertama Kali Bertemu)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <textarea id="cfg-story1-desc" rows="2" placeholder="Cerita singkat momen ini..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"></textarea>
+                <input type="url" id="cfg-story1-img" placeholder="URL Foto Kenangan (opsional)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Milestone 2 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Milestone 2 • Komitmen</span>
+                  <input type="text" id="cfg-story2-tag" placeholder="Tag Lokasi (cth: Senja Bersama)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] bg-white">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-story2-date" placeholder="Waktu (cth: Desember 2023)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-story2-title" placeholder="Judul (cth: Memulai Komitmen)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <textarea id="cfg-story2-desc" rows="2" placeholder="Cerita singkat momen ini..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"></textarea>
+                <input type="url" id="cfg-story2-img" placeholder="URL Foto Kenangan (opsional)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Milestone 3 -->
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Milestone 3 • Lamaran / Menuju Pelaminan</span>
+                  <input type="text" id="cfg-story3-tag" placeholder="Tag Lokasi (cth: Bukit Pinus)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] bg-white">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-story3-date" placeholder="Waktu (cth: November 2025)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-story3-title" placeholder="Judul (cth: Momen Lamaran)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <textarea id="cfg-story3-desc" rows="2" placeholder="Cerita singkat momen ini..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"></textarea>
+                <input type="url" id="cfg-story3-img" placeholder="URL Foto Kenangan (opsional)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Galeri Foto Pre-Wedding -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center font-bold">
+                <i data-lucide="image" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-base">Galeri Foto Pre-Wedding (5 Slot Foto)</h3>
+            </div>
+            <p class="text-xs text-slate-500">Masukkan tautan foto pre-wedding Anda (Google Drive langsung / Imgur / URL hosting). Foto ini akan tampil di grid galeri dengan fitur lightbox layar penuh.</p>
+
+            <div class="space-y-3">
+              <!-- Foto 1 (Utama) -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Foto 1 (Tampilan Lebar Utama)</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="url" id="cfg-gallery1-url" placeholder="URL Foto 1" class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-gallery1-cat" placeholder="Kategori (Potret Elegan)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <input type="text" id="cfg-gallery1-title" placeholder="Judul Foto (cth: Harmoni di Balutan Sutra)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Foto 2 -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Foto 2</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="url" id="cfg-gallery2-url" placeholder="URL Foto 2" class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-gallery2-cat" placeholder="Kategori (Momen Spontan)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <input type="text" id="cfg-gallery2-title" placeholder="Judul Foto (cth: Gelak Tawa di Bawah Mentari)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Foto 3 -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Foto 3</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="url" id="cfg-gallery3-url" placeholder="URL Foto 3" class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-gallery3-cat" placeholder="Kategori (Detail Cincin)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <input type="text" id="cfg-gallery3-title" placeholder="Judul Foto (cth: Simbol Pengikat Janji)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Foto 4 -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Foto 4</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="url" id="cfg-gallery4-url" placeholder="URL Foto 4" class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-gallery4-cat" placeholder="Kategori (Potret Mempelai)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <input type="text" id="cfg-gallery4-title" placeholder="Judul Foto (cth: Tatapan Penuh Ketulusan)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+
+              <!-- Foto 5 -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-800">Foto 5 (Tampilan Lebar)</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="url" id="cfg-gallery5-url" placeholder="URL Foto 5" class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <input type="text" id="cfg-gallery5-cat" placeholder="Kategori (Siluet Sunset)" class="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                </div>
+                <input type="text" id="cfg-gallery5-title" placeholder="Judul Foto (cth: Janji di Cakrawala Senja)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Foto Sampul, Background & Lagu -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center space-x-2 text-slate-900 border-b border-slate-100 pb-3">
               <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
@@ -874,7 +1014,7 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="py-8 text-center text-slate-400">
+            <td colspan="9" class="py-8 text-center text-slate-400">
               Tidak ada data tamu yang sesuai dengan filter.
             </td>
           </tr>
@@ -885,6 +1025,25 @@
       tbody.innerHTML = filtered.map((g, index) => {
         const sanitizedPhone = WeddingApi.sanitizePhone(g.phone);
         const inviteUrl = WeddingApi.buildInviteUrl(g.code, g.name);
+
+        // Category Badge / Selector
+        const currentCat = g.category || 'Reguler';
+        const catBadgeClasses = {
+          'VVIP': 'bg-purple-100 text-purple-800 border-purple-300 font-bold',
+          'VIP': 'bg-amber-100 text-amber-800 border-amber-300 font-bold',
+          'Keluarga': 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+          'Reguler': 'bg-slate-100 text-slate-700 border-slate-200 font-normal'
+        };
+        const catClass = catBadgeClasses[currentCat] || catBadgeClasses['Reguler'];
+
+        const categorySelect = `
+          <select onchange="changeGuestCategory('${g.code}', this.value)" class="text-[11px] py-1 px-2 rounded-lg border focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer ${catClass}">
+            <option value="Reguler" ${currentCat === 'Reguler' ? 'selected' : ''}>Reguler</option>
+            <option value="VIP" ${currentCat === 'VIP' ? 'selected' : ''}>🌟 VIP</option>
+            <option value="VVIP" ${currentCat === 'VVIP' ? 'selected' : ''}>👑 VVIP</option>
+            <option value="Keluarga" ${currentCat === 'Keluarga' ? 'selected' : ''}>👨‍👩‍👧 Keluarga</option>
+          </select>
+        `;
 
         // RSVP Badge
         let rsvpBadge = '<span class="text-slate-400 italic">Belum RSVP</span>';
@@ -920,6 +1079,7 @@
           <tr class="hover:bg-slate-50 transition-colors" id="row-${g.code}">
             <td class="py-3 px-4 font-mono font-bold text-amber-800">${g.code}</td>
             <td class="py-3 px-4 font-semibold text-slate-900">${g.name}</td>
+            <td class="py-3 px-4">${categorySelect}</td>
             <td class="py-3 px-4 font-mono text-slate-600">${g.phone || '-'}</td>
             <td class="py-3 px-4">${rsvpBadge}</td>
             <td class="py-3 px-4">${attendBadge}</td>
@@ -948,6 +1108,23 @@
 
       lucide.createIcons();
     }
+
+    // Category Change Handler
+    window.changeGuestCategory = async function(code, newCategory) {
+      const guest = allGuests.find(g => g.code === code);
+      if (guest) guest.category = newCategory;
+      try {
+        const res = await WeddingApi.postToGas('updateGuestCategory', { code, category: newCategory });
+        if (res && res.success) {
+          showToast(`Kategori ${code} diubah ke ${newCategory}`);
+          renderTable();
+        } else {
+          showToast('Gagal mengubah kategori: ' + (res?.error || 'Server error'));
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
 
     // 5. 1-Click WhatsApp Launcher (Reuses single 'wa_sender' tab)
     window.sendWa = function(code, rawName, phone) {
@@ -1040,25 +1217,38 @@
 
       const parsed = [];
       lines.forEach(line => {
-        // Supports CSV format: Code, Name, Phone OR Name, Phone
+        // Supports CSV format: Code, Name, Phone, [Category] OR Name, Phone, [Category]
         const parts = line.split(/[,;\t]/).map(p => p.trim());
         if (parts.length >= 2) {
           let code = '';
           let name = '';
           let phone = '';
+          let category = 'Reguler';
 
           if (parts[0].match(/^G\d+/i) && parts.length >= 3) {
             code = parts[0].toUpperCase();
             name = parts[1];
             phone = parts[2];
+            if (parts[3]) {
+              const catCand = parts[3].trim().toLowerCase();
+              if (catCand === 'vvip') category = 'VVIP';
+              else if (catCand === 'vip') category = 'VIP';
+              else if (catCand === 'keluarga') category = 'Keluarga';
+            }
           } else {
             code = 'G' + String(nextCodeNum++).padStart(3, '0');
             name = parts[0];
             phone = parts[1];
+            if (parts[2]) {
+              const catCand = parts[2].trim().toLowerCase();
+              if (catCand === 'vvip') category = 'VVIP';
+              else if (catCand === 'vip') category = 'VIP';
+              else if (catCand === 'keluarga') category = 'Keluarga';
+            }
           }
 
           if (name) {
-            parsed.push({ code, name, phone });
+            parsed.push({ code, name, phone, category });
           }
         }
       });
@@ -1227,6 +1417,60 @@
         document.getElementById('cfg-gift-phone').value = currentRawSettings.GIFT_PHONE || cfg.giftAddress?.phone || '';
         document.getElementById('cfg-gift-address').value = currentRawSettings.GIFT_ADDRESS || cfg.giftAddress?.address || '';
 
+        // Quote / Ayat Suci
+        document.getElementById('cfg-quote-text').value = currentRawSettings.QUOTE_TEXT || cfg.quote?.text || '';
+        document.getElementById('cfg-quote-source').value = currentRawSettings.QUOTE_SOURCE || cfg.quote?.source || 'QS. Ar-Rum: 21';
+
+        // Love Story Milestones (1 - 3)
+        const s1 = (cfg.loveStory && cfg.loveStory[0]) || {};
+        const s2 = (cfg.loveStory && cfg.loveStory[1]) || {};
+        const s3 = (cfg.loveStory && cfg.loveStory[2]) || {};
+
+        document.getElementById('cfg-story1-tag').value = currentRawSettings.STORY1_TAG || s1.tag || '';
+        document.getElementById('cfg-story1-date').value = currentRawSettings.STORY1_DATE || s1.date || '';
+        document.getElementById('cfg-story1-title').value = currentRawSettings.STORY1_TITLE || s1.title || '';
+        document.getElementById('cfg-story1-desc').value = currentRawSettings.STORY1_DESC || s1.description || '';
+        document.getElementById('cfg-story1-img').value = currentRawSettings.STORY1_IMG || s1.image || '';
+
+        document.getElementById('cfg-story2-tag').value = currentRawSettings.STORY2_TAG || s2.tag || '';
+        document.getElementById('cfg-story2-date').value = currentRawSettings.STORY2_DATE || s2.date || '';
+        document.getElementById('cfg-story2-title').value = currentRawSettings.STORY2_TITLE || s2.title || '';
+        document.getElementById('cfg-story2-desc').value = currentRawSettings.STORY2_DESC || s2.description || '';
+        document.getElementById('cfg-story2-img').value = currentRawSettings.STORY2_IMG || s2.image || '';
+
+        document.getElementById('cfg-story3-tag').value = currentRawSettings.STORY3_TAG || s3.tag || '';
+        document.getElementById('cfg-story3-date').value = currentRawSettings.STORY3_DATE || s3.date || '';
+        document.getElementById('cfg-story3-title').value = currentRawSettings.STORY3_TITLE || s3.title || '';
+        document.getElementById('cfg-story3-desc').value = currentRawSettings.STORY3_DESC || s3.description || '';
+        document.getElementById('cfg-story3-img').value = currentRawSettings.STORY3_IMG || s3.image || '';
+
+        // Pre-Wedding Gallery (1 - 5)
+        const g1 = (cfg.gallery && cfg.gallery[0]) || {};
+        const g2 = (cfg.gallery && cfg.gallery[1]) || {};
+        const g3 = (cfg.gallery && cfg.gallery[2]) || {};
+        const g4 = (cfg.gallery && cfg.gallery[3]) || {};
+        const g5 = (cfg.gallery && cfg.gallery[4]) || {};
+
+        document.getElementById('cfg-gallery1-url').value = currentRawSettings.GALLERY1_URL || g1.url || '';
+        document.getElementById('cfg-gallery1-cat').value = currentRawSettings.GALLERY1_CAT || g1.category || '';
+        document.getElementById('cfg-gallery1-title').value = currentRawSettings.GALLERY1_TITLE || g1.title || '';
+
+        document.getElementById('cfg-gallery2-url').value = currentRawSettings.GALLERY2_URL || g2.url || '';
+        document.getElementById('cfg-gallery2-cat').value = currentRawSettings.GALLERY2_CAT || g2.category || '';
+        document.getElementById('cfg-gallery2-title').value = currentRawSettings.GALLERY2_TITLE || g2.title || '';
+
+        document.getElementById('cfg-gallery3-url').value = currentRawSettings.GALLERY3_URL || g3.url || '';
+        document.getElementById('cfg-gallery3-cat').value = currentRawSettings.GALLERY3_CAT || g3.category || '';
+        document.getElementById('cfg-gallery3-title').value = currentRawSettings.GALLERY3_TITLE || g3.title || '';
+
+        document.getElementById('cfg-gallery4-url').value = currentRawSettings.GALLERY4_URL || g4.url || '';
+        document.getElementById('cfg-gallery4-cat').value = currentRawSettings.GALLERY4_CAT || g4.category || '';
+        document.getElementById('cfg-gallery4-title').value = currentRawSettings.GALLERY4_TITLE || g4.title || '';
+
+        document.getElementById('cfg-gallery5-url').value = currentRawSettings.GALLERY5_URL || g5.url || '';
+        document.getElementById('cfg-gallery5-cat').value = currentRawSettings.GALLERY5_CAT || g5.category || '';
+        document.getElementById('cfg-gallery5-title').value = currentRawSettings.GALLERY5_TITLE || g5.title || '';
+
         // PINs
         document.getElementById('cfg-admin-pin').value = currentRawSettings.ADMIN_PIN || cfg.ADMIN_PIN || '1234';
         document.getElementById('cfg-reception-pin').value = currentRawSettings.RECEPTION_PIN || cfg.RECEPTION_PIN || '5678';
@@ -1299,6 +1543,50 @@
         GIFT_RECIPIENT: document.getElementById('cfg-gift-recipient').value.trim(),
         GIFT_PHONE: document.getElementById('cfg-gift-phone').value.trim(),
         GIFT_ADDRESS: document.getElementById('cfg-gift-address').value.trim(),
+
+        // Quote
+        QUOTE_TEXT: document.getElementById('cfg-quote-text').value.trim(),
+        QUOTE_SOURCE: document.getElementById('cfg-quote-source').value.trim(),
+
+        // Love Story
+        STORY1_TAG: document.getElementById('cfg-story1-tag').value.trim(),
+        STORY1_DATE: document.getElementById('cfg-story1-date').value.trim(),
+        STORY1_TITLE: document.getElementById('cfg-story1-title').value.trim(),
+        STORY1_DESC: document.getElementById('cfg-story1-desc').value.trim(),
+        STORY1_IMG: document.getElementById('cfg-story1-img').value.trim(),
+
+        STORY2_TAG: document.getElementById('cfg-story2-tag').value.trim(),
+        STORY2_DATE: document.getElementById('cfg-story2-date').value.trim(),
+        STORY2_TITLE: document.getElementById('cfg-story2-title').value.trim(),
+        STORY2_DESC: document.getElementById('cfg-story2-desc').value.trim(),
+        STORY2_IMG: document.getElementById('cfg-story2-img').value.trim(),
+
+        STORY3_TAG: document.getElementById('cfg-story3-tag').value.trim(),
+        STORY3_DATE: document.getElementById('cfg-story3-date').value.trim(),
+        STORY3_TITLE: document.getElementById('cfg-story3-title').value.trim(),
+        STORY3_DESC: document.getElementById('cfg-story3-desc').value.trim(),
+        STORY3_IMG: document.getElementById('cfg-story3-img').value.trim(),
+
+        // Gallery
+        GALLERY1_URL: document.getElementById('cfg-gallery1-url').value.trim(),
+        GALLERY1_CAT: document.getElementById('cfg-gallery1-cat').value.trim(),
+        GALLERY1_TITLE: document.getElementById('cfg-gallery1-title').value.trim(),
+
+        GALLERY2_URL: document.getElementById('cfg-gallery2-url').value.trim(),
+        GALLERY2_CAT: document.getElementById('cfg-gallery2-cat').value.trim(),
+        GALLERY2_TITLE: document.getElementById('cfg-gallery2-title').value.trim(),
+
+        GALLERY3_URL: document.getElementById('cfg-gallery3-url').value.trim(),
+        GALLERY3_CAT: document.getElementById('cfg-gallery3-cat').value.trim(),
+        GALLERY3_TITLE: document.getElementById('cfg-gallery3-title').value.trim(),
+
+        GALLERY4_URL: document.getElementById('cfg-gallery4-url').value.trim(),
+        GALLERY4_CAT: document.getElementById('cfg-gallery4-cat').value.trim(),
+        GALLERY4_TITLE: document.getElementById('cfg-gallery4-title').value.trim(),
+
+        GALLERY5_URL: document.getElementById('cfg-gallery5-url').value.trim(),
+        GALLERY5_CAT: document.getElementById('cfg-gallery5-cat').value.trim(),
+        GALLERY5_TITLE: document.getElementById('cfg-gallery5-title').value.trim(),
 
         ADMIN_PIN: document.getElementById('cfg-admin-pin').value.trim() || '1234',
         RECEPTION_PIN: document.getElementById('cfg-reception-pin').value.trim() || '5678'

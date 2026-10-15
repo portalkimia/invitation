@@ -6,42 +6,36 @@ A zero-cost, static wedding web application ready for GitHub Pages hosting, powe
 
 ## 🌟 Fitur Utama
 
-1. **Portal Utama & Hub Layanan (`index.html`)**:
-   - Halaman utama ketika pengunjung membuka alamat dasar situs (`https://portalkimia.github.io/invitation/`).
-   - Menyediakan navigasi lengkap ke: **Undangan Digital**, **Pocket Camera (18 Jepretan)**, **Meja Resepsi Usher**, dan **Admin Dashboard**.
-   - Dilengkapi *Smart Auto-Redirect*: Jika tautan diakses dengan parameter kode tamu (misal `?code=G001&to=Nama`), sistem langsung otomatis mengarahkan tamu ke `invitation.html?code=G001&to=Nama` tanpa merusak tautan undangan lama.
-
-2. **Digital Invitation (`invitation.html`)**:
-   - Tampilan undangan mobile-first responsif, elegan & bernuansa pernikahan (cream/gold).
-   - Membaca parameter tautan `?code=G001&to=Nama%20Tamu`.
-   - **Check-in Digital Pass**: Barcode/QR unik per tamu (`qrcodejs`) yang dapat diunduh ke galeri ponsel tamu.
+1. **Undangan Digital Utama (`index.html`)**:
+   - Halaman utama ketika tamu membuka alamat website (`https://portalkimia.github.io/invitation/` atau `?code=G001&to=Nama%20Tamu`).
+   - Tampilan mobile-first responsif, elegan & bernuansa pernikahan (cream/gold/vintage floral).
+   - **Check-in Digital Pass**: Barcode/QR Code unik per tamu (`qrcodejs`) yang dapat langsung disimpan/diunduh tamu untuk discan di meja resepsi.
+   - **Hitung Mundur Dinamis**: Countdown waktu acara yang tersinkronisasi otomatis dari database Google Sheets / `config.js`.
    - **Konfirmasi Kehadiran (RSVP)**: Status kehadiran, jumlah tamu (pax), dan ucapan/doa restu yang tersinkronisasi langsung ke Google Sheets.
-   - **Amplop Digital**: Salin nomor rekening BCA/Mandiri 1-klik dengan notifikasi toast.
-   - Menyimpan otomatis sesi tamu (`guestCode`) di `localStorage` untuk membuka Pocket Camera tanpa login ulang.
+   - **Amplop Digital**: Salin nomor rekening/e-wallet 1-klik dengan konfirmasi toast.
+   - **Music Player Otomatis**: Memutar background music pernikahan secara otomatis atau via floating play/pause button.
+   - **Redirect Alias (`invitation.html`)**: Memastikan tautan lama yang menyertakan `invitation.html` otomatis diteruskan ke `index.html` dengan parameter query utuh.
 
-3. **Admin Dashboard & WhatsApp Sender (`dashboard.html`)**:
-   - Dilindungi PIN keamanan (`ADMIN_PIN: '1234'`).
-   - Kartu ringkasan live: Total Tamu, Undangan Terkirim, Tamu Hadir, Total Pax RSVP, & Foto Drive.
-   - **Import Tamu Massal**: Input CSV atau teks fleksibel (`Nama, No_HP`) dengan auto-generate kode tamu `G001..G999`.
-   - **Editor Template WhatsApp**: Variabel dinamis `{nama}`, `{link}`, `{kode}` dengan live preview.
-   - **1-Click `wa.me` Launcher**: Membuka WhatsApp di tab tunggal terdedikasi (`window.open(url, 'wa_sender')`) dan secara instan menandai status `waSentAt` di Google Sheets.
-   - Filter tab: *Semua*, *Belum Kirim WA*, *Sudah Kirim WA*, dan *Hadir*.
-   - Tabel rekap kehadiran beserta tautan langsung ke foto check-in di Google Drive.
-
-4. **Meja Resepsi Usher Scanner (`reception.html`)**:
-   - Dilindungi PIN keamanan (`RECEPTION_PIN: '5678'`).
-   - **Barcode / QR Scanner**: Pemindaian kamera langsung via `html5-qrcode` + fallback pencarian manual kode tamu.
-   - **WebRTC Check-in Camera**: Mengambil foto kedatangan tamu, kompresi `<canvas>` JPEG (1280px, 0.75), dan mengunggah ke Google Drive sebagai `[Nama_Tamu]_[Code].jpg`.
-   - **Pola Non-Blocking Drive**: Foto diunggah ke Google Drive sebelum mengunci Google Sheets via `LockService`, memastikan pemindaian di meja resepsi tetap instan tanpa jeda antrean.
-   - **Modal Pocket Camera QR**: Menampilkan QR Code tautan `pocket-cam.html?code=[Code]` untuk di-scan oleh tamu saat tiba di meja resepsi.
-
-5. **18-Shot Pocket Camera (`pocket-cam.html`)**:
+2. **18-Shot Retro Pocket Camera (`pocket-cam.html`) - Smart Attendance Lock**:
    - Kamera sekali pakai vintage retro 35mm (desain disposable camera klasik).
-   - Identifikasi tamu otomatis: URL `?code=`, `localStorage` (dari undangan), atau dropdown pencarian nama tamu (untuk scan QR akrilik meja).
-   - Viewfinder WebRTC kamera depan/belakang, flash simulator, dan efek suara klik mekanis shutter (Web Audio API tanpa file audio eksternal).
-   - Layar LCD sisa jepretan: Membatasi maksimal 18 foto per tamu.
+   - **Smart Dynamic Lock (Opsi A)**: Tamu belum bisa mengambil foto sebelum hadir di acara resepsi (mencegah kuota habis terpakai sebelum hari H). Kunci otomatis terbuka setelah usher melakukan check-in di meja resepsi.
+   - Membatasi kuota maksimal 18 jepretan foto per tamu dengan auto-rollback kuota jika terjadi gangguan sinyal/koneksi saat upload.
    - Mengunggah foto ke Google Drive sebagai `[Nama_Tamu]_Moment_[01..18].jpg` dan mencatat riwayat di tab `PocketLogs`.
-   - Layar kunci *FILM HABIS* saat mencapai batas 18 foto dengan fitur pratinjau roll foto.
+   - Menampilkan rol film galeri foto sesi tersebut (`renderReel`).
+
+3. **Meja Resepsi Usher Scanner (`reception.html`)**:
+   - Akses via link terdedikasi dan dilindungi PIN keamanan resepsi (`5678`), tersimpan aman di browser dengan auto re-verifikasi jika PIN diganti di database.
+   - **Barcode / QR Scanner**: Pemindaian kamera langsung via `html5-qrcode` (dengan tombol ganti kamera depan/belakang) + pencarian kode manual.
+   - **Check-in Otomatis Tamu Walk-in**: Mendukung pengeditan nama tamu langsung di layar; jika tamu belum terdaftar di database, sistem langsung otomatis mendaftarkannya ke sheet `Guests`.
+   - **WebRTC Check-in Camera**: Mengambil foto kedatangan tamu (dengan tombol pembalik kamera) dan upload non-blocking ke Google Drive.
+   - **QR Pocket Camera**: Menampilkan QR Code instan berparameter unlock untuk di-scan oleh tamu begitu check-in berhasil.
+
+4. **Admin Dashboard & WhatsApp Sender (`dashboard.html`)**:
+   - Akses via link terdedikasi dan dilindungi PIN keamanan admin (`1234`), tersimpan aman di browser dengan auto re-verifikasi jika PIN diganti di database.
+   - Ringkasan live statistik: Total Tamu, Undangan Terkirim, Tamu Hadir, Pax RSVP, dan Foto Drive.
+   - **Tab Pengaturan Acara**: Form lengkap untuk mengubah nama pengantin, tanggal akad & resepsi, nomor rekening amplop digital, hingga PIN admin/resepsi tanpa perlu mengedit kode HTML/JS. Data tersimpan ke tab `Settings` di Google Sheets.
+   - **Import Tamu Massal**: Input teks/CSV fleksibel dengan auto-generate kode tamu `G001..G999`.
+   - **1-Click WhatsApp Sender**: Generator pesan undangan personal dengan template dinamis dan pelacakan status pengiriman di Google Sheets.
 
 ---
 
@@ -54,15 +48,15 @@ wedding-app/
 │   ├── audio/              # Folder lagu pernikahan (.mp3)
 │   ├── js/
 │   │   ├── config.js       # Konfigurasi acara, PIN, rekening, template WA, dan GAS URL
-│   │   └── api.js          # CORS fetch, normalisasi HP (08xx -> 628xx), kompresi canvas, audio Web API
+│   │   └── api.js          # CORS fetch, normalisasi HP, kompresi canvas, audio Web API, PIN auth
 │   └── css/                # Custom CSS styling
 ├── backend/
-│   └── Code.gs             # Unified Google Apps Script Web App (setupDatabase, LockService, DriveApp)
-├── index.html              # Landing Page Portal Utama (Hub navigasi semua layanan)
-├── invitation.html         # Undangan Digital Tamu (Ticket QR, RSVP, Amplop Digital)
-├── dashboard.html          # Admin Portal & 1-Click WhatsApp Sender
-├── reception.html          # Usher Check-in Barcode Scanner & Drive Photo Snap
-├── pocket-cam.html         # 18-Shot Retro Disposable Pocket Camera
+│   └── Code.gs             # Unified Google Apps Script (Setup DB, LockService, DriveApp, Settings)
+├── index.html              # Undangan Digital Utama Tamu (Ticket QR, Countdown, RSVP, Amplop Digital)
+├── invitation.html         # Redirect Helper (Mengalihkan link lama invitation.html ke index.html)
+├── pocket-cam.html         # 18-Shot Retro Pocket Camera dengan Smart Attendance Lock (Opsi A)
+├── reception.html          # Meja Resepsi Usher Scanner & Walk-in Check-in Foto
+├── dashboard.html          # Admin Portal, Pengaturan Acara Dinamis, & 1-Click WhatsApp Sender
 └── README.md
 ```
 

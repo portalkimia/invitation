@@ -159,6 +159,46 @@ const WeddingApi = {
   },
 
   /**
+   * Build Google Calendar 1-Click "Add to Calendar" URL
+   */
+  buildGoogleCalendarUrl(cfg = {}) {
+    const groom = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || 'Romeo';
+    const bride = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || 'Juliet';
+    const title = cfg.event?.title || `The Wedding of ${groom} & ${bride}`;
+
+    let startDate = new Date();
+    if (cfg.event?.countdownTarget) {
+      const parsed = new Date(cfg.event.countdownTarget);
+      if (!isNaN(parsed.getTime())) {
+        startDate = parsed;
+      }
+    }
+    const endDate = new Date(startDate.getTime() + (3 * 60 * 60 * 1000)); // +3 hours default
+
+    const formatGCal = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    const dates = `${formatGCal(startDate)}/${formatGCal(endDate)}`;
+
+    const venue = cfg.event?.resepsiVenue || cfg.event?.akadVenue || '';
+    const address = cfg.event?.resepsiAddress || cfg.event?.akadAddress || '';
+    const location = [venue, address].filter(Boolean).join(', ');
+
+    const details = `Undangan Pernikahan ${groom} & ${bride}.\n` +
+      (cfg.event?.dateFormatted ? `Tanggal: ${cfg.event.dateFormatted}\n` : '') +
+      (cfg.event?.mapsUrl ? `Lokasi Maps: ${cfg.event.mapsUrl}\n` : '') +
+      `Website: ${window.location ? window.location.origin + window.location.pathname : ''}`;
+
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: title,
+      dates: dates,
+      details: details,
+      location: location
+    });
+
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  },
+
+  /**
    * Compress image via HTML5 Canvas
    * Max width: 1280px, Quality: 0.75 JPEG
    * Returns Promise<string> Base64 JPEG data URL
@@ -371,7 +411,10 @@ const WeddingApi = {
 
     // Groom
     if (settings.GROOM_NAME) cfg.couple.groom.name = settings.GROOM_NAME;
-    if (settings.GROOM_SHORT) cfg.couple.groom.shortName = settings.GROOM_SHORT;
+    if (settings.GROOM_SHORT) {
+      cfg.couple.groom.shortName = settings.GROOM_SHORT;
+      cfg.couple.groomShort = settings.GROOM_SHORT;
+    }
     if (settings.GROOM_FATHER) cfg.couple.groom.father = settings.GROOM_FATHER;
     if (settings.GROOM_MOTHER) cfg.couple.groom.mother = settings.GROOM_MOTHER;
     if (settings.GROOM_BIO) cfg.couple.groom.bio = settings.GROOM_BIO;
@@ -379,7 +422,10 @@ const WeddingApi = {
 
     // Bride
     if (settings.BRIDE_NAME) cfg.couple.bride.name = settings.BRIDE_NAME;
-    if (settings.BRIDE_SHORT) cfg.couple.bride.shortName = settings.BRIDE_SHORT;
+    if (settings.BRIDE_SHORT) {
+      cfg.couple.bride.shortName = settings.BRIDE_SHORT;
+      cfg.couple.brideShort = settings.BRIDE_SHORT;
+    }
     if (settings.BRIDE_FATHER) cfg.couple.bride.father = settings.BRIDE_FATHER;
     if (settings.BRIDE_MOTHER) cfg.couple.bride.mother = settings.BRIDE_MOTHER;
     if (settings.BRIDE_BIO) cfg.couple.bride.bio = settings.BRIDE_BIO;
@@ -420,6 +466,51 @@ const WeddingApi = {
     if (settings.GIFT_RECIPIENT) cfg.giftAddress.recipient = settings.GIFT_RECIPIENT;
     if (settings.GIFT_PHONE) cfg.giftAddress.phone = settings.GIFT_PHONE;
     if (settings.GIFT_ADDRESS) cfg.giftAddress.address = settings.GIFT_ADDRESS;
+
+    // Quote / Ayat Suci
+    cfg.quote = cfg.quote || {};
+    if (settings.QUOTE_TEXT) cfg.quote.text = settings.QUOTE_TEXT;
+    if (settings.QUOTE_SOURCE) cfg.quote.source = settings.QUOTE_SOURCE;
+
+    // Love Story Milestones (Up to 3 milestones)
+    const customStory = [];
+    for (let i = 1; i <= 3; i++) {
+      const date = settings[`STORY${i}_DATE`];
+      const title = settings[`STORY${i}_TITLE`];
+      const desc = settings[`STORY${i}_DESC`];
+      const img = settings[`STORY${i}_IMG`];
+      const tag = settings[`STORY${i}_TAG`];
+      if (title || desc || img) {
+        customStory.push({
+          date: date || '',
+          title: title || '',
+          description: desc || '',
+          image: img || '',
+          tag: tag || ''
+        });
+      }
+    }
+    if (customStory.length > 0) {
+      cfg.loveStory = customStory;
+    }
+
+    // Pre-Wedding Gallery Photos (Up to 5 photos)
+    const customGallery = [];
+    for (let i = 1; i <= 5; i++) {
+      const url = settings[`GALLERY${i}_URL`];
+      const title = settings[`GALLERY${i}_TITLE`];
+      const cat = settings[`GALLERY${i}_CAT`];
+      if (url) {
+        customGallery.push({
+          url: url,
+          title: title || `Foto Prewed ${i}`,
+          category: cat || 'Pre-Wedding'
+        });
+      }
+    }
+    if (customGallery.length > 0) {
+      cfg.gallery = customGallery;
+    }
 
     // WA Template
     if (settings.WA_TEMPLATE) cfg.defaultWaTemplate = settings.WA_TEMPLATE;

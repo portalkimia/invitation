@@ -58,6 +58,14 @@ const WEDDING_CONFIG = {
     countdownTarget: '2026-10-25T08:00:00+07:00',
     // Optional background image for invitation (e.g. 'assets/images/bg.jpg' or online URL)
     backgroundImage: '',
+    akadTime: '08:00 - 10:00 WIB',
+    akadVenue: 'Masjid Agung Al-Azhar',
+    akadAddress: 'Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan',
+    akadNote: 'Khusus Keluarga & Kerabat Dekat',
+    resepsiTime: '11:00 - 14:00 WIB',
+    resepsiVenue: 'Grand Ballroom Hotel Mulia Senayan',
+    resepsiAddress: 'Jl. Asia Afrika No.6, Gelora, Senayan, Jakarta Pusat',
+    mapsUrl: 'https://maps.google.com/?q=Hotel+Mulia+Senayan+Jakarta',
     akad: {
       title: 'Akad Nikah',
       time: '08:00 - 10:00 WIB',
@@ -69,8 +77,13 @@ const WEDDING_CONFIG = {
       time: '11:00 - 14:00 WIB',
       venue: 'Grand Ballroom Hotel Mulia Senayan',
       address: 'Jl. Asia Afrika No.6, Gelora, Senayan, Jakarta Pusat'
-    },
-    mapsUrl: 'https://maps.google.com/?q=Hotel+Mulia+Senayan+Jakarta'
+    }
+  },
+
+  // Quran / Holy Scripture Quote
+  quote: {
+    text: 'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.',
+    source: 'QS. Ar-Rum: 21'
   },
 
   // Wedding Background Music
@@ -100,6 +113,60 @@ const WEDDING_CONFIG = {
     phone: '08123456789',
     address: 'Jl. Kebahagiaan No. 10, Kebayoran Baru, Jakarta Selatan, 12180'
   },
+
+  // Love Story Milestones (Kisah Perjalanan Cinta)
+  loveStory: [
+    {
+      date: 'September 2021',
+      title: 'Pertama Kali Bertemu',
+      description: 'Tak sengaja bertegur sapa saat menyelesaikan proyek akhir bersama di kampus, berawal dari tatapan malu hingga percakapan hangat yang tak pernah usai.',
+      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80',
+      tag: 'Sudut Kampus'
+    },
+    {
+      date: 'Desember 2023',
+      title: 'Memulai Komitmen',
+      description: 'Setelah melewati masa persahabatan yang indah, kami sepakat untuk melangkah ke babak baru bersama, saling menjaga dan menguatkan satu sama lain.',
+      image: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&auto=format&fit=crop&q=80',
+      tag: 'Senja Bersama'
+    },
+    {
+      date: 'November 2025',
+      title: 'Momen Lamaran (She Said Yes!)',
+      description: 'Di bawah hangatnya cahaya mentari sore dan restu kedua keluarga, sebuah cincin tersemat sebagai simbol janji suci menuju mahligai pernikahan.',
+      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&auto=format&fit=crop&q=80',
+      tag: 'Bukit Pinus'
+    }
+  ],
+
+  // Pre-Wedding Photo Gallery
+  gallery: [
+    {
+      url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80',
+      title: 'Harmoni di Balutan Sutra',
+      category: 'Potret Elegan'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&auto=format&fit=crop&q=80',
+      title: 'Gelak Tawa di Bawah Mentari',
+      category: 'Momen Spontan'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&auto=format&fit=crop&q=80',
+      title: 'Simbol Pengikat Janji',
+      category: 'Detail Cincin'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&auto=format&fit=crop&q=80',
+      title: 'Tatapan Penuh Ketulusan',
+      category: 'Potret Mempelai'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1000&auto=format&fit=crop&q=80',
+      title: 'Janji di Cakrawala Senja',
+      category: 'Siluet Sunset'
+    }
+  ],
 
   // Default WhatsApp Message Template
   // Supported placeholders: {nama}, {link}, {kode}

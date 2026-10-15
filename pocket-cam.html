@@ -295,6 +295,32 @@
     let cameraStream = null;
     let currentFacing = 'environment'; // environment or user
     const localReelPhotos = []; // { shotNumber, dataUrl, timestamp }
+    let coupleShortGroom = 'Romeo';
+    let coupleShortBride = 'Juliet';
+
+    function syncCoupleSettings(settings) {
+      if (!settings) return;
+      if (settings.GROOM_SHORT) coupleShortGroom = settings.GROOM_SHORT;
+      else if (settings.couple?.groom?.shortName) coupleShortGroom = settings.couple.groom.shortName;
+
+      if (settings.BRIDE_SHORT) coupleShortBride = settings.BRIDE_SHORT;
+      else if (settings.couple?.bride?.shortName) coupleShortBride = settings.couple.bride.shortName;
+    }
+
+    // Try cached settings first
+    const cachedCamSettings = WeddingApi.getCachedSettings();
+    if (cachedCamSettings) {
+      syncCoupleSettings(cachedCamSettings);
+    } else if (typeof WEDDING_CONFIG !== 'undefined') {
+      syncCoupleSettings(WEDDING_CONFIG);
+    }
+
+    // Asynchronously fetch live settings from Google Sheets
+    WeddingApi.getSettings().then(live => {
+      if (live && Object.keys(live).length > 0) {
+        syncCoupleSettings(live);
+      }
+    }).catch(e => console.warn('Sync couple settings error:', e));
 
     // Elements
     const camVideo = document.getElementById('cam-video');
@@ -552,6 +578,51 @@
       const ctx = camCanvas.getContext('2d');
       ctx.drawImage(camVideo, 0, 0, camCanvas.width, camCanvas.height);
 
+      // ===== Retro 35mm Date Stamp & Dynamic Couple Watermark =====
+      const w = camCanvas.width;
+      const h = camCanvas.height;
+      const barH = Math.max(48, Math.round(h * 0.085));
+
+      // 1. Subtle dark gradient bar at bottom for high legibility
+      const grad = ctx.createLinearGradient(0, h - barH, 0, h);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.45)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, h - barH, w, barH);
+
+      // 2. Retro 35mm Quartz Date Stamp (Classic Orange/Amber LED glow) on bottom-right
+      const now = new Date();
+      const yy = String(now.getFullYear()).slice(-2);
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const dateStamp = `'${yy} ${mm} ${dd}`;
+
+      const dateFontSize = Math.max(16, Math.round(w * 0.024));
+      ctx.save();
+      ctx.font = `bold ${dateFontSize}px "Courier New", monospace`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.shadowColor = 'rgba(255, 140, 0, 0.85)';
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = '#FFA000';
+      ctx.fillText(dateStamp, w - Math.round(w * 0.035), h - Math.round(barH * 0.28));
+      ctx.restore();
+
+      // 3. Dynamic Couple & Guest Watermark on bottom-left
+      const guestNameStr = (currentGuest && currentGuest.name) ? currentGuest.name : 'Tamu Undangan';
+      const watermarkText = `The Wedding of ${coupleShortGroom} & ${coupleShortBride} • Shot by ${guestNameStr}`;
+      const watermarkFontSize = Math.max(12, Math.round(w * 0.016));
+      ctx.save();
+      ctx.font = `600 ${watermarkFontSize}px sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(watermarkText, Math.round(w * 0.035), h - Math.round(barH * 0.28));
+      ctx.restore();
+
       const rawDataUrl = camCanvas.toDataURL('image/jpeg', 0.85);
 
       // Decrement shot counter immediately (Optimistic UI)
@@ -588,11 +659,21 @@
         if (res.success || res.mock) {
           uploadStatusText.innerHTML = `Foto #${shotNum} tersimpan di album Drive!`;
         } else {
-          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}</span>`;
+          // Failure: roll back quota and remove optimistic photo from local reel
+          if (pocketPhotoCount > 0) pocketPhotoCount--;
+          localReelPhotos.shift();
+          updateFilmCounter();
+          renderReel();
+          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}. Kuota dikembalikan, silakan coba lagi.</span>`;
         }
       } catch (err) {
         console.error('Upload error:', err);
-        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu</span>`;
+        // Network error: roll back quota and remove optimistic photo from local reel
+        if (pocketPhotoCount > 0) pocketPhotoCount--;
+        localReelPhotos.shift();
+        updateFilmCounter();
+        renderReel();
+        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu saat upload. Kuota foto dikembalikan, silakan coba lagi.</span>`;
       } finally {
         isUploading = false;
       }

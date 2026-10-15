@@ -158,18 +158,33 @@
     <div id="step-2-photo" class="hidden space-y-4">
       <!-- Guest Details Banner -->
       <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
-        <div>
+        <div class="flex-1 mr-3">
           <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Tamu Terverifikasi</span>
-          <h2 id="checkin-guest-name" class="text-lg font-bold text-white">Nama Tamu</h2>
-          <div class="flex items-center space-x-2 text-xs text-slate-300 mt-0.5">
+          <div class="flex items-center space-x-1.5 mt-0.5">
+            <input type="text" id="checkin-guest-name" class="bg-transparent border-b border-amber-400/40 hover:border-amber-400 focus:border-amber-400 focus:outline-none text-lg font-bold text-white w-full py-0.5" placeholder="Nama Tamu (Klik untuk edit)">
+            <i data-lucide="edit-2" class="w-3.5 h-3.5 text-amber-400/70 pointer-events-none flex-shrink-0"></i>
+          </div>
+          <div class="flex items-center space-x-2 text-xs text-slate-300 mt-1">
             <span id="checkin-guest-code" class="font-mono text-amber-300 font-bold">G001</span>
             <span>•</span>
             <span id="checkin-guest-rsvp">RSVP: Hadir (2 Pax)</span>
           </div>
         </div>
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
           <i data-lucide="user-check" class="w-5 h-5"></i>
         </div>
+      </div>
+
+      <!-- VIP / Priority Guest Alert Banner -->
+      <div id="checkin-vip-banner" class="hidden p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 border-2 border-amber-400/60 items-center justify-between shadow-lg">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">🌟</span>
+          <div>
+            <span id="checkin-vip-label" class="text-xs font-bold text-amber-300 block uppercase tracking-wider">TAMU VIP</span>
+            <span class="text-[11px] text-slate-200">Prioritas Sambutan &amp; Souvenir Khusus</span>
+          </div>
+        </div>
+        <span id="checkin-vip-tag" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wide">VIP</span>
       </div>
 
       <!-- Photo Capture Card -->
@@ -187,11 +202,15 @@
         </div>
 
         <!-- Camera Action Controls -->
-        <div id="photo-capture-controls" class="mt-4 flex items-center justify-center gap-3">
-          <button id="btn-skip-photo" class="py-2.5 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold text-xs transition-colors">
+        <div id="photo-capture-controls" class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+          <button id="btn-toggle-photo-cam" type="button" class="py-2.5 px-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold text-xs inline-flex items-center space-x-1.5 transition-colors">
+            <i data-lucide="flip-horizontal" class="w-3.5 h-3.5"></i>
+            <span>Ganti Kamera</span>
+          </button>
+          <button id="btn-skip-photo" type="button" class="py-2.5 px-3.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold text-xs transition-colors">
             Lewati Foto
           </button>
-          <button id="btn-snap-photo" class="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg inline-flex items-center space-x-2 transition-all">
+          <button id="btn-snap-photo" type="button" class="py-2.5 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg inline-flex items-center space-x-2 transition-all">
             <i data-lucide="camera" class="w-4 h-4"></i>
             <span>Ambil Foto</span>
           </button>
@@ -219,7 +238,13 @@
         </div>
         
         <h2 class="text-2xl font-bold text-white mb-1">Check-in Berhasil!</h2>
-        <p id="success-guest-greeting" class="text-sm text-amber-300 font-semibold mb-4">Selamat datang, Budi Santoso</p>
+        <p id="success-guest-greeting" class="text-sm text-amber-300 font-semibold mb-2">Selamat datang, Budi Santoso</p>
+        
+        <!-- Step 3 VIP Alert Badge -->
+        <div id="success-vip-badge" class="hidden mb-4 inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-amber-400/20 border border-amber-400/50 text-amber-300 text-xs font-bold">
+          <span>🌟</span>
+          <span id="success-vip-text">TAMU VIP — Prioritas Souvenir &amp; Sambutan</span>
+        </div>
 
         <!-- QR Pocket Cam Modal Container -->
         <div class="p-5 rounded-2xl bg-white text-slate-900 border border-slate-200 inline-block shadow-inner mb-4">
@@ -352,6 +377,7 @@
     let photoStream = null;
     let capturedPhotoBase64 = null;
     let currentFacingMode = 'environment'; // environment or user
+    let photoFacingMode = 'environment'; // default to rear camera for usher photographing guest
 
     // Step Elements
     const step1 = document.getElementById('step-1-scanner');
@@ -422,7 +448,8 @@
       await stopQrScanner();
 
       // Show temporary loading indicator
-      document.getElementById('checkin-guest-name').textContent = 'Memuat tamu...';
+      const guestNameInput = document.getElementById('checkin-guest-name');
+      if (guestNameInput) guestNameInput.value = 'Memuat tamu...';
       document.getElementById('checkin-guest-code').textContent = code;
 
       // Switch view to Step 2
@@ -442,12 +469,41 @@
         console.error('Error fetching guest:', e);
       }
 
-      currentGuest = guest || { code: code, name: 'Tamu ' + code, rsvpStatus: 'Hadir', pax: 1 };
+      currentGuest = guest || { code: code, name: 'Tamu ' + code, rsvpStatus: 'Hadir', pax: 1, category: 'Reguler' };
 
       // Update UI Banner
-      document.getElementById('checkin-guest-name').textContent = currentGuest.name;
+      if (guestNameInput) guestNameInput.value = currentGuest.name;
       document.getElementById('checkin-guest-code').textContent = currentGuest.code;
       document.getElementById('checkin-guest-rsvp').textContent = `RSVP: ${currentGuest.rsvpStatus || 'Belum'} (${currentGuest.pax || 1} Pax)`;
+
+      // Check VIP / Priority Category Alert
+      const vipBanner = document.getElementById('checkin-vip-banner');
+      const vipLabel = document.getElementById('checkin-vip-label');
+      const vipTag = document.getElementById('checkin-vip-tag');
+      const guestCat = (currentGuest.category || 'Reguler').trim();
+
+      if (['VIP', 'VVIP', 'Keluarga'].includes(guestCat)) {
+        if (vipBanner) {
+          vipBanner.classList.remove('hidden');
+          vipBanner.classList.add('flex');
+        }
+        if (vipLabel) vipLabel.textContent = `🌟 TAMU ${guestCat.toUpperCase()} — Prioritas Sambutan`;
+        if (vipTag) {
+          vipTag.textContent = guestCat.toUpperCase();
+          if (guestCat === 'VVIP') {
+            vipTag.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-400 text-slate-950 uppercase tracking-wide';
+          } else if (guestCat === 'Keluarga') {
+            vipTag.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-400 text-slate-950 uppercase tracking-wide';
+          } else {
+            vipTag.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wide';
+          }
+        }
+      } else {
+        if (vipBanner) {
+          vipBanner.classList.add('hidden');
+          vipBanner.classList.remove('flex');
+        }
+      }
 
       // Start WebRTC camera for check-in photo
       startPhotoCamera();
@@ -464,6 +520,14 @@
     const btnSkip = document.getElementById('btn-skip-photo');
     const btnConfirm = document.getElementById('btn-confirm-checkin');
 
+    const btnTogglePhotoCam = document.getElementById('btn-toggle-photo-cam');
+    if (btnTogglePhotoCam) {
+      btnTogglePhotoCam.addEventListener('click', async () => {
+        photoFacingMode = (photoFacingMode === 'environment') ? 'user' : 'environment';
+        await startPhotoCamera();
+      });
+    }
+
     async function startPhotoCamera() {
       stopPhotoCamera();
       photoVideo.classList.remove('hidden');
@@ -474,7 +538,7 @@
       try {
         photoStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: 'user', // Selfie/front facing for usher & guest check-in
+            facingMode: photoFacingMode, // Toggleable facingMode (environment / user)
             width: { ideal: 1280 },
             height: { ideal: 720 }
           },
@@ -540,8 +604,14 @@
       btnConfirm.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan...`;
 
       try {
+        const nameInput = document.getElementById('checkin-guest-name');
+        if (nameInput && nameInput.value.trim()) {
+          currentGuest.name = nameInput.value.trim();
+        }
+
         const payload = {
           code: currentGuest.code,
+          name: currentGuest.name,
           photoBase64: photoBase64 || '',
           mimeType: 'image/jpeg'
         };
@@ -570,6 +640,24 @@
 
       document.getElementById('success-guest-greeting').textContent = `Selamat Datang, ${currentGuest.name}!`;
 
+      // Check VIP Badge in Step 3
+      const successVipBadge = document.getElementById('success-vip-badge');
+      const successVipText = document.getElementById('success-vip-text');
+      const guestCat = (currentGuest.category || 'Reguler').trim();
+
+      if (['VIP', 'VVIP', 'Keluarga'].includes(guestCat)) {
+        if (successVipBadge) {
+          successVipBadge.classList.remove('hidden');
+          successVipBadge.classList.add('inline-flex');
+        }
+        if (successVipText) successVipText.textContent = `TAMU ${guestCat.toUpperCase()} — Prioritas Souvenir & Sambutan`;
+      } else {
+        if (successVipBadge) {
+          successVipBadge.classList.add('hidden');
+          successVipBadge.classList.remove('inline-flex');
+        }
+      }
+
       // Generate Pocket Cam QR Code linking to pocket-cam.html?code=[Code]&unlock=true
       const rawInviteUrl = WeddingApi.buildInviteUrl(currentGuest.code, currentGuest.name);
       const pocketCamUrl = rawInviteUrl.replace(/(index|invitation)\.html/, 'pocket-cam.html') + '&unlock=true';
@@ -592,6 +680,18 @@
       currentGuest = null;
       capturedPhotoBase64 = null;
       document.getElementById('manual-code-input').value = '';
+
+      // Reset VIP Banners
+      const vipBanner = document.getElementById('checkin-vip-banner');
+      if (vipBanner) {
+        vipBanner.classList.add('hidden');
+        vipBanner.classList.remove('flex');
+      }
+      const successVipBadge = document.getElementById('success-vip-badge');
+      if (successVipBadge) {
+        successVipBadge.classList.add('hidden');
+        successVipBadge.classList.remove('inline-flex');
+      }
 
       step3.classList.add('hidden');
       step1.classList.remove('hidden');

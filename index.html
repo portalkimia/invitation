@@ -127,8 +127,8 @@
       </div>
 
       <p class="text-slate-600 text-sm max-w-lg mx-auto leading-relaxed italic px-4">
-        "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang."
-        <br><span class="font-semibold text-xs text-gold-800 not-italic mt-1 block">— QS. Ar-Rum: 21</span>
+        "<span id="hero-quote-text">Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.</span>"
+        <br><span id="hero-quote-source" class="font-semibold text-xs text-gold-800 not-italic mt-1 block">— QS. Ar-Rum: 21</span>
       </p>
     </section>
 
@@ -165,6 +165,41 @@
       </div>
     </section>
 
+    <!-- ==================== OUR LOVE STORY (KISAH PERJALANAN CINTA) ==================== -->
+    <section id="love-story-section" class="space-y-6">
+      <div class="text-center">
+        <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
+          Kisah Kami
+        </div>
+        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Perjalanan Cinta</h3>
+        <p class="text-xs text-slate-500 italic max-w-md mx-auto">
+          "Setiap kisah cinta itu indah, namun kisah cinta kami adalah yang paling kami syukuri."
+        </p>
+      </div>
+
+      <!-- Vertical Timeline Container -->
+      <div id="love-story-container" class="relative max-w-lg mx-auto pl-4 sm:pl-6 space-y-8">
+        <div class="absolute left-6 top-3 bottom-3 w-0.5 bg-gradient-to-b from-gold-300 via-gold-400 to-gold-200"></div>
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==================== PRE-WEDDING PHOTO GALLERY ==================== -->
+    <section id="gallery-section" class="space-y-6">
+      <div class="text-center">
+        <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
+          Memori Bahagia
+        </div>
+        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Galeri Foto Pre-Wedding</h3>
+        <p class="text-xs text-slate-500">Ketuk foto untuk melihat dalam resolusi penuh</p>
+      </div>
+
+      <!-- Gallery Grid Container -->
+      <div id="gallery-container" class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
     <!-- COUNTDOWN TIMER -->
     <section class="bg-white rounded-3xl p-6 sm:p-8 text-center border border-gold-200 shadow-md">
       <h3 class="font-serif text-2xl font-bold text-slate-900 mb-2">Menuju Hari Bahagia</h3>
@@ -187,6 +222,15 @@
           <span id="cd-seconds" class="font-serif text-2xl sm:text-3xl font-bold text-gold-800 block">00</span>
           <span class="text-[10px] uppercase font-semibold text-slate-500">Detik</span>
         </div>
+      </div>
+
+      <!-- Add to Google Calendar Button -->
+      <div class="mt-6 flex justify-center">
+        <a id="btn-add-calendar" href="#" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center space-x-2 py-2.5 px-5 rounded-full bg-gold-700 hover:bg-gold-800 text-white font-medium text-xs shadow-md transition-all transform hover:-translate-y-0.5">
+          <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+          <span>Simpan ke Google Calendar</span>
+        </a>
       </div>
     </section>
 
@@ -397,6 +441,27 @@
       </form>
     </section>
 
+    <!-- ==================== LIVE WALL OF WISHES ==================== -->
+    <section id="wishes-wall-section" class="bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+      <div class="text-center mb-5">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-2">
+          <i data-lucide="message-square-heart" class="w-6 h-6"></i>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <h3 class="font-serif text-2xl font-bold text-slate-900">Untaian Doa & Ucapan</h3>
+          <span id="wishes-count-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-gold-100 text-gold-800 border border-gold-300">0</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">Pesan cinta & doa tulus dari para sahabat dan keluarga</p>
+      </div>
+
+      <!-- Scrollable Wishes List -->
+      <div id="wishes-container" class="max-w-md mx-auto space-y-3 max-h-96 overflow-y-auto pr-1">
+        <div id="wishes-loading" class="text-center py-6 text-xs text-slate-400">
+          <span class="inline-block animate-spin mr-1">⏳</span> Memuat untaian doa...
+        </div>
+      </div>
+    </section>
+
     <!-- ==================== DIGITAL ENVELOPE / WEDDING GIFT ==================== -->
     <section class="bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-6">
@@ -448,6 +513,22 @@
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl flex items-center space-x-2 pointer-events-none">
     <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
     <span id="toast-message">Tersalin ke clipboard!</span>
+  </div>
+
+  <!-- ==================== PHOTO LIGHTBOX MODAL ==================== -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <button id="btn-close-lightbox" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors z-10" onclick="closeLightbox()">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    <div class="max-w-2xl w-full flex flex-col items-center">
+      <div class="relative w-full max-h-[75vh] flex items-center justify-center">
+        <img id="lightbox-img" src="" alt="Preview Foto" class="max-h-[70vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl">
+      </div>
+      <div class="mt-4 text-center text-white px-4">
+        <h4 id="lightbox-title" class="font-serif text-lg font-bold"></h4>
+        <p id="lightbox-caption" class="text-xs text-slate-300 mt-1"></p>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
@@ -504,6 +585,12 @@
       const cdDateLabelEl = document.getElementById('countdown-date-label');
       if (cdDateLabelEl && cfg.event?.dateFormatted) cdDateLabelEl.textContent = cfg.event.dateFormatted;
 
+      // Quote / Ayat Suci
+      const quoteTextEl = document.getElementById('hero-quote-text');
+      const quoteSrcEl = document.getElementById('hero-quote-source');
+      if (quoteTextEl && cfg.quote?.text) quoteTextEl.textContent = cfg.quote.text;
+      if (quoteSrcEl && cfg.quote?.source) quoteSrcEl.textContent = `— ${cfg.quote.source}`;
+
       // Cover / Prewedding Photo
       if (cfg.couple?.coverPhoto) {
         const coverImg = document.getElementById('cover-photo');
@@ -536,17 +623,30 @@
         }
       }
 
-      // Akad Nikah
-      if (cfg.event?.akadTime) document.getElementById('akad-time').textContent = cfg.event.akadTime;
-      if (cfg.event?.akadVenue) document.getElementById('akad-venue').textContent = cfg.event.akadVenue;
-      if (cfg.event?.akadAddress) document.getElementById('akad-address').textContent = cfg.event.akadAddress;
-      if (cfg.event?.akadNote) document.getElementById('akad-note').textContent = cfg.event.akadNote;
+      // Akad Nikah (supports flat and nested keys)
+      const akadTime = cfg.event?.akadTime || cfg.event?.akad?.time;
+      const akadVenue = cfg.event?.akadVenue || cfg.event?.akad?.venue;
+      const akadAddress = cfg.event?.akadAddress || cfg.event?.akad?.address;
+      const akadNote = cfg.event?.akadNote || cfg.event?.akad?.note;
+      if (akadTime) document.getElementById('akad-time').textContent = akadTime;
+      if (akadVenue) document.getElementById('akad-venue').textContent = akadVenue;
+      if (akadAddress) document.getElementById('akad-address').textContent = akadAddress;
+      if (akadNote) document.getElementById('akad-note').textContent = akadNote;
 
-      // Resepsi Pernikahan
-      if (cfg.event?.resepsiTime) document.getElementById('resepsi-time').textContent = cfg.event.resepsiTime;
-      if (cfg.event?.resepsiVenue) document.getElementById('resepsi-venue').textContent = cfg.event.resepsiVenue;
-      if (cfg.event?.resepsiAddress) document.getElementById('resepsi-address').textContent = cfg.event.resepsiAddress;
+      // Resepsi Pernikahan (supports flat and nested keys)
+      const resepsiTime = cfg.event?.resepsiTime || cfg.event?.reception?.time;
+      const resepsiVenue = cfg.event?.resepsiVenue || cfg.event?.reception?.venue;
+      const resepsiAddress = cfg.event?.resepsiAddress || cfg.event?.reception?.address;
+      if (resepsiTime) document.getElementById('resepsi-time').textContent = resepsiTime;
+      if (resepsiVenue) document.getElementById('resepsi-venue').textContent = resepsiVenue;
+      if (resepsiAddress) document.getElementById('resepsi-address').textContent = resepsiAddress;
       if (cfg.event?.mapsUrl) document.getElementById('btn-maps-link').href = cfg.event.mapsUrl;
+
+      // Google Calendar Button
+      const calBtn = document.getElementById('btn-add-calendar');
+      if (calBtn && WeddingApi.buildGoogleCalendarUrl) {
+        calBtn.href = WeddingApi.buildGoogleCalendarUrl(cfg);
+      }
 
       // Custom Background Image
       if (cfg.event?.backgroundImage) {
@@ -600,8 +700,112 @@
         }
       }
 
+      // Render Love Story Milestones
+      renderLoveStory(cfg.loveStory);
+
+      // Render Pre-Wedding Gallery
+      renderGallery(cfg.gallery);
+
       lucide.createIcons();
     }
+
+    // Render Love Story Milestones
+    function renderLoveStory(items) {
+      const container = document.getElementById('love-story-container');
+      if (!container) return;
+      const list = (items && items.length > 0) ? items : (WEDDING_CONFIG?.loveStory || []);
+      if (!list || list.length === 0) return;
+
+      container.innerHTML = `
+        <div class="absolute left-6 top-3 bottom-3 w-0.5 bg-gradient-to-b from-gold-300 via-gold-400 to-gold-200"></div>
+      `;
+
+      list.forEach((item) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'relative flex items-start gap-4 group';
+        itemEl.innerHTML = `
+          <!-- Timeline Node -->
+          <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-white border-2 border-gold-400 shadow-sm flex items-center justify-center mt-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-gold-600"></span>
+          </div>
+
+          <!-- Story Card -->
+          <div class="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-gold-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-gold-50 border border-gold-200 text-gold-800 text-[11px] font-bold tracking-wider uppercase">
+                ${item.date || ''}
+              </span>
+              ${item.tag ? `<span class="text-[11px] text-slate-400 font-medium">${item.tag}</span>` : ''}
+            </div>
+            <h4 class="font-serif text-lg font-bold text-slate-900 mb-1.5">${item.title || ''}</h4>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3">${item.description || ''}</p>
+            ${item.image ? `
+              <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-slate-100 cursor-pointer group/img" onclick="openLightbox('${item.image}', '${item.title || 'Kisah Cinta'}', '${item.date || ''}')">
+                <img src="${item.image}" alt="${item.title || 'Foto Milestone'}" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/50 text-white text-[10px] backdrop-blur-sm flex items-center gap-1">
+                  <i data-lucide="zoom-in" class="w-3 h-3"></i> Perbesar
+                </span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(itemEl);
+      });
+      lucide.createIcons();
+    }
+
+    // Render Pre-Wedding Photo Gallery
+    function renderGallery(items) {
+      const container = document.getElementById('gallery-container');
+      if (!container) return;
+      const list = (items && items.length > 0) ? items : (WEDDING_CONFIG?.gallery || []);
+      if (!list || list.length === 0) return;
+
+      container.innerHTML = '';
+      list.forEach((photo, idx) => {
+        const itemEl = document.createElement('div');
+        const isWide = (idx === 0 || (idx === list.length - 1 && list.length % 2 !== 0));
+        itemEl.className = `${isWide ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-[3/4]'} relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-gold-200 cursor-pointer group`;
+        itemEl.onclick = () => openLightbox(photo.url, photo.title || 'Pre-Wedding', photo.category || '');
+        itemEl.innerHTML = `
+          <img src="${photo.url}" alt="${photo.title || 'Foto Prewed'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+          <div class="absolute bottom-2.5 left-3 right-3 text-white">
+            ${photo.category ? `<span class="text-[10px] font-semibold text-gold-300 uppercase tracking-wider block">${photo.category}</span>` : ''}
+            <h4 class="font-serif text-xs sm:text-sm font-bold truncate">${photo.title || ''}</h4>
+          </div>
+          <span class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+          </span>
+        `;
+        container.appendChild(itemEl);
+      });
+      lucide.createIcons();
+    }
+
+    // Lightbox modal helpers
+    function openLightbox(url, title, caption) {
+      const modal = document.getElementById('lightbox-modal');
+      const img = document.getElementById('lightbox-img');
+      const titleEl = document.getElementById('lightbox-title');
+      const capEl = document.getElementById('lightbox-caption');
+      if (!modal || !img) return;
+      img.src = url;
+      if (titleEl) titleEl.textContent = title || '';
+      if (capEl) capEl.textContent = caption || '';
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      if (!modal) return;
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    document.getElementById('lightbox-modal')?.addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
 
     // 1. Initial render with local cached settings (instant) or config.js fallback
     const cachedSettings = WeddingApi.getCachedSettings();
@@ -653,7 +857,7 @@
 
     // Countdown Timer
     function updateCountdown() {
-      const targetDate = new Date(WEDDING_CONFIG?.event?.countdownTarget || '2026-10-25T08:00:00+07:00').getTime();
+      const targetDate = new Date(currentConfig?.event?.countdownTarget || WEDDING_CONFIG?.event?.countdownTarget || '2026-10-25T08:00:00+07:00').getTime();
       const now = new Date().getTime();
       const diff = targetDate - now;
 
@@ -768,6 +972,15 @@
           rsvpAlert.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
           rsvpAlert.textContent = `Terima kasih, ${guestName}! Konfirmasi kehadiran (${status}) telah tersimpan.`;
           WeddingApi.playSuccessChime();
+
+          // Prepend new wish to Live Wall of Wishes immediately
+          if (wishes && wishes.trim()) {
+            addWishToWall({
+              name: guestName || guestNameParam,
+              rsvpStatus: status,
+              wishes: wishes.trim()
+            });
+          }
         } else {
           rsvpAlert.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
           rsvpAlert.textContent = `Pemberitahuan: ${response.error || 'Gagal menyimpan, silakan coba lagi.'}`;
@@ -785,6 +998,93 @@
         lucide.createIcons();
       }
     });
+
+    // ==================== LIVE WALL OF WISHES SYSTEM ====================
+    let totalWishesCount = 0;
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    function createWishCardHtml(wish) {
+      const rsvpBadge = wish.rsvpStatus === 'Hadir' 
+        ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Hadir</span>'
+        : (wish.rsvpStatus === 'Tidak Hadir'
+          ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">Tidak Hadir</span>'
+          : '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Masih Ragu</span>');
+
+      const initial = (wish.name && wish.name.trim().length > 0) ? wish.name.trim().charAt(0).toUpperCase() : 'T';
+
+      return `
+        <div class="p-3.5 rounded-2xl bg-gold-50/50 border border-gold-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center space-x-1.5">
+              <div class="w-6 h-6 rounded-full bg-gold-200 text-gold-800 font-bold text-[11px] flex items-center justify-center">
+                ${escapeHtml(initial)}
+              </div>
+              <span class="font-bold text-xs text-slate-800">${escapeHtml(wish.name || 'Tamu')}</span>
+            </div>
+            ${rsvpBadge}
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed pl-7.5">${escapeHtml(wish.wishes)}</p>
+        </div>
+      `;
+    }
+
+    function renderWishesList(wishes) {
+      const container = document.getElementById('wishes-container');
+      const countBadge = document.getElementById('wishes-count-badge');
+      if (!container) return;
+
+      if (!wishes || wishes.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Belum ada doa dan ucapan. Jadilah yang pertama memberikan doa!</p>`;
+        if (countBadge) countBadge.textContent = '0';
+        totalWishesCount = 0;
+        return;
+      }
+
+      totalWishesCount = wishes.length;
+      if (countBadge) countBadge.textContent = String(totalWishesCount);
+      container.innerHTML = wishes.map(createWishCardHtml).join('');
+    }
+
+    function addWishToWall(newWish) {
+      const container = document.getElementById('wishes-container');
+      const countBadge = document.getElementById('wishes-count-badge');
+      if (!container) return;
+
+      if (totalWishesCount === 0) {
+        container.innerHTML = '';
+      }
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = createWishCardHtml(newWish);
+      const newCard = tempDiv.firstElementChild;
+      container.insertBefore(newCard, container.firstChild);
+      totalWishesCount++;
+      if (countBadge) countBadge.textContent = String(totalWishesCount);
+    }
+
+    async function loadWishes() {
+      try {
+        const res = await WeddingApi.postToGas('listWishes');
+        if (res && res.success && Array.isArray(res.wishes)) {
+          renderWishesList(res.wishes);
+        } else if (res && res.mock) {
+          renderWishesList([
+            { name: 'dr. Andi Wijaya', rsvpStatus: 'Hadir', wishes: 'Selamat menempuh hidup baru untuk Romeo & Juliet! Semoga sakinah, mawaddah, warahmah.' },
+            { name: 'Siti Rahma', rsvpStatus: 'Hadir', wishes: 'Barakallahu lakuma! Bahagia selalu sampai akhir hayat ya.' }
+          ]);
+        } else {
+          renderWishesList([]);
+        }
+      } catch (err) {
+        console.warn('Load wishes error:', err);
+        renderWishesList([]);
+      }
+    }
+    loadWishes();
 
     // ==================== POCKET CAMERA SMART DYNAMIC LOCK (OPTION A) ====================
     const unlockKey = 'wedding_cam_unlocked_' + guestCodeParam;
