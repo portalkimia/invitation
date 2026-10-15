@@ -454,9 +454,14 @@
                 <input type="text" id="cfg-event-date-formatted" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="Minggu, 25 Oktober 2026">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Waktu Target Hitung Mundur</label>
-                <input type="text" id="cfg-countdown-target" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 font-mono" placeholder="2026-10-25T08:00">
-                <span class="text-[10px] text-slate-400">Format: YYYY-MM-DDTHH:mm (contoh: 2026-10-25T08:00)</span>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-slate-600">Waktu Target Hitung Mundur</label>
+                  <span class="text-[10px] text-amber-600 font-semibold">📅 Klik untuk pilih</span>
+                </div>
+                <input type="datetime-local" id="cfg-countdown-target" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500 bg-white font-medium cursor-pointer shadow-sm">
+                <div id="countdown-preview-text" class="text-[11px] text-amber-800 font-medium mt-1.5 flex items-center space-x-1.5 min-h-[1.25rem]">
+                  <span class="text-slate-400">Pilih tanggal & jam acara</span>
+                </div>
               </div>
             </div>
 
@@ -1354,6 +1359,46 @@
     // ==================== EVENT CUSTOMIZER (SETTINGS CONTROLLER) ====================
     let currentRawSettings = {};
 
+    function updateCountdownPreview() {
+      const input = document.getElementById('cfg-countdown-target');
+      const preview = document.getElementById('countdown-preview-text');
+      if (!input || !preview) return;
+      const val = input.value;
+      if (!val) {
+        preview.innerHTML = '<span class="text-slate-400">Pilih tanggal & jam acara</span>';
+        return;
+      }
+      try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) {
+          preview.innerHTML = '<span class="text-rose-500 font-semibold">⚠️ Format waktu belum lengkap</span>';
+          return;
+        }
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const dayName = days[d.getDay()];
+        const dateNum = d.getDate();
+        const monthName = months[d.getMonth()];
+        const year = d.getFullYear();
+        const pad = (n) => String(n).padStart(2, '0');
+        const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())} WIB`;
+        preview.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="text-emerald-700 font-bold">Target:</span> <span>${dayName}, ${dateNum} ${monthName} ${year} • ${timeStr}</span>`;
+      } catch (e) {
+        preview.innerHTML = '<span class="text-slate-400">Pilih tanggal & jam acara</span>';
+      }
+    }
+
+    const countdownTargetEl = document.getElementById('cfg-countdown-target');
+    if (countdownTargetEl) {
+      countdownTargetEl.addEventListener('input', updateCountdownPreview);
+      countdownTargetEl.addEventListener('change', updateCountdownPreview);
+      countdownTargetEl.addEventListener('click', () => {
+        if (typeof countdownTargetEl.showPicker === 'function') {
+          try { countdownTargetEl.showPicker(); } catch (err) {}
+        }
+      });
+    }
+
     async function loadEventSettingsForm(forceRefresh = false) {
       const loadIcon = document.getElementById('load-settings-icon');
       if (loadIcon) loadIcon.classList.add('animate-spin');
@@ -1363,10 +1408,27 @@
         currentRawSettings = settings || {};
         const cfg = (typeof WEDDING_CONFIG !== 'undefined') ? WEDDING_CONFIG : {};
 
+        // Helper to format any ISO or Date string into HTML5 datetime-local format (YYYY-MM-DDTHH:mm)
+        function formatToDatetimeLocal(isoStr) {
+          if (!isoStr) return '';
+          const d = new Date(isoStr);
+          if (!isNaN(d.getTime())) {
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          }
+          const match = String(isoStr).match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+          return match ? match[1] : '';
+        }
+
         // Populate Form Inputs
         document.getElementById('cfg-event-title').value = currentRawSettings.EVENT_TITLE || cfg.event?.title || 'The Wedding of Romeo & Juliet';
         document.getElementById('cfg-event-date-formatted').value = currentRawSettings.EVENT_DATE_FORMATTED || cfg.event?.dateFormatted || 'Minggu, 25 Oktober 2026';
-        document.getElementById('cfg-countdown-target').value = currentRawSettings.COUNTDOWN_TARGET || cfg.event?.countdownTarget || '2026-10-25T08:00';
+        
+        const countdownInput = document.getElementById('cfg-countdown-target');
+        if (countdownInput) {
+          countdownInput.value = formatToDatetimeLocal(currentRawSettings.COUNTDOWN_TARGET || cfg.event?.countdownTarget || '2026-10-25T08:00');
+          updateCountdownPreview();
+        }
 
         // Groom
         document.getElementById('cfg-groom-name').value = currentRawSettings.GROOM_NAME || cfg.couple?.groom?.name || '';
@@ -1426,20 +1488,24 @@
         const s2 = (cfg.loveStory && cfg.loveStory[1]) || {};
         const s3 = (cfg.loveStory && cfg.loveStory[2]) || {};
 
+        const cleanDateFn = (typeof WeddingApi !== 'undefined' && WeddingApi.cleanTimelineDate)
+          ? WeddingApi.cleanTimelineDate
+          : (v => v || '');
+
         document.getElementById('cfg-story1-tag').value = currentRawSettings.STORY1_TAG || s1.tag || '';
-        document.getElementById('cfg-story1-date').value = currentRawSettings.STORY1_DATE || s1.date || '';
+        document.getElementById('cfg-story1-date').value = cleanDateFn(currentRawSettings.STORY1_DATE || s1.date);
         document.getElementById('cfg-story1-title').value = currentRawSettings.STORY1_TITLE || s1.title || '';
         document.getElementById('cfg-story1-desc').value = currentRawSettings.STORY1_DESC || s1.description || '';
         document.getElementById('cfg-story1-img').value = currentRawSettings.STORY1_IMG || s1.image || '';
 
         document.getElementById('cfg-story2-tag').value = currentRawSettings.STORY2_TAG || s2.tag || '';
-        document.getElementById('cfg-story2-date').value = currentRawSettings.STORY2_DATE || s2.date || '';
+        document.getElementById('cfg-story2-date').value = cleanDateFn(currentRawSettings.STORY2_DATE || s2.date);
         document.getElementById('cfg-story2-title').value = currentRawSettings.STORY2_TITLE || s2.title || '';
         document.getElementById('cfg-story2-desc').value = currentRawSettings.STORY2_DESC || s2.description || '';
         document.getElementById('cfg-story2-img').value = currentRawSettings.STORY2_IMG || s2.image || '';
 
         document.getElementById('cfg-story3-tag').value = currentRawSettings.STORY3_TAG || s3.tag || '';
-        document.getElementById('cfg-story3-date').value = currentRawSettings.STORY3_DATE || s3.date || '';
+        document.getElementById('cfg-story3-date').value = cleanDateFn(currentRawSettings.STORY3_DATE || s3.date);
         document.getElementById('cfg-story3-title').value = currentRawSettings.STORY3_TITLE || s3.title || '';
         document.getElementById('cfg-story3-desc').value = currentRawSettings.STORY3_DESC || s3.description || '';
         document.getElementById('cfg-story3-img').value = currentRawSettings.STORY3_IMG || s3.image || '';

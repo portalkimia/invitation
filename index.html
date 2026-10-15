@@ -721,6 +721,21 @@
       `;
 
       list.forEach((item) => {
+        const cleanDate = (typeof WeddingApi !== 'undefined' && WeddingApi.cleanTimelineDate)
+          ? WeddingApi.cleanTimelineDate(item.date)
+          : (function(s) {
+              if (!s) return '';
+              const str = String(s).trim();
+              if (str.includes('GMT') || (str.length > 25 && !isNaN(Date.parse(str)))) {
+                const d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                  const m = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                  return (d.getDate() === 1) ? `${m[d.getMonth()]} ${d.getFullYear()}` : `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
+                }
+              }
+              return str;
+            })(item.date);
+
         const itemEl = document.createElement('div');
         itemEl.className = 'relative flex items-start gap-4 group';
         itemEl.innerHTML = `
@@ -733,14 +748,14 @@
           <div class="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-gold-200 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
               <span class="px-2.5 py-0.5 rounded-full bg-gold-50 border border-gold-200 text-gold-800 text-[11px] font-bold tracking-wider uppercase">
-                ${item.date || ''}
+                ${cleanDate}
               </span>
               ${item.tag ? `<span class="text-[11px] text-slate-400 font-medium">${item.tag}</span>` : ''}
             </div>
             <h4 class="font-serif text-lg font-bold text-slate-900 mb-1.5">${item.title || ''}</h4>
             <p class="text-xs text-slate-600 leading-relaxed mb-3">${item.description || ''}</p>
             ${item.image ? `
-              <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-slate-100 cursor-pointer group/img" onclick="openLightbox('${item.image}', '${item.title || 'Kisah Cinta'}', '${item.date || ''}')">
+              <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-slate-100 cursor-pointer group/img" onclick="openLightbox('${item.image}', '${item.title || 'Kisah Cinta'}', '${cleanDate}')">
                 <img src="${item.image}" alt="${item.title || 'Foto Milestone'}" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                 <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/50 text-white text-[10px] backdrop-blur-sm flex items-center gap-1">

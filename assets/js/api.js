@@ -475,7 +475,8 @@ const WeddingApi = {
     // Love Story Milestones (Up to 3 milestones)
     const customStory = [];
     for (let i = 1; i <= 3; i++) {
-      const date = settings[`STORY${i}_DATE`];
+      const rawDate = settings[`STORY${i}_DATE`];
+      const date = this.cleanTimelineDate ? this.cleanTimelineDate(rawDate) : (rawDate || '');
       const title = settings[`STORY${i}_TITLE`];
       const desc = settings[`STORY${i}_DESC`];
       const img = settings[`STORY${i}_IMG`];
@@ -516,6 +517,23 @@ const WeddingApi = {
     if (settings.WA_TEMPLATE) cfg.defaultWaTemplate = settings.WA_TEMPLATE;
 
     return cfg;
+  },
+
+  /**
+   * Sanitizes date strings from Google Sheets (e.g. Wed Oct 01 2025 00:00:00 GMT+0700)
+   * into clean Indonesian milestone dates like "Oktober 2025" or "15 Oktober 2025".
+   */
+  cleanTimelineDate(dateStr) {
+    if (!dateStr) return '';
+    const str = String(dateStr).trim();
+    if (str.includes('GMT') || str.includes('T00:00') || /^\d{4}-\d{2}-\d{2}/.test(str) || (str.length > 25 && !isNaN(Date.parse(str)))) {
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return (d.getDate() === 1) ? `${months[d.getMonth()]} ${d.getFullYear()}` : `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      }
+    }
+    return str;
   },
 
   /**
