@@ -169,14 +169,15 @@ const WEDDING_CONFIG = {
   ],
 
   // Default WhatsApp Message Template
-  // Supported placeholders: {nama}, {link}, {kode}
+  // Supported placeholders: {nama}, {link}, {kode}, {mempelai}, {tanggal}, {tempat}, {alamat}, {waktu}, {kategori}, {pax}
   defaultWaTemplate: `Halo {nama},
 
 Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
 
-👰🤵 *Romeo & Juliet*
-📅 Minggu, 25 Oktober 2026
-📍 Grand Ballroom Hotel Mulia Senayan, Jakarta
+👰🤵 *{mempelai}*
+📅 {tanggal}
+📍 {tempat}
+{alamat}
 
 Tautan undangan resmi & barcode kehadiran Anda dapat diakses di:
 🔗 {link}
@@ -187,7 +188,7 @@ Kode Tamu Anda: *{kode}*
 Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.
 
 Salam hangat,
-*Romeo & Juliet*`
+*{mempelai}*`
 };
 
 if (typeof module !== 'undefined' && module.exports) {

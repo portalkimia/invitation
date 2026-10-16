@@ -254,11 +254,36 @@
               </button>
             </div>
 
-            <p class="text-xs text-slate-500 mb-2">
-              Placeholder otomatis: <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{nama}</span>, <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{link}</span>, <span class="font-mono bg-slate-100 px-1 py-0.5 rounded text-emerald-700">{kode}</span>.
-            </p>
+            <div class="space-y-1.5 mb-2.5">
+              <p class="text-[11px] text-slate-500">
+                Pesan ini otomatis mengikuti pengaturan acara. Klik tag di bawah untuk menyisipkan ke teks:
+              </p>
+              <div class="flex flex-wrap gap-1 text-[10px]">
+                <button type="button" onclick="insertWaTag('{nama}')" class="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-mono font-medium border border-emerald-200 cursor-pointer">+ {nama}</button>
+                <button type="button" onclick="insertWaTag('{mempelai}')" class="px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-800 font-mono font-medium border border-amber-200 cursor-pointer">+ {mempelai}</button>
+                <button type="button" onclick="insertWaTag('{tanggal}')" class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-800 font-mono font-medium border border-blue-200 cursor-pointer">+ {tanggal}</button>
+                <button type="button" onclick="insertWaTag('{tempat}')" class="px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-800 font-mono font-medium border border-purple-200 cursor-pointer">+ {tempat}</button>
+                <button type="button" onclick="insertWaTag('{alamat}')" class="px-2 py-0.5 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-mono font-medium border border-indigo-200 cursor-pointer">+ {alamat}</button>
+                <button type="button" onclick="insertWaTag('{waktu}')" class="px-2 py-0.5 rounded-md bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-mono font-medium border border-cyan-200 cursor-pointer">+ {waktu}</button>
+                <button type="button" onclick="insertWaTag('{link}')" class="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-mono font-medium border border-emerald-200 cursor-pointer">+ {link}</button>
+                <button type="button" onclick="insertWaTag('{kode}')" class="px-2 py-0.5 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-800 font-mono font-medium border border-rose-200 cursor-pointer">+ {kode}</button>
+                <button type="button" onclick="insertWaTag('{kategori}')" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 font-mono font-medium border border-slate-300 cursor-pointer">+ {kategori}</button>
+              </div>
+            </div>
 
-            <textarea id="wa-template-input" rows="5" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <textarea id="wa-template-input" rows="6" class="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"></textarea>
+
+            <!-- Pratinjau Pesan WA Real-Time -->
+            <div class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[11px] font-bold text-slate-700 flex items-center space-x-1.5">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>Pratinjau Pesan WA (Tampilan Real-Time):</span>
+                </span>
+                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">Mengikuti Acara & Tamu</span>
+              </div>
+              <div id="wa-preview-box" class="bg-white p-3 rounded-xl border border-slate-200 text-[11px] font-sans text-slate-800 whitespace-pre-wrap leading-relaxed shadow-sm max-h-44 overflow-y-auto"></div>
+            </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -664,6 +689,19 @@
               <h3 class="font-bold text-base">Foto Sampul, Background & Musik Lagu</h3>
             </div>
 
+            <!-- Panduan Link Foto Google Drive vs Google Foto -->
+            <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-xs text-amber-950 space-y-2">
+              <div class="flex items-center space-x-2 font-bold text-amber-900">
+                <i data-lucide="info" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+                <span>Tips & Panduan Link Foto (Google Drive vs Google Foto):</span>
+              </div>
+              <div class="text-[11px] leading-relaxed text-amber-900/90 space-y-1">
+                <p>• <strong>Google Foto (Error/Tidak Bisa):</strong> Tautan share Google Foto (<code>photos.app.goo.gl</code> / <code>photos.google.com</code>) adalah halaman web album, bukan file gambar mentah, sehingga gambarnya tidak akan muncul di website.</p>
+                <p>• <strong>Google Drive (Sangat Direkomendasikan):</strong> Upload foto ke Google Drive Anda &gt; Klik kanan foto &gt; <em>Bagikan (Share)</em> &gt; Ubah Akses Umum menjadi <strong>"Siapa saja yang memiliki link"</strong> (<em>Anyone with the link</em>) &gt; Salin link lalu tempel di sini. <em>Sistem kami otomatis mengonversinya menjadi foto langsung!</em></p>
+                <p>• <strong>Hosting Gratis Lainnya:</strong> Anda juga bisa upload foto langsung secara gratis ke <a href="https://postimages.org" target="_blank" class="underline font-bold text-amber-800 hover:text-amber-950">PostImages.org</a> (pilih opsi <em>Direct link</em>) atau <a href="https://imgur.com" target="_blank" class="underline font-bold text-amber-800 hover:text-amber-950">Imgur.com</a>.</p>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">URL Foto Sampul / Prewedding</label>
@@ -905,21 +943,72 @@
     let allGuests = [];
     let currentFilter = 'all';
 
-    // WA Template Management
+    // WA Template Management & Dynamic Real-Time Preview
     const waTemplateInput = document.getElementById('wa-template-input');
-    const savedTemplate = localStorage.getItem('wedding_custom_wa_template');
-    waTemplateInput.value = savedTemplate || WEDDING_CONFIG?.defaultWaTemplate || '';
+    const waPreviewBox = document.getElementById('wa-preview-box');
 
-    document.getElementById('btn-save-template').addEventListener('click', () => {
-      localStorage.setItem('wedding_custom_wa_template', waTemplateInput.value);
-      showToast('Template pesan WhatsApp berhasil disimpan.');
+    function updateWaTemplatePreview() {
+      if (!waPreviewBox || !waTemplateInput) return;
+      const rawTpl = waTemplateInput.value;
+      const sampleGuest = (allGuests && allGuests.length > 0) ? allGuests[0] : {
+        name: 'Budi Santoso',
+        code: 'G001',
+        phone: '08123456789',
+        category: 'VIP',
+        pax: 2
+      };
+      const formatted = (typeof WeddingApi !== 'undefined' && WeddingApi.formatWaMessage)
+        ? WeddingApi.formatWaMessage(rawTpl, sampleGuest)
+        : rawTpl;
+      waPreviewBox.textContent = formatted;
+    }
+
+    // Quick tag insert helper
+    window.insertWaTag = function(tag) {
+      if (!waTemplateInput) return;
+      const start = waTemplateInput.selectionStart || 0;
+      const end = waTemplateInput.selectionEnd || 0;
+      const text = waTemplateInput.value;
+      waTemplateInput.value = text.substring(0, start) + tag + text.substring(end);
+      waTemplateInput.focus();
+      waTemplateInput.selectionStart = waTemplateInput.selectionEnd = start + tag.length;
+      updateWaTemplatePreview();
+    };
+
+    const savedTemplate = localStorage.getItem('wedding_custom_wa_template');
+    const cachedSettings = (typeof WeddingApi !== 'undefined' && WeddingApi.getCachedSettings) ? (WeddingApi.getCachedSettings() || {}) : {};
+    waTemplateInput.value = savedTemplate || cachedSettings?.WA_TEMPLATE || WEDDING_CONFIG?.defaultWaTemplate || '';
+    updateWaTemplatePreview();
+
+    waTemplateInput.addEventListener('input', updateWaTemplatePreview);
+
+    document.getElementById('btn-save-template').addEventListener('click', async () => {
+      const val = waTemplateInput.value;
+      localStorage.setItem('wedding_custom_wa_template', val);
+      updateWaTemplatePreview();
+
+      const btn = document.getElementById('btn-save-template');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan...`;
+
+      try {
+        await WeddingApi.saveSettings({ WA_TEMPLATE: val });
+        showToast('Template pesan WhatsApp berhasil disimpan & disinkronkan ke Spreadsheet.');
+      } catch (e) {
+        showToast('Template disimpan di browser.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Simpan Template</span>`;
+        lucide.createIcons();
+      }
     });
 
     document.getElementById('btn-reset-template').addEventListener('click', () => {
-      if (confirm('Kembalikan template ke default?')) {
+      if (confirm('Kembalikan template ke default dinamis (otomatis mengikuti nama mempelai, tanggal, tempat acara)?')) {
         waTemplateInput.value = WEDDING_CONFIG?.defaultWaTemplate || '';
         localStorage.removeItem('wedding_custom_wa_template');
-        showToast('Template direset ke default.');
+        updateWaTemplatePreview();
+        showToast('Template direset ke default dinamis.');
       }
     });
 
@@ -947,6 +1036,7 @@
       } finally {
         refreshIcon.classList.remove('animate-spin');
         renderDashboard();
+        updateWaTemplatePreview();
       }
     }
 
@@ -1135,7 +1225,8 @@
     window.sendWa = function(code, rawName, phone) {
       const name = decodeURIComponent(rawName);
       const customTemplate = waTemplateInput.value;
-      const waLink = WeddingApi.buildWaMeLink(phone, name, code, customTemplate);
+      const guest = allGuests.find(g => g.code === code) || { code, name, phone };
+      const waLink = WeddingApi.buildWaMeLink(phone, name, code, customTemplate, guest);
 
       // Reusable window name prevents tab clutter
       window.open(waLink, 'wa_sender');
@@ -1149,7 +1240,6 @@
       }
 
       // Update local state
-      const guest = allGuests.find(g => g.code === code);
       if (guest) {
         guest.waSentAt = new Date().toISOString();
       }
@@ -1349,6 +1439,7 @@
         navTabSettings.className = 'py-2.5 px-5 rounded-xl font-bold text-xs bg-white text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center space-x-2 transition-all';
         sectionSettings.classList.add('hidden');
         sectionGuests.classList.remove('hidden');
+        updateWaTemplatePreview();
       }
       lucide.createIcons();
     }
@@ -1398,6 +1489,64 @@
         }
       });
     }
+
+    // ==================== PHOTO URL VALIDATION & FEEDBACK ====================
+    const photoInputIds = [
+      'cfg-groom-photo', 'cfg-bride-photo', 'cfg-cover-photo', 'cfg-bg-image',
+      'cfg-story1-img', 'cfg-story2-img', 'cfg-story3-img',
+      'cfg-gallery1-url', 'cfg-gallery2-url', 'cfg-gallery3-url', 'cfg-gallery4-url', 'cfg-gallery5-url'
+    ];
+
+    function validateSinglePhotoInput(input) {
+      if (!input) return;
+      let feedback = input.parentElement.querySelector('.photo-feedback-badge');
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.className = 'photo-feedback-badge text-[11px] mt-1 hidden';
+        input.parentElement.appendChild(feedback);
+      }
+
+      const val = input.value.trim();
+      if (!val) {
+        feedback.className = 'photo-feedback-badge text-[11px] mt-1 hidden';
+        feedback.innerHTML = '';
+        return;
+      }
+
+      const isGPhotos = (typeof WeddingApi !== 'undefined' && WeddingApi.isGooglePhotosUrl)
+        ? WeddingApi.isGooglePhotosUrl(val)
+        : (val.includes('photos.app.goo.gl') || val.includes('photos.google.com'));
+
+      if (isGPhotos) {
+        feedback.className = 'photo-feedback-badge text-[11px] text-rose-600 font-semibold mt-1 block';
+        feedback.innerHTML = `⚠️ <span>Link Google Foto adalah album web, bukan file foto langsung. Silakan gunakan <strong>Google Drive</strong> (bagikan: "Siapa saja yang memiliki link") atau <strong>PostImages.org</strong>.</span>`;
+      } else if (val.includes('drive.google.com')) {
+        feedback.className = 'photo-feedback-badge text-[11px] text-emerald-700 font-medium mt-1 block';
+        feedback.innerHTML = `✅ <span>Link Google Drive terdeteksi! Format otomatis dikonversi agar foto tampil lancar.</span>`;
+      } else {
+        feedback.className = 'photo-feedback-badge text-[11px] mt-1 hidden';
+        feedback.innerHTML = '';
+      }
+    }
+
+    function setupPhotoUrlValidators() {
+      photoInputIds.forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('input', () => validateSinglePhotoInput(input));
+        input.addEventListener('change', () => validateSinglePhotoInput(input));
+      });
+    }
+
+    function validateAllPhotoInputs() {
+      photoInputIds.forEach((id) => {
+        const input = document.getElementById(id);
+        if (input) validateSinglePhotoInput(input);
+      });
+    }
+
+    // Initialize photo input validators
+    setupPhotoUrlValidators();
 
     async function loadEventSettingsForm(forceRefresh = false) {
       const loadIcon = document.getElementById('load-settings-icon');
@@ -1541,6 +1690,12 @@
         document.getElementById('cfg-admin-pin').value = currentRawSettings.ADMIN_PIN || cfg.ADMIN_PIN || '1234';
         document.getElementById('cfg-reception-pin').value = currentRawSettings.RECEPTION_PIN || cfg.RECEPTION_PIN || '5678';
 
+        // Validate and show feedback for all photo inputs
+        validateAllPhotoInputs();
+
+        // Update WA preview with fresh settings
+        updateWaTemplatePreview();
+
         if (forceRefresh) {
           showToast('Data pengaturan berhasil dimuat ulang!');
         }
@@ -1565,6 +1720,34 @@
       btnSaveAllSettings.disabled = true;
       btnSaveAllSettings.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Google Sheets...`;
 
+      const formatImg = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+        ? WeddingApi.formatImageUrl
+        : (u => u);
+
+      const checkPhotosList = [
+        document.getElementById('cfg-groom-photo').value.trim(),
+        document.getElementById('cfg-bride-photo').value.trim(),
+        document.getElementById('cfg-cover-photo').value.trim(),
+        document.getElementById('cfg-bg-image').value.trim(),
+        document.getElementById('cfg-story1-img').value.trim(),
+        document.getElementById('cfg-story2-img').value.trim(),
+        document.getElementById('cfg-story3-img').value.trim(),
+        document.getElementById('cfg-gallery1-url').value.trim(),
+        document.getElementById('cfg-gallery2-url').value.trim(),
+        document.getElementById('cfg-gallery3-url').value.trim(),
+        document.getElementById('cfg-gallery4-url').value.trim(),
+        document.getElementById('cfg-gallery5-url').value.trim()
+      ];
+      const hasGPhotos = checkPhotosList.some(u => (typeof WeddingApi !== 'undefined' && WeddingApi.isGooglePhotosUrl) ? WeddingApi.isGooglePhotosUrl(u) : (u.includes('photos.app.goo.gl') || u.includes('photos.google.com')));
+      if (hasGPhotos) {
+        if (!confirm('⚠️ Perhatian: Tautan Google Foto terdeteksi!\n\nLink dari Google Foto (photos.app.goo.gl) adalah halaman web album, bukan file gambar langsung, sehingga gambar akan gagal dimuat di website undangan.\n\nDisarankan mengupload foto ke Google Drive (bagikan: "Siapa saja yang memiliki link") atau PostImages.org.\n\nTetap ingin menyimpan tautan ini?')) {
+          btnSaveAllSettings.disabled = false;
+          btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Simpan Semua Pengaturan ke Spreadsheet</span>`;
+          lucide.createIcons();
+          return;
+        }
+      }
+
       const settingsPayload = {
         EVENT_TITLE: document.getElementById('cfg-event-title').value.trim(),
         EVENT_DATE_FORMATTED: document.getElementById('cfg-event-date-formatted').value.trim(),
@@ -1575,17 +1758,17 @@
         GROOM_FATHER: document.getElementById('cfg-groom-father').value.trim(),
         GROOM_MOTHER: document.getElementById('cfg-groom-mother').value.trim(),
         GROOM_BIO: document.getElementById('cfg-groom-bio').value.trim(),
-        GROOM_PHOTO: document.getElementById('cfg-groom-photo').value.trim(),
+        GROOM_PHOTO: formatImg(document.getElementById('cfg-groom-photo').value.trim()),
 
         BRIDE_NAME: document.getElementById('cfg-bride-name').value.trim(),
         BRIDE_SHORT: document.getElementById('cfg-bride-short').value.trim(),
         BRIDE_FATHER: document.getElementById('cfg-bride-father').value.trim(),
         BRIDE_MOTHER: document.getElementById('cfg-bride-mother').value.trim(),
         BRIDE_BIO: document.getElementById('cfg-bride-bio').value.trim(),
-        BRIDE_PHOTO: document.getElementById('cfg-bride-photo').value.trim(),
+        BRIDE_PHOTO: formatImg(document.getElementById('cfg-bride-photo').value.trim()),
 
-        COVER_PHOTO: document.getElementById('cfg-cover-photo').value.trim(),
-        BG_IMAGE: document.getElementById('cfg-bg-image').value.trim(),
+        COVER_PHOTO: formatImg(document.getElementById('cfg-cover-photo').value.trim()),
+        BG_IMAGE: formatImg(document.getElementById('cfg-bg-image').value.trim()),
         MUSIC_URL: document.getElementById('cfg-music-url').value.trim(),
 
         AKAD_TIME: document.getElementById('cfg-akad-time').value.trim(),
@@ -1619,38 +1802,38 @@
         STORY1_DATE: document.getElementById('cfg-story1-date').value.trim(),
         STORY1_TITLE: document.getElementById('cfg-story1-title').value.trim(),
         STORY1_DESC: document.getElementById('cfg-story1-desc').value.trim(),
-        STORY1_IMG: document.getElementById('cfg-story1-img').value.trim(),
+        STORY1_IMG: formatImg(document.getElementById('cfg-story1-img').value.trim()),
 
         STORY2_TAG: document.getElementById('cfg-story2-tag').value.trim(),
         STORY2_DATE: document.getElementById('cfg-story2-date').value.trim(),
         STORY2_TITLE: document.getElementById('cfg-story2-title').value.trim(),
         STORY2_DESC: document.getElementById('cfg-story2-desc').value.trim(),
-        STORY2_IMG: document.getElementById('cfg-story2-img').value.trim(),
+        STORY2_IMG: formatImg(document.getElementById('cfg-story2-img').value.trim()),
 
         STORY3_TAG: document.getElementById('cfg-story3-tag').value.trim(),
         STORY3_DATE: document.getElementById('cfg-story3-date').value.trim(),
         STORY3_TITLE: document.getElementById('cfg-story3-title').value.trim(),
         STORY3_DESC: document.getElementById('cfg-story3-desc').value.trim(),
-        STORY3_IMG: document.getElementById('cfg-story3-img').value.trim(),
+        STORY3_IMG: formatImg(document.getElementById('cfg-story3-img').value.trim()),
 
         // Gallery
-        GALLERY1_URL: document.getElementById('cfg-gallery1-url').value.trim(),
+        GALLERY1_URL: formatImg(document.getElementById('cfg-gallery1-url').value.trim()),
         GALLERY1_CAT: document.getElementById('cfg-gallery1-cat').value.trim(),
         GALLERY1_TITLE: document.getElementById('cfg-gallery1-title').value.trim(),
 
-        GALLERY2_URL: document.getElementById('cfg-gallery2-url').value.trim(),
+        GALLERY2_URL: formatImg(document.getElementById('cfg-gallery2-url').value.trim()),
         GALLERY2_CAT: document.getElementById('cfg-gallery2-cat').value.trim(),
         GALLERY2_TITLE: document.getElementById('cfg-gallery2-title').value.trim(),
 
-        GALLERY3_URL: document.getElementById('cfg-gallery3-url').value.trim(),
+        GALLERY3_URL: formatImg(document.getElementById('cfg-gallery3-url').value.trim()),
         GALLERY3_CAT: document.getElementById('cfg-gallery3-cat').value.trim(),
         GALLERY3_TITLE: document.getElementById('cfg-gallery3-title').value.trim(),
 
-        GALLERY4_URL: document.getElementById('cfg-gallery4-url').value.trim(),
+        GALLERY4_URL: formatImg(document.getElementById('cfg-gallery4-url').value.trim()),
         GALLERY4_CAT: document.getElementById('cfg-gallery4-cat').value.trim(),
         GALLERY4_TITLE: document.getElementById('cfg-gallery4-title').value.trim(),
 
-        GALLERY5_URL: document.getElementById('cfg-gallery5-url').value.trim(),
+        GALLERY5_URL: formatImg(document.getElementById('cfg-gallery5-url').value.trim()),
         GALLERY5_CAT: document.getElementById('cfg-gallery5-cat').value.trim(),
         GALLERY5_TITLE: document.getElementById('cfg-gallery5-title').value.trim(),
 
@@ -1665,6 +1848,7 @@
             WeddingApi.saveStoredPin('admin', settingsPayload.ADMIN_PIN);
           }
           WeddingApi.playSuccessChime();
+          updateWaTemplatePreview();
           showToast('🎉 Pengaturan berhasil disimpan ke Google Sheets! Tampilan undangan langsung terupdate.');
         } else {
           showToast('Gagal menyimpan: ' + (res?.error || 'Koneksi bermasalah'));

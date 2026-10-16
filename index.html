@@ -60,38 +60,169 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    /* Envelope open transition */
+
+    /* Envelope Open Transition */
     #cover-screen {
-      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+      transition: transform 0.95s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.85s ease;
+      will-change: transform, opacity;
     }
     #cover-screen.opened {
       transform: translateY(-100%);
       opacity: 0;
       pointer-events: none;
     }
+
+    /* Scroll Reveal Animation Framework */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal-up {
+      transform: translate3d(0, 36px, 0);
+    }
+    .reveal-down {
+      transform: translate3d(0, -36px, 0);
+    }
+    .reveal-left {
+      transform: translate3d(-36px, 0, 0);
+    }
+    .reveal-right {
+      transform: translate3d(36px, 0, 0);
+    }
+    .reveal-zoom {
+      transform: scale3d(0.9, 0.9, 0.9);
+    }
+    .reveal.is-revealed {
+      opacity: 1 !important;
+      transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important;
+    }
+
+    /* Staggered Delay Utilities */
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+    .delay-400 { transition-delay: 400ms; }
+    .delay-500 { transition-delay: 500ms; }
+
+    /* Romantic Keyframes & Micro-Animations */
+    @keyframes floatGentle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-float {
+      animation: floatGentle 4s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(197, 168, 128, 0.4); }
+      50% { transform: scale(1.025); box-shadow: 0 0 22px 5px rgba(197, 168, 128, 0.35); }
+    }
+    .animate-pulse-glow {
+      animation: pulseGlow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(250%) skewX(-20deg); }
+    }
+    .shimmer-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        60deg,
+        rgba(255, 255, 255, 0) 20%,
+        rgba(255, 255, 255, 0.38) 50%,
+        rgba(255, 255, 255, 0) 80%
+      );
+      animation: shimmerSweep 3.2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes spinVinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .vinyl-spinning {
+      animation: spinVinyl 8s linear infinite;
+    }
+
+    @keyframes soundWavePulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .music-wave {
+      position: absolute;
+      inset: -4px;
+      border-radius: 9999px;
+      border: 2px solid rgba(197, 168, 128, 0.6);
+      animation: soundWavePulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+      pointer-events: none;
+    }
+
+    /* Falling Petals Canvas */
+    #petals-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Photo zoom effect on card hover */
+    .couple-card-img {
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .couple-card:hover .couple-card-img {
+      transform: scale(1.07);
+    }
+
+    /* Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal {
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .animate-float, .shimmer-btn::after, .vinyl-spinning, .music-wave {
+        animation: none !important;
+      }
+    }
   </style>
 </head>
-<body class="bg-[#FAF7F2] text-slate-800 font-sans antialiased selection:bg-gold-200 selection:text-gold-900 min-h-screen">
+<body class="bg-[#FAF7F2] text-slate-800 font-sans antialiased selection:bg-gold-200 selection:text-gold-900 min-h-screen relative overflow-x-hidden">
+
+  <!-- ==================== FLOATING FLOWER PETALS CANVAS ==================== -->
+  <canvas id="petals-canvas" aria-hidden="true"></canvas>
 
   <!-- ==================== COVER SCREEN (SPLASH ENVELOPE) ==================== -->
   <div id="cover-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#FAF7F2] bg-pattern px-4">
-    <div class="max-w-md w-full text-center p-8 rounded-3xl bg-white/80 backdrop-blur-md shadow-2xl border border-gold-200 relative overflow-hidden">
+    <div class="max-w-md w-full text-center p-8 rounded-3xl bg-white/85 backdrop-blur-md shadow-2xl border border-gold-200 relative overflow-hidden">
       <!-- Decorative floral corners -->
-      <div class="absolute -top-10 -left-10 w-28 h-28 bg-gold-100 rounded-full blur-2xl opacity-70"></div>
-      <div class="absolute -bottom-10 -right-10 w-28 h-28 bg-gold-200 rounded-full blur-2xl opacity-70"></div>
+      <div class="absolute -top-10 -left-10 w-28 h-28 bg-gold-100 rounded-full blur-2xl opacity-70 animate-float"></div>
+      <div class="absolute -bottom-10 -right-10 w-28 h-28 bg-gold-200 rounded-full blur-2xl opacity-70 animate-float" style="animation-delay: -2s;"></div>
 
       <!-- Optional Couple Cover Photo or Fallback Icon -->
-      <div id="cover-photo-container" class="w-24 h-24 mx-auto rounded-full border-2 border-gold-300 overflow-hidden mb-4 shadow-md hidden">
+      <div id="cover-photo-container" class="w-24 h-24 mx-auto rounded-full border-2 border-gold-300 overflow-hidden mb-4 shadow-md hidden transform transition-transform duration-500 hover:scale-105">
         <img id="cover-photo" class="w-full h-full object-cover" alt="Foto Pengantin">
       </div>
-      <div id="cover-icon-container" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold-50 border border-gold-200 text-gold-700 mb-6 shadow-inner">
+      <div id="cover-icon-container" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold-50 border border-gold-200 text-gold-700 mb-6 shadow-inner animate-float">
         <i data-lucide="mail-open" class="w-8 h-8"></i>
       </div>
 
       <p class="text-xs uppercase tracking-[0.3em] text-gold-700 font-semibold mb-2">The Wedding of</p>
       <h1 id="cover-couple-title" class="font-serif text-4xl sm:text-5xl text-slate-900 mb-6 font-bold tracking-tight">Romeo & Juliet</h1>
 
-      <div class="my-6 p-4 rounded-2xl bg-gold-50/70 border border-gold-200/80">
+      <div class="my-6 p-4 rounded-2xl bg-gold-50/70 border border-gold-200/80 shadow-xs">
         <p class="text-xs text-slate-500 mb-1">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
         <h2 id="cover-guest-name" class="font-serif text-2xl font-bold text-slate-800">Tamu Undangan</h2>
         <p id="cover-guest-code" class="text-xs text-gold-700 font-medium mt-1 tracking-wider"></p>
@@ -101,8 +232,8 @@
         Tanpa mengurangi rasa hormat, kami mengundang Anda untuk hadir dalam momen bahagia pernikahan kami.
       </p>
 
-      <button id="btn-open-invitation" class="w-full py-3.5 px-6 rounded-full gold-gradient text-white font-medium tracking-wide shadow-lg hover:shadow-gold-300/50 hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center space-x-2">
-        <i data-lucide="heart" class="w-4 h-4 fill-white"></i>
+      <button id="btn-open-invitation" type="button" onclick="openInvitation()" class="shimmer-btn animate-pulse-glow w-full py-3.5 px-6 rounded-full gold-gradient text-white font-medium tracking-wide shadow-lg hover:shadow-gold-300/50 hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 cursor-pointer relative z-10">
+        <i data-lucide="heart" class="w-4 h-4 fill-white animate-bounce"></i>
         <span>Buka Undangan</span>
       </button>
     </div>
@@ -113,20 +244,20 @@
 
     <!-- HERO HEADER -->
     <section class="text-center pt-8 pb-4 relative">
-      <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-4">
+      <div class="reveal reveal-down delay-100 inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-4">
         Official Wedding Invitation
       </div>
-      <h2 id="hero-couple-title" class="font-serif text-5xl sm:text-6xl text-slate-900 font-bold mb-3 tracking-tight">Romeo & Juliet</h2>
-      <p id="hero-event-date" class="text-slate-600 font-medium tracking-wider text-sm sm:text-base">Minggu, 25 Oktober 2026</p>
+      <h2 id="hero-couple-title" class="reveal reveal-zoom delay-200 font-serif text-5xl sm:text-6xl text-slate-900 font-bold mb-3 tracking-tight">Romeo & Juliet</h2>
+      <p id="hero-event-date" class="reveal reveal-up delay-300 text-slate-600 font-medium tracking-wider text-sm sm:text-base">Minggu, 25 Oktober 2026</p>
       
       <!-- Botanical Divider -->
-      <div class="flex items-center justify-center space-x-4 my-6 text-gold-400">
+      <div class="reveal reveal-zoom delay-300 flex items-center justify-center space-x-4 my-6 text-gold-400">
         <div class="h-[1px] w-16 bg-gold-300"></div>
-        <i data-lucide="flower-2" class="w-5 h-5 text-gold-600"></i>
+        <i data-lucide="flower-2" class="w-5 h-5 text-gold-600 animate-float"></i>
         <div class="h-[1px] w-16 bg-gold-300"></div>
       </div>
 
-      <p class="text-slate-600 text-sm max-w-lg mx-auto leading-relaxed italic px-4">
+      <p class="reveal reveal-up delay-400 text-slate-600 text-sm max-w-lg mx-auto leading-relaxed italic px-4">
         "<span id="hero-quote-text">Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.</span>"
         <br><span id="hero-quote-source" class="font-semibold text-xs text-gold-800 not-italic mt-1 block">— QS. Ar-Rum: 21</span>
       </p>
@@ -135,9 +266,9 @@
     <!-- COUPLE PROFILE -->
     <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <!-- Groom Card -->
-      <div class="bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden">
+      <div class="reveal reveal-left delay-100 couple-card bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
         <div class="w-28 h-28 mx-auto rounded-full bg-gold-100 border-2 border-gold-300 flex items-center justify-center text-gold-700 mb-4 shadow-sm overflow-hidden">
-          <img id="groom-photo" class="w-full h-full object-cover hidden" alt="Foto Mempelai Pria">
+          <img id="groom-photo" class="couple-card-img w-full h-full object-cover hidden" alt="Foto Mempelai Pria">
           <div id="groom-icon" class="flex items-center justify-center">
             <i data-lucide="user" class="w-14 h-14"></i>
           </div>
@@ -150,9 +281,9 @@
       </div>
 
       <!-- Bride Card -->
-      <div class="bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden">
+      <div class="reveal reveal-right delay-200 couple-card bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
         <div class="w-28 h-28 mx-auto rounded-full bg-gold-100 border-2 border-gold-300 flex items-center justify-center text-gold-700 mb-4 shadow-sm overflow-hidden">
-          <img id="bride-photo" class="w-full h-full object-cover hidden" alt="Foto Mempelai Wanita">
+          <img id="bride-photo" class="couple-card-img w-full h-full object-cover hidden" alt="Foto Mempelai Wanita">
           <div id="bride-icon" class="flex items-center justify-center">
             <i data-lucide="user" class="w-14 h-14"></i>
           </div>
@@ -166,7 +297,7 @@
     </section>
 
     <!-- ==================== OUR LOVE STORY (KISAH PERJALANAN CINTA) ==================== -->
-    <section id="love-story-section" class="space-y-6">
+    <section id="love-story-section" class="reveal reveal-up space-y-6">
       <div class="text-center">
         <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
           Kisah Kami
@@ -185,7 +316,7 @@
     </section>
 
     <!-- ==================== PRE-WEDDING PHOTO GALLERY ==================== -->
-    <section id="gallery-section" class="space-y-6">
+    <section id="gallery-section" class="reveal reveal-up space-y-6">
       <div class="text-center">
         <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
           Memori Bahagia
@@ -201,33 +332,33 @@
     </section>
 
     <!-- COUNTDOWN TIMER -->
-    <section class="bg-white rounded-3xl p-6 sm:p-8 text-center border border-gold-200 shadow-md">
+    <section class="reveal reveal-up bg-white rounded-3xl p-6 sm:p-8 text-center border border-gold-200 shadow-md">
       <h3 class="font-serif text-2xl font-bold text-slate-900 mb-2">Menuju Hari Bahagia</h3>
       <p id="countdown-date-label" class="text-xs text-slate-500 mb-6">Minggu, 25 Oktober 2026</p>
 
-      <div class="grid grid-cols-4 gap-3 max-w-md mx-auto">
-        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center">
+      <div class="reveal reveal-zoom delay-200 grid grid-cols-4 gap-3 max-w-md mx-auto">
+        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center transform transition-all hover:scale-105">
           <span id="cd-days" class="font-serif text-2xl sm:text-3xl font-bold text-gold-800 block">00</span>
           <span class="text-[10px] uppercase font-semibold text-slate-500">Hari</span>
         </div>
-        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center">
+        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center transform transition-all hover:scale-105">
           <span id="cd-hours" class="font-serif text-2xl sm:text-3xl font-bold text-gold-800 block">00</span>
           <span class="text-[10px] uppercase font-semibold text-slate-500">Jam</span>
         </div>
-        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center">
+        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center transform transition-all hover:scale-105">
           <span id="cd-minutes" class="font-serif text-2xl sm:text-3xl font-bold text-gold-800 block">00</span>
           <span class="text-[10px] uppercase font-semibold text-slate-500">Menit</span>
         </div>
-        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center">
+        <div class="bg-gold-50 rounded-2xl p-3 border border-gold-200 text-center transform transition-all hover:scale-105">
           <span id="cd-seconds" class="font-serif text-2xl sm:text-3xl font-bold text-gold-800 block">00</span>
           <span class="text-[10px] uppercase font-semibold text-slate-500">Detik</span>
         </div>
       </div>
 
       <!-- Add to Google Calendar Button -->
-      <div class="mt-6 flex justify-center">
+      <div class="reveal reveal-up delay-300 mt-6 flex justify-center">
         <a id="btn-add-calendar" href="#" target="_blank" rel="noopener noreferrer"
-           class="inline-flex items-center space-x-2 py-2.5 px-5 rounded-full bg-gold-700 hover:bg-gold-800 text-white font-medium text-xs shadow-md transition-all transform hover:-translate-y-0.5">
+           class="inline-flex items-center space-x-2 py-2.5 px-5 rounded-full bg-gold-700 hover:bg-gold-800 text-white font-medium text-xs shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95">
           <i data-lucide="calendar-plus" class="w-4 h-4"></i>
           <span>Simpan ke Google Calendar</span>
         </a>
@@ -236,14 +367,14 @@
 
     <!-- EVENT ITINERARY & VENUE -->
     <section class="space-y-6">
-      <div class="text-center">
+      <div class="reveal reveal-up text-center">
         <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Waktu & Tempat Acara</h3>
         <p class="text-xs text-slate-500">Rangkaian acara pernikahan kami</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <!-- Akad Card -->
-        <div class="bg-white rounded-3xl p-6 border border-gold-200 shadow-sm flex flex-col justify-between">
+        <div class="reveal reveal-left delay-100 bg-white rounded-3xl p-6 border border-gold-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div>
             <div class="flex items-center space-x-2 text-gold-700 mb-3">
               <i data-lucide="clock" class="w-5 h-5"></i>
@@ -260,7 +391,7 @@
         </div>
 
         <!-- Resepsi Card -->
-        <div class="bg-white rounded-3xl p-6 border border-gold-200 shadow-sm flex flex-col justify-between">
+        <div class="reveal reveal-right delay-200 bg-white rounded-3xl p-6 border border-gold-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div>
             <div class="flex items-center space-x-2 text-gold-700 mb-3">
               <i data-lucide="sparkles" class="w-5 h-5"></i>
@@ -281,7 +412,7 @@
     </section>
 
     <!-- ==================== UNIQUE GUEST BARCODE / QR CARD ==================== -->
-    <section id="guest-ticket" class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-gold-300 shadow-xl relative overflow-hidden">
+    <section id="guest-ticket" class="reveal reveal-zoom delay-100 bg-white rounded-3xl p-6 sm:p-8 border-2 border-gold-300 shadow-xl relative overflow-hidden">
       <!-- Decorative Ticket Notches -->
       <div class="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#FAF7F2] border-r-2 border-gold-300"></div>
       <div class="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#FAF7F2] border-l-2 border-gold-300"></div>
@@ -316,7 +447,7 @@
     </section>
 
     <!-- ==================== POCKET CAMERA (SMART DYNAMIC LOCK - OPTION A) ==================== -->
-    <section id="pocket-cam-section" class="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white text-center shadow-xl relative overflow-hidden border border-slate-800">
+    <section id="pocket-cam-section" class="reveal reveal-up delay-100 p-6 sm:p-8 rounded-3xl bg-slate-900 text-white text-center shadow-xl relative overflow-hidden border border-slate-800">
       <!-- Decorative background blur -->
       <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
 
@@ -374,7 +505,7 @@
     </section>
 
     <!-- ==================== RSVP FORM ==================== -->
-    <section class="bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+    <section class="reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-6">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-3">
           <i data-lucide="calendar-check" class="w-6 h-6"></i>
@@ -442,7 +573,7 @@
     </section>
 
     <!-- ==================== LIVE WALL OF WISHES ==================== -->
-    <section id="wishes-wall-section" class="bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+    <section id="wishes-wall-section" class="reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-5">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-2">
           <i data-lucide="message-square-heart" class="w-6 h-6"></i>
@@ -463,7 +594,7 @@
     </section>
 
     <!-- ==================== DIGITAL ENVELOPE / WEDDING GIFT ==================== -->
-    <section class="bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+    <section class="reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-6">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-3">
           <i data-lucide="gift" class="w-6 h-6"></i>
@@ -492,7 +623,7 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="text-center py-8 text-xs text-slate-400 border-t border-slate-200">
+    <footer class="reveal reveal-up delay-100 text-center py-8 text-xs text-slate-400 border-t border-slate-200">
       <p id="footer-couple-name" class="font-serif text-lg font-bold text-slate-700 mb-1">Romeo & Juliet</p>
       <p>Terima kasih atas segala doa dan restu yang tulus.</p>
       <p class="mt-4 text-[11px] text-slate-400">Wedding Web App • Built with ❤️</p>
@@ -501,9 +632,19 @@
   </main>
 
   <!-- ==================== FLOATING MUSIC & AUDIO CONTROLLER ==================== -->
-  <button id="btn-music-toggle" class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full gold-gradient text-white shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
-    <i id="music-icon" data-lucide="music" class="w-5 h-5"></i>
-  </button>
+  <div class="fixed bottom-6 right-6 z-40 flex flex-col items-center space-y-3">
+    <!-- Optional Petals Toggle Button -->
+    <button id="btn-petals-toggle" title="Nyalakan/Matikan Kelopak Bunga" class="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-gold-200 text-gold-700 shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+      <i id="petals-icon" data-lucide="flower" class="w-4 h-4"></i>
+    </button>
+    <!-- Music Button with rotating vinyl and pulse ring -->
+    <div class="relative">
+      <div id="music-pulse-ring" class="hidden music-wave"></div>
+      <button id="btn-music-toggle" class="relative w-12 h-12 rounded-full gold-gradient text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+        <i id="music-icon" data-lucide="music" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
   <audio id="wedding-audio" loop preload="auto">
     <!-- Free royalty-free wedding ambient instrumental melody -->
     <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-113824.mp3" type="audio/mp3">
@@ -535,8 +676,95 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
   <script>
+    function safeCreateIcons() {
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+          lucide.createIcons();
+        }
+      } catch (e) {
+        console.warn('Lucide icons warning:', e);
+      }
+    }
+
     // Initialize Lucide Icons
-    lucide.createIcons();
+    safeCreateIcons();
+
+    // ==================== SCROLL REVEAL OBSERVER (DECLARED FIRST) ====================
+    var revealObserver = (typeof IntersectionObserver !== 'undefined')
+      ? new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-revealed');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: '0px 0px -40px 0px',
+          threshold: 0.1
+        })
+      : null;
+
+    function observeRevealElements(parent = document) {
+      if (!parent || !parent.querySelectorAll) return;
+      const reveals = parent.querySelectorAll('.reveal:not(.is-revealed)');
+      reveals.forEach(el => {
+        if (revealObserver) {
+          revealObserver.observe(el);
+        } else {
+          el.classList.add('is-revealed');
+        }
+      });
+    }
+
+    // ==================== COVER SCREEN & AUDIO CONTROL ====================
+    var isPlaying = false;
+    var isInvitationOpened = false;
+
+    function updateMusicUI(playing) {
+      const btnMusicEl = document.getElementById('btn-music-toggle');
+      const musicPulseRingEl = document.getElementById('music-pulse-ring');
+      if (btnMusicEl) {
+        btnMusicEl.innerHTML = `<i id="music-icon" data-lucide="${playing ? 'music' : 'volume-x'}" class="w-5 h-5"></i>`;
+        if (playing) {
+          btnMusicEl.classList.add('vinyl-spinning');
+        } else {
+          btnMusicEl.classList.remove('vinyl-spinning');
+        }
+      }
+      if (musicPulseRingEl) {
+        if (playing) {
+          musicPulseRingEl.classList.remove('hidden');
+        } else {
+          musicPulseRingEl.classList.add('hidden');
+        }
+      }
+      safeCreateIcons();
+    }
+
+    function openInvitation() {
+      if (isInvitationOpened) return;
+      isInvitationOpened = true;
+
+      const coverScreenEl = document.getElementById('cover-screen');
+      if (coverScreenEl) {
+        coverScreenEl.classList.add('opened');
+      }
+
+      setTimeout(() => {
+        observeRevealElements();
+      }, 300);
+
+      const audioEl = document.getElementById('wedding-audio');
+      if (audioEl) {
+        audioEl.play().then(() => {
+          isPlaying = true;
+          updateMusicUI(true);
+        }).catch(err => {
+          console.log('Audio autoplay prevented:', err);
+        });
+      }
+    }
 
     // 1. Parse URL Parameters (?code=G001&to=Nama%20Tamu)
     const urlParams = new URLSearchParams(window.location.search);
@@ -544,7 +772,9 @@
     const guestNameParam = urlParams.get('to') || 'Tamu Undangan';
 
     // Store in LocalStorage for seamless pocket-cam recognition
-    WeddingApi.saveGuestSession(guestCodeParam, guestNameParam);
+    if (typeof WeddingApi !== 'undefined' && WeddingApi.saveGuestSession) {
+      WeddingApi.saveGuestSession(guestCodeParam, guestNameParam);
+    }
 
     // Populate Cover Screen
     document.getElementById('cover-guest-name').textContent = guestNameParam;
@@ -592,9 +822,16 @@
       if (quoteSrcEl && cfg.quote?.source) quoteSrcEl.textContent = `— ${cfg.quote.source}`;
 
       // Cover / Prewedding Photo
-      if (cfg.couple?.coverPhoto) {
+      const coverUrl = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+        ? WeddingApi.formatImageUrl(cfg.couple?.coverPhoto)
+        : (cfg.couple?.coverPhoto || '');
+      if (coverUrl) {
         const coverImg = document.getElementById('cover-photo');
-        coverImg.src = cfg.couple.coverPhoto;
+        coverImg.onerror = () => {
+          document.getElementById('cover-photo-container').classList.add('hidden');
+          document.getElementById('cover-icon-container').classList.remove('hidden');
+        };
+        coverImg.src = coverUrl;
         document.getElementById('cover-photo-container').classList.remove('hidden');
         document.getElementById('cover-icon-container').classList.add('hidden');
       }
@@ -603,9 +840,16 @@
       if (cfg.couple?.groom) {
         if (cfg.couple.groom.name) document.getElementById('groom-name').textContent = cfg.couple.groom.name;
         if (cfg.couple.groom.bio) document.getElementById('groom-bio').textContent = cfg.couple.groom.bio;
-        if (cfg.couple.groom.photo) {
+        const groomUrl = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+          ? WeddingApi.formatImageUrl(cfg.couple.groom.photo)
+          : (cfg.couple.groom.photo || '');
+        if (groomUrl) {
           const groomImg = document.getElementById('groom-photo');
-          groomImg.src = cfg.couple.groom.photo;
+          groomImg.onerror = () => {
+            groomImg.classList.add('hidden');
+            document.getElementById('groom-icon').classList.remove('hidden');
+          };
+          groomImg.src = groomUrl;
           groomImg.classList.remove('hidden');
           document.getElementById('groom-icon').classList.add('hidden');
         }
@@ -615,9 +859,16 @@
       if (cfg.couple?.bride) {
         if (cfg.couple.bride.name) document.getElementById('bride-name').textContent = cfg.couple.bride.name;
         if (cfg.couple.bride.bio) document.getElementById('bride-bio').textContent = cfg.couple.bride.bio;
-        if (cfg.couple.bride.photo) {
+        const brideUrl = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+          ? WeddingApi.formatImageUrl(cfg.couple.bride.photo)
+          : (cfg.couple.bride.photo || '');
+        if (brideUrl) {
           const brideImg = document.getElementById('bride-photo');
-          brideImg.src = cfg.couple.bride.photo;
+          brideImg.onerror = () => {
+            brideImg.classList.add('hidden');
+            document.getElementById('bride-icon').classList.remove('hidden');
+          };
+          brideImg.src = brideUrl;
           brideImg.classList.remove('hidden');
           document.getElementById('bride-icon').classList.add('hidden');
         }
@@ -720,7 +971,7 @@
         <div class="absolute left-6 top-3 bottom-3 w-0.5 bg-gradient-to-b from-gold-300 via-gold-400 to-gold-200"></div>
       `;
 
-      list.forEach((item) => {
+      list.forEach((item, idx) => {
         const cleanDate = (typeof WeddingApi !== 'undefined' && WeddingApi.cleanTimelineDate)
           ? WeddingApi.cleanTimelineDate(item.date)
           : (function(s) {
@@ -736,16 +987,21 @@
               return str;
             })(item.date);
 
+        const storyImgUrl = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+          ? WeddingApi.formatImageUrl(item.image)
+          : item.image;
+
+        const delayClass = `delay-${((idx % 4) + 1) * 100}`;
         const itemEl = document.createElement('div');
-        itemEl.className = 'relative flex items-start gap-4 group';
+        itemEl.className = `relative flex items-start gap-4 group reveal reveal-up ${delayClass}`;
         itemEl.innerHTML = `
           <!-- Timeline Node -->
-          <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-white border-2 border-gold-400 shadow-sm flex items-center justify-center mt-1">
-            <span class="w-2.5 h-2.5 rounded-full bg-gold-600"></span>
+          <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-white border-2 border-gold-400 shadow-sm flex items-center justify-center mt-1 group-hover:scale-110 transition-transform">
+            <span class="w-2.5 h-2.5 rounded-full bg-gold-600 animate-pulse"></span>
           </div>
 
           <!-- Story Card -->
-          <div class="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-gold-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-gold-200 shadow-sm hover:shadow-md transition-all">
             <div class="flex items-center justify-between mb-2">
               <span class="px-2.5 py-0.5 rounded-full bg-gold-50 border border-gold-200 text-gold-800 text-[11px] font-bold tracking-wider uppercase">
                 ${cleanDate}
@@ -754,9 +1010,9 @@
             </div>
             <h4 class="font-serif text-lg font-bold text-slate-900 mb-1.5">${item.title || ''}</h4>
             <p class="text-xs text-slate-600 leading-relaxed mb-3">${item.description || ''}</p>
-            ${item.image ? `
-              <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-slate-100 cursor-pointer group/img" onclick="openLightbox('${item.image}', '${item.title || 'Kisah Cinta'}', '${cleanDate}')">
-                <img src="${item.image}" alt="${item.title || 'Foto Milestone'}" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" loading="lazy">
+            ${storyImgUrl ? `
+              <div class="relative w-full h-40 sm:h-48 rounded-xl overflow-hidden bg-slate-100 cursor-pointer group/img" onclick="openLightbox('${storyImgUrl}', '${item.title || 'Kisah Cinta'}', '${cleanDate}')">
+                <img src="${storyImgUrl}" alt="${item.title || 'Foto Milestone'}" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" loading="lazy" onerror="this.parentElement.style.display='none'">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                 <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/50 text-white text-[10px] backdrop-blur-sm flex items-center gap-1">
                   <i data-lucide="zoom-in" class="w-3 h-3"></i> Perbesar
@@ -768,6 +1024,9 @@
         container.appendChild(itemEl);
       });
       lucide.createIcons();
+      if (typeof observeRevealElements === 'function') {
+        observeRevealElements(container);
+      }
     }
 
     // Render Pre-Wedding Photo Gallery
@@ -779,12 +1038,18 @@
 
       container.innerHTML = '';
       list.forEach((photo, idx) => {
+        const photoUrl = (typeof WeddingApi !== 'undefined' && WeddingApi.formatImageUrl)
+          ? WeddingApi.formatImageUrl(photo.url)
+          : photo.url;
+        if (!photoUrl) return;
+
         const itemEl = document.createElement('div');
         const isWide = (idx === 0 || (idx === list.length - 1 && list.length % 2 !== 0));
-        itemEl.className = `${isWide ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-[3/4]'} relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-gold-200 cursor-pointer group`;
-        itemEl.onclick = () => openLightbox(photo.url, photo.title || 'Pre-Wedding', photo.category || '');
+        const delayClass = `delay-${((idx % 3) + 1) * 100}`;
+        itemEl.className = `${isWide ? 'col-span-2 aspect-[16/9]' : 'col-span-1 aspect-[3/4]'} relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-gold-200 cursor-pointer group reveal reveal-zoom ${delayClass}`;
+        itemEl.onclick = () => openLightbox(photoUrl, photo.title || 'Pre-Wedding', photo.category || '');
         itemEl.innerHTML = `
-          <img src="${photo.url}" alt="${photo.title || 'Foto Prewed'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <img src="${photoUrl}" alt="${photo.title || 'Foto Prewed'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.parentElement.style.display='none'">
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
           <div class="absolute bottom-2.5 left-3 right-3 text-white">
             ${photo.category ? `<span class="text-[10px] font-semibold text-gold-300 uppercase tracking-wider block">${photo.category}</span>` : ''}
@@ -797,6 +1062,9 @@
         container.appendChild(itemEl);
       });
       lucide.createIcons();
+      if (typeof observeRevealElements === 'function') {
+        observeRevealElements(container);
+      }
     }
 
     // Lightbox modal helpers
@@ -839,15 +1107,21 @@
 
     // Generate Scannable QR Code
     const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = '';
-    const qr = new QRCode(qrContainer, {
-      text: guestCodeParam,
-      width: 180,
-      height: 180,
-      colorDark: "#1E293B",
-      colorLight: "#FFFFFF",
-      correctLevel: QRCode.CorrectLevel.H
-    });
+    if (qrContainer && typeof QRCode !== 'undefined') {
+      qrContainer.innerHTML = '';
+      try {
+        new QRCode(qrContainer, {
+          text: guestCodeParam,
+          width: 180,
+          height: 180,
+          colorDark: "#1E293B",
+          colorLight: "#FFFFFF",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      } catch (e) {
+        console.warn('QRCode generation warning:', e);
+      }
+    }
 
     // Save QR to Phone Gallery
     document.getElementById('btn-save-qr').addEventListener('click', () => {
@@ -897,38 +1171,177 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Cover Screen & Audio Control
-    const coverScreen = document.getElementById('cover-screen');
+    // ==================== ROMANTIC FALLING PETALS ANIMATION ====================
+    const petalsCanvas = document.getElementById('petals-canvas');
+    let petalsCtx = petalsCanvas ? petalsCanvas.getContext('2d') : null;
+    let petals = [];
+    let petalsAnimationId = null;
+    let isPetalsEnabled = true;
+
+    function initPetalsCanvas() {
+      if (!petalsCanvas || !petalsCtx) return;
+      petalsCanvas.width = window.innerWidth;
+      petalsCanvas.height = window.innerHeight;
+
+      const count = window.innerWidth < 640 ? 14 : 24;
+      petals = [];
+      const colors = [
+        'rgba(255, 192, 203, 0.72)',   // Sakura / Rose pink
+        'rgba(247, 214, 201, 0.68)',  // Warm peach
+        'rgba(255, 228, 225, 0.75)',  // Misty rose
+        'rgba(223, 202, 158, 0.65)',  // Subtle gold dust
+        'rgba(255, 240, 245, 0.8)'    // Soft blush
+      ];
+
+      for (let i = 0; i < count; i++) {
+        petals.push({
+          x: Math.random() * petalsCanvas.width,
+          y: Math.random() * petalsCanvas.height,
+          size: Math.random() * 8 + 8,
+          speedY: Math.random() * 1.1 + 0.7,
+          speedX: Math.random() * 0.8 - 0.4,
+          angle: Math.random() * Math.PI * 2,
+          angleSpeed: (Math.random() - 0.5) * 0.025,
+          oscillationSpeed: Math.random() * 0.02 + 0.01,
+          oscillationAngle: Math.random() * Math.PI * 2,
+          oscillationDistance: Math.random() * 28 + 14,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          flipSpeed: Math.random() * 0.03 + 0.01,
+          flipAngle: Math.random() * Math.PI
+        });
+      }
+    }
+
+    function drawPetal(ctx, p) {
+      ctx.save();
+      ctx.translate(p.x + Math.sin(p.oscillationAngle) * p.oscillationDistance, p.y);
+      ctx.rotate(p.angle);
+      ctx.scale(Math.cos(p.flipAngle), 1); // 3D fluttering flip effect
+
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-p.size / 2, -p.size / 2, -p.size, p.size / 3, 0, p.size);
+      ctx.bezierCurveTo(p.size, p.size / 3, p.size / 2, -p.size / 2, 0, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Delicate petal central vein
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, p.size * 0.85);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function animatePetals() {
+      if (!isPetalsEnabled || !petalsCtx) return;
+      petalsCtx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
+
+      for (let i = 0; i < petals.length; i++) {
+        const p = petals[i];
+        p.y += p.speedY;
+        p.x += p.speedX;
+        p.angle += p.angleSpeed;
+        p.oscillationAngle += p.oscillationSpeed;
+        p.flipAngle += p.flipSpeed;
+
+        if (p.y > petalsCanvas.height + 25) {
+          p.y = -25;
+          p.x = Math.random() * petalsCanvas.width;
+        }
+        if (p.x > petalsCanvas.width + 50) {
+          p.x = -50;
+        } else if (p.x < -50) {
+          p.x = petalsCanvas.width + 50;
+        }
+
+        drawPetal(petalsCtx, p);
+      }
+
+      petalsAnimationId = requestAnimationFrame(animatePetals);
+    }
+
+    function startPetals() {
+      if (!petalsAnimationId && isPetalsEnabled) {
+        animatePetals();
+      }
+    }
+
+    function stopPetals() {
+      if (petalsAnimationId) {
+        cancelAnimationFrame(petalsAnimationId);
+        petalsAnimationId = null;
+      }
+      if (petalsCtx && petalsCanvas) {
+        petalsCtx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
+      }
+    }
+
+    initPetalsCanvas();
+    startPetals();
+
+    window.addEventListener('resize', () => {
+      if (petalsCanvas) {
+        petalsCanvas.width = window.innerWidth;
+        petalsCanvas.height = window.innerHeight;
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopPetals();
+      } else if (isPetalsEnabled) {
+        startPetals();
+      }
+    });
+
+    // Petals Toggle Control
+    const btnPetals = document.getElementById('btn-petals-toggle');
+    if (btnPetals) {
+      btnPetals.addEventListener('click', () => {
+        isPetalsEnabled = !isPetalsEnabled;
+        if (isPetalsEnabled) {
+          startPetals();
+          btnPetals.classList.remove('opacity-50', 'bg-slate-100');
+          showToast('🌸 Efek kelopak bunga diaktifkan');
+        } else {
+          stopPetals();
+          btnPetals.classList.add('opacity-50', 'bg-slate-100');
+          showToast('Efek kelopak bunga dimatikan');
+        }
+      });
+    }
+
+    // Bind Cover Screen & Audio Control Listeners
     const btnOpen = document.getElementById('btn-open-invitation');
     const audio = document.getElementById('wedding-audio');
     const btnMusic = document.getElementById('btn-music-toggle');
-    const musicIcon = document.getElementById('music-icon');
-    let isPlaying = false;
 
-    btnOpen.addEventListener('click', () => {
-      coverScreen.classList.add('opened');
-      // Attempt audio autoplay on user interaction
-      audio.play().then(() => {
-        isPlaying = true;
-        musicIcon.setAttribute('data-lucide', 'music');
-        lucide.createIcons();
-      }).catch(err => {
-        console.log('Audio autoplay prevented:', err);
+    if (btnOpen) {
+      btnOpen.addEventListener('click', openInvitation);
+    }
+
+    if (btnMusic && audio) {
+      btnMusic.addEventListener('click', () => {
+        if (isPlaying) {
+          audio.pause();
+          isPlaying = false;
+          updateMusicUI(false);
+        } else {
+          audio.play().then(() => {
+            isPlaying = true;
+            updateMusicUI(true);
+          }).catch(e => console.log('Playback error:', e));
+        }
       });
-    });
+    }
 
-    btnMusic.addEventListener('click', () => {
-      if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-        musicIcon.setAttribute('data-lucide', 'volume-x');
-      } else {
-        audio.play();
-        isPlaying = true;
-        musicIcon.setAttribute('data-lucide', 'music');
-      }
-      lucide.createIcons();
-    });
+    // Observe initial elements on DOM ready
+    observeRevealElements();
 
     // Clipboard Copy Helper
     function copyToClipboard(text, label) {
@@ -1033,7 +1446,7 @@
       const initial = (wish.name && wish.name.trim().length > 0) ? wish.name.trim().charAt(0).toUpperCase() : 'T';
 
       return `
-        <div class="p-3.5 rounded-2xl bg-gold-50/50 border border-gold-200/80 shadow-xs">
+        <div class="p-3.5 rounded-2xl bg-gold-50/50 border border-gold-200/80 shadow-xs reveal reveal-up">
           <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center space-x-1.5">
               <div class="w-6 h-6 rounded-full bg-gold-200 text-gold-800 font-bold text-[11px] flex items-center justify-center">
@@ -1063,6 +1476,9 @@
       totalWishesCount = wishes.length;
       if (countBadge) countBadge.textContent = String(totalWishesCount);
       container.innerHTML = wishes.map(createWishCardHtml).join('');
+      if (typeof observeRevealElements === 'function') {
+        observeRevealElements(container);
+      }
     }
 
     function addWishToWall(newWish) {
@@ -1079,6 +1495,9 @@
       container.insertBefore(newCard, container.firstChild);
       totalWishesCount++;
       if (countBadge) countBadge.textContent = String(totalWishesCount);
+      if (typeof observeRevealElements === 'function') {
+        observeRevealElements(container);
+      }
     }
 
     async function loadWishes() {

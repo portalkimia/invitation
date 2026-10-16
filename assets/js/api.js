@@ -142,18 +142,80 @@ const WeddingApi = {
   },
 
   /**
+   * Formats a WhatsApp message template by dynamically substituting all guest
+   * and event configuration placeholders ({nama}, {mempelai}, {tanggal}, {tempat}, etc.)
+   */
+  formatWaMessage(template, guest = {}, config = null) {
+    const raw = this.getCachedSettings() || {};
+    const base = (typeof WEDDING_CONFIG !== 'undefined') ? WEDDING_CONFIG : {};
+    const cfg = config || this.mapSettingsToConfig(raw, base);
+
+    const groomShort = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || raw.GROOM_SHORT || 'Romeo';
+    const brideShort = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || raw.BRIDE_SHORT || 'Juliet';
+    const couplePair = `${groomShort} & ${brideShort}`;
+    const groomName = cfg.couple?.groom?.name || raw.GROOM_NAME || groomShort;
+    const brideName = cfg.couple?.bride?.name || raw.BRIDE_NAME || brideShort;
+    const eventTitle = cfg.event?.title || raw.EVENT_TITLE || `The Wedding of ${couplePair}`;
+    const eventDate = cfg.event?.dateFormatted || raw.EVENT_DATE_FORMATTED || 'Minggu, 25 Oktober 2026';
+
+    const akadTime = cfg.event?.akadTime || cfg.event?.akad?.time || raw.AKAD_TIME || '08:00 - 10:00 WIB';
+    const akadVenue = cfg.event?.akadVenue || cfg.event?.akad?.venue || raw.AKAD_VENUE || 'Masjid Agung Al-Azhar';
+    const akadAddress = cfg.event?.akadAddress || cfg.event?.akad?.address || raw.AKAD_ADDRESS || '';
+
+    const resepsiTime = cfg.event?.resepsiTime || cfg.event?.reception?.time || raw.RESEPSI_TIME || '11:00 - 14:00 WIB';
+    const resepsiVenue = cfg.event?.resepsiVenue || cfg.event?.reception?.venue || raw.RESEPSI_VENUE || akadVenue || 'Grand Ballroom Hotel Mulia Senayan';
+    const resepsiAddress = cfg.event?.resepsiAddress || cfg.event?.reception?.address || raw.RESEPSI_ADDRESS || akadAddress || '';
+
+    const mainVenue = resepsiVenue || akadVenue;
+    const mainAddress = resepsiAddress || akadAddress;
+    const mainTime = resepsiTime || akadTime;
+    const mapsUrl = cfg.event?.mapsUrl || raw.MAPS_URL || '';
+
+    const guestName = guest.name || 'Tamu Undangan';
+    const guestCode = guest.code || '';
+    const guestLink = guest.link || this.buildInviteUrl(guestCode, guestName);
+    const guestPax = (guest.pax !== undefined && guest.pax !== null && guest.pax !== '') ? String(guest.pax) : '1';
+    const guestCategory = guest.category || 'Reguler';
+
+    let msg = template || raw.WA_TEMPLATE || cfg.defaultWaTemplate || base.defaultWaTemplate || 'Halo {nama}, tautan undangan: {link}';
+
+    msg = msg.replace(/\{nama\}/gi, guestName);
+    msg = msg.replace(/\{kode\}/gi, guestCode);
+    msg = msg.replace(/\{link\}/gi, guestLink);
+    msg = msg.replace(/\{pax\}/gi, guestPax);
+    msg = msg.replace(/\{kategori\}/gi, guestCategory);
+
+    msg = msg.replace(/\{mempelai\}/gi, couplePair);
+    msg = msg.replace(/\{pria\}|\{groom\}/gi, groomShort);
+    msg = msg.replace(/\{wanita\}|\{bride\}/gi, brideShort);
+    msg = msg.replace(/\{nama_pria\}/gi, groomName);
+    msg = msg.replace(/\{nama_wanita\}/gi, brideName);
+    msg = msg.replace(/\{judul\}/gi, eventTitle);
+    msg = msg.replace(/\{tanggal\}/gi, eventDate);
+    msg = msg.replace(/\{tempat\}/gi, mainVenue);
+    msg = msg.replace(/\{alamat\}/gi, mainAddress);
+    msg = msg.replace(/\{waktu\}|\{jam\}/gi, mainTime);
+    msg = msg.replace(/\{maps\}/gi, mapsUrl);
+
+    msg = msg.replace(/\{akad_waktu\}/gi, akadTime);
+    msg = msg.replace(/\{akad_tempat\}/gi, akadVenue);
+    msg = msg.replace(/\{akad_alamat\}/gi, akadAddress);
+
+    msg = msg.replace(/\{resepsi_waktu\}/gi, resepsiTime);
+    msg = msg.replace(/\{resepsi_tempat\}/gi, resepsiVenue);
+    msg = msg.replace(/\{resepsi_alamat\}/gi, resepsiAddress);
+
+    return msg;
+  },
+
+  /**
    * Build WhatsApp wa.me direct link
    */
-  buildWaMeLink(phone, name, code, customTemplate) {
-    const config = (typeof WEDDING_CONFIG !== 'undefined') ? WEDDING_CONFIG : {};
+  buildWaMeLink(phone, name, code, customTemplate, guest = {}, config = null) {
     const cleanPhone = this.sanitizePhone(phone);
-    const template = customTemplate || config.defaultWaTemplate || 'Halo {nama}, tautan undangan: {link}';
     const inviteLink = this.buildInviteUrl(code, name);
-
-    const message = template
-      .replace(/{nama}/g, name || 'Tamu Undangan')
-      .replace(/{kode}/g, code || '')
-      .replace(/{link}/g, inviteLink);
+    const guestData = { name, code, link: inviteLink, ...guest };
+    const message = this.formatWaMessage(customTemplate, guestData, config);
 
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   },
@@ -405,8 +467,8 @@ const WeddingApi = {
     if (settings.EVENT_TITLE) cfg.event.title = settings.EVENT_TITLE;
     if (settings.EVENT_DATE_FORMATTED) cfg.event.dateFormatted = settings.EVENT_DATE_FORMATTED;
     if (settings.COUNTDOWN_TARGET) cfg.event.countdownTarget = settings.COUNTDOWN_TARGET;
-    if (settings.COVER_PHOTO !== undefined && settings.COVER_PHOTO !== '') cfg.couple.coverPhoto = settings.COVER_PHOTO;
-    if (settings.BG_IMAGE !== undefined && settings.BG_IMAGE !== '') cfg.event.backgroundImage = settings.BG_IMAGE;
+    if (settings.COVER_PHOTO !== undefined && settings.COVER_PHOTO !== '') cfg.couple.coverPhoto = this.formatImageUrl(settings.COVER_PHOTO);
+    if (settings.BG_IMAGE !== undefined && settings.BG_IMAGE !== '') cfg.event.backgroundImage = this.formatImageUrl(settings.BG_IMAGE);
     if (settings.MUSIC_URL !== undefined && settings.MUSIC_URL !== '') cfg.music.audioUrl = settings.MUSIC_URL;
 
     // Groom
@@ -418,7 +480,7 @@ const WeddingApi = {
     if (settings.GROOM_FATHER) cfg.couple.groom.father = settings.GROOM_FATHER;
     if (settings.GROOM_MOTHER) cfg.couple.groom.mother = settings.GROOM_MOTHER;
     if (settings.GROOM_BIO) cfg.couple.groom.bio = settings.GROOM_BIO;
-    if (settings.GROOM_PHOTO !== undefined && settings.GROOM_PHOTO !== '') cfg.couple.groom.photo = settings.GROOM_PHOTO;
+    if (settings.GROOM_PHOTO !== undefined && settings.GROOM_PHOTO !== '') cfg.couple.groom.photo = this.formatImageUrl(settings.GROOM_PHOTO);
 
     // Bride
     if (settings.BRIDE_NAME) cfg.couple.bride.name = settings.BRIDE_NAME;
@@ -429,7 +491,7 @@ const WeddingApi = {
     if (settings.BRIDE_FATHER) cfg.couple.bride.father = settings.BRIDE_FATHER;
     if (settings.BRIDE_MOTHER) cfg.couple.bride.mother = settings.BRIDE_MOTHER;
     if (settings.BRIDE_BIO) cfg.couple.bride.bio = settings.BRIDE_BIO;
-    if (settings.BRIDE_PHOTO !== undefined && settings.BRIDE_PHOTO !== '') cfg.couple.bride.photo = settings.BRIDE_PHOTO;
+    if (settings.BRIDE_PHOTO !== undefined && settings.BRIDE_PHOTO !== '') cfg.couple.bride.photo = this.formatImageUrl(settings.BRIDE_PHOTO);
 
     // Akad & Resepsi
     if (settings.AKAD_TIME) cfg.event.akadTime = settings.AKAD_TIME;
@@ -479,7 +541,8 @@ const WeddingApi = {
       const date = this.cleanTimelineDate ? this.cleanTimelineDate(rawDate) : (rawDate || '');
       const title = settings[`STORY${i}_TITLE`];
       const desc = settings[`STORY${i}_DESC`];
-      const img = settings[`STORY${i}_IMG`];
+      const rawImg = settings[`STORY${i}_IMG`];
+      const img = this.formatImageUrl ? this.formatImageUrl(rawImg) : (rawImg || '');
       const tag = settings[`STORY${i}_TAG`];
       if (title || desc || img) {
         customStory.push({
@@ -498,7 +561,8 @@ const WeddingApi = {
     // Pre-Wedding Gallery Photos (Up to 5 photos)
     const customGallery = [];
     for (let i = 1; i <= 5; i++) {
-      const url = settings[`GALLERY${i}_URL`];
+      const rawUrl = settings[`GALLERY${i}_URL`];
+      const url = this.formatImageUrl ? this.formatImageUrl(rawUrl) : (rawUrl || '');
       const title = settings[`GALLERY${i}_TITLE`];
       const cat = settings[`GALLERY${i}_CAT`];
       if (url) {
@@ -517,6 +581,39 @@ const WeddingApi = {
     if (settings.WA_TEMPLATE) cfg.defaultWaTemplate = settings.WA_TEMPLATE;
 
     return cfg;
+  },
+
+  /**
+   * Normalizes image URLs from external cloud providers (Google Drive, Dropbox, etc.)
+   * into direct embeddable image URLs.
+   */
+  formatImageUrl(url) {
+    if (!url) return '';
+    const str = String(url).trim();
+    if (!str) return '';
+
+    // Google Drive share link -> direct CDN URL (lh3.googleusercontent.com/d/FILE_ID)
+    const driveMatch = str.match(/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]+)|open\?id=([a-zA-Z0-9_-]+)|uc\?(?:.*&)?id=([a-zA-Z0-9_-]+))/i);
+    if (driveMatch) {
+      const fileId = driveMatch[1] || driveMatch[2] || driveMatch[3];
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+
+    // Dropbox share link -> direct raw image
+    if (str.includes('dropbox.com')) {
+      return str.replace(/[?&]dl=0/, '?raw=1');
+    }
+
+    return str;
+  },
+
+  /**
+   * Checks if a URL is an unsupported Google Photos webpage link
+   */
+  isGooglePhotosUrl(url) {
+    if (!url) return false;
+    const str = String(url).trim().toLowerCase();
+    return str.includes('photos.app.goo.gl') || str.includes('photos.google.com');
   },
 
   /**
