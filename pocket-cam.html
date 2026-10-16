@@ -651,6 +651,7 @@
       try {
         const payload = {
           code: currentGuest.code,
+          name: (currentGuest && currentGuest.name) ? currentGuest.name : '',
           photoBase64: photoBase64,
           mimeType: 'image/jpeg'
         };
@@ -664,7 +665,8 @@
           localReelPhotos.shift();
           updateFilmCounter();
           renderReel();
-          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}. Kuota dikembalikan, silakan coba lagi.</span>`;
+          const reason = res && res.error ? ` (${res.error})` : '';
+          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}${reason}. Kuota dikembalikan, silakan coba lagi.</span>`;
         }
       } catch (err) {
         console.error('Upload error:', err);
@@ -673,7 +675,7 @@
         localReelPhotos.shift();
         updateFilmCounter();
         renderReel();
-        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu saat upload. Kuota foto dikembalikan, silakan coba lagi.</span>`;
+        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu (${err.message || 'Error'}). Kuota dikembalikan, silakan coba lagi.</span>`;
       } finally {
         isUploading = false;
       }
