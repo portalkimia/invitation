@@ -712,7 +712,7 @@
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">URL Foto Sampul / Prewedding</label>
                 <input type="url" id="cfg-cover-photo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-amber-500" placeholder="https://example.com/cover.jpg">
-                <span class="text-[10px] text-slate-400">Tampil di lingkaran amplop pembuka</span>
+                <span class="text-[10px] text-slate-400">Foto utama layar penuh setelah undangan dibuka</span>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">URL Latar Belakang (Background)</label>
@@ -850,6 +850,7 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/improvements.js"></script>
+  <script src="assets/js/design-shared.js"></script>
   <script>
     lucide.createIcons();
 
@@ -1532,7 +1533,7 @@
         document.getElementById('cfg-groom-father').value = currentRawSettings.GROOM_FATHER || cfg.couple?.groom?.father || '';
         document.getElementById('cfg-groom-mother').value = currentRawSettings.GROOM_MOTHER || cfg.couple?.groom?.mother || '';
         document.getElementById('cfg-groom-bio').value = currentRawSettings.GROOM_BIO || cfg.couple?.groom?.bio || '';
-        document.getElementById('cfg-groom-photo').value = currentRawSettings.GROOM_PHOTO || cfg.couple?.groom?.photo || '';
+        document.getElementById('cfg-groom-photo').value = currentRawSettings.GROOM_PHOTO ?? (cfg.couple?.groom?.photo || '');
 
         // Bride
         document.getElementById('cfg-bride-name').value = currentRawSettings.BRIDE_NAME || cfg.couple?.bride?.name || '';
@@ -1540,11 +1541,11 @@
         document.getElementById('cfg-bride-father').value = currentRawSettings.BRIDE_FATHER || cfg.couple?.bride?.father || '';
         document.getElementById('cfg-bride-mother').value = currentRawSettings.BRIDE_MOTHER || cfg.couple?.bride?.mother || '';
         document.getElementById('cfg-bride-bio').value = currentRawSettings.BRIDE_BIO || cfg.couple?.bride?.bio || '';
-        document.getElementById('cfg-bride-photo').value = currentRawSettings.BRIDE_PHOTO || cfg.couple?.bride?.photo || '';
+        document.getElementById('cfg-bride-photo').value = currentRawSettings.BRIDE_PHOTO ?? (cfg.couple?.bride?.photo || '');
 
         // Media
-        document.getElementById('cfg-cover-photo').value = currentRawSettings.COVER_PHOTO || cfg.couple?.coverPhoto || '';
-        document.getElementById('cfg-bg-image').value = currentRawSettings.BG_IMAGE || cfg.event?.backgroundImage || '';
+        document.getElementById('cfg-cover-photo').value = currentRawSettings.COVER_PHOTO ?? (cfg.couple?.coverPhoto || '');
+        document.getElementById('cfg-bg-image').value = currentRawSettings.BG_IMAGE ?? (cfg.event?.backgroundImage || '');
         document.getElementById('cfg-music-url').value = currentRawSettings.MUSIC_URL || cfg.music?.audioUrl || '';
 
         // Akad
@@ -1588,23 +1589,23 @@
           ? WeddingApi.cleanTimelineDate
           : (v => v || '');
 
-        document.getElementById('cfg-story1-tag').value = currentRawSettings.STORY1_TAG || s1.tag || '';
+        document.getElementById('cfg-story1-tag').value = currentRawSettings.STORY1_TAG ?? (s1.tag || '');
         document.getElementById('cfg-story1-date').value = cleanDateFn(currentRawSettings.STORY1_DATE || s1.date);
-        document.getElementById('cfg-story1-title').value = currentRawSettings.STORY1_TITLE || s1.title || '';
-        document.getElementById('cfg-story1-desc').value = currentRawSettings.STORY1_DESC || s1.description || '';
-        document.getElementById('cfg-story1-img').value = currentRawSettings.STORY1_IMG || s1.image || '';
+        document.getElementById('cfg-story1-title').value = currentRawSettings.STORY1_TITLE ?? (s1.title || '');
+        document.getElementById('cfg-story1-desc').value = currentRawSettings.STORY1_DESC ?? (s1.description || '');
+        document.getElementById('cfg-story1-img').value = currentRawSettings.STORY1_IMG ?? (s1.image || '');
 
-        document.getElementById('cfg-story2-tag').value = currentRawSettings.STORY2_TAG || s2.tag || '';
+        document.getElementById('cfg-story2-tag').value = currentRawSettings.STORY2_TAG ?? (s2.tag || '');
         document.getElementById('cfg-story2-date').value = cleanDateFn(currentRawSettings.STORY2_DATE || s2.date);
-        document.getElementById('cfg-story2-title').value = currentRawSettings.STORY2_TITLE || s2.title || '';
-        document.getElementById('cfg-story2-desc').value = currentRawSettings.STORY2_DESC || s2.description || '';
-        document.getElementById('cfg-story2-img').value = currentRawSettings.STORY2_IMG || s2.image || '';
+        document.getElementById('cfg-story2-title').value = currentRawSettings.STORY2_TITLE ?? (s2.title || '');
+        document.getElementById('cfg-story2-desc').value = currentRawSettings.STORY2_DESC ?? (s2.description || '');
+        document.getElementById('cfg-story2-img').value = currentRawSettings.STORY2_IMG ?? (s2.image || '');
 
-        document.getElementById('cfg-story3-tag').value = currentRawSettings.STORY3_TAG || s3.tag || '';
+        document.getElementById('cfg-story3-tag').value = currentRawSettings.STORY3_TAG ?? (s3.tag || '');
         document.getElementById('cfg-story3-date').value = cleanDateFn(currentRawSettings.STORY3_DATE || s3.date);
-        document.getElementById('cfg-story3-title').value = currentRawSettings.STORY3_TITLE || s3.title || '';
-        document.getElementById('cfg-story3-desc').value = currentRawSettings.STORY3_DESC || s3.description || '';
-        document.getElementById('cfg-story3-img').value = currentRawSettings.STORY3_IMG || s3.image || '';
+        document.getElementById('cfg-story3-title').value = currentRawSettings.STORY3_TITLE ?? (s3.title || '');
+        document.getElementById('cfg-story3-desc').value = currentRawSettings.STORY3_DESC ?? (s3.description || '');
+        document.getElementById('cfg-story3-img').value = currentRawSettings.STORY3_IMG ?? (s3.image || '');
 
         // Pre-Wedding Gallery (1 - 5)
         const g1 = (cfg.gallery && cfg.gallery[0]) || {};
@@ -1613,29 +1614,31 @@
         const g4 = (cfg.gallery && cfg.gallery[3]) || {};
         const g5 = (cfg.gallery && cfg.gallery[4]) || {};
 
-        document.getElementById('cfg-gallery1-url').value = currentRawSettings.GALLERY1_URL || g1.url || '';
-        document.getElementById('cfg-gallery1-cat').value = currentRawSettings.GALLERY1_CAT || g1.category || '';
-        document.getElementById('cfg-gallery1-title').value = currentRawSettings.GALLERY1_TITLE || g1.title || '';
+        document.getElementById('cfg-gallery1-url').value = currentRawSettings.GALLERY1_URL ?? (g1.url || '');
+        document.getElementById('cfg-gallery1-cat').value = currentRawSettings.GALLERY1_CAT ?? (g1.category || '');
+        document.getElementById('cfg-gallery1-title').value = currentRawSettings.GALLERY1_TITLE ?? (g1.title || '');
 
-        document.getElementById('cfg-gallery2-url').value = currentRawSettings.GALLERY2_URL || g2.url || '';
-        document.getElementById('cfg-gallery2-cat').value = currentRawSettings.GALLERY2_CAT || g2.category || '';
-        document.getElementById('cfg-gallery2-title').value = currentRawSettings.GALLERY2_TITLE || g2.title || '';
+        document.getElementById('cfg-gallery2-url').value = currentRawSettings.GALLERY2_URL ?? (g2.url || '');
+        document.getElementById('cfg-gallery2-cat').value = currentRawSettings.GALLERY2_CAT ?? (g2.category || '');
+        document.getElementById('cfg-gallery2-title').value = currentRawSettings.GALLERY2_TITLE ?? (g2.title || '');
 
-        document.getElementById('cfg-gallery3-url').value = currentRawSettings.GALLERY3_URL || g3.url || '';
-        document.getElementById('cfg-gallery3-cat').value = currentRawSettings.GALLERY3_CAT || g3.category || '';
-        document.getElementById('cfg-gallery3-title').value = currentRawSettings.GALLERY3_TITLE || g3.title || '';
+        document.getElementById('cfg-gallery3-url').value = currentRawSettings.GALLERY3_URL ?? (g3.url || '');
+        document.getElementById('cfg-gallery3-cat').value = currentRawSettings.GALLERY3_CAT ?? (g3.category || '');
+        document.getElementById('cfg-gallery3-title').value = currentRawSettings.GALLERY3_TITLE ?? (g3.title || '');
 
-        document.getElementById('cfg-gallery4-url').value = currentRawSettings.GALLERY4_URL || g4.url || '';
-        document.getElementById('cfg-gallery4-cat').value = currentRawSettings.GALLERY4_CAT || g4.category || '';
-        document.getElementById('cfg-gallery4-title').value = currentRawSettings.GALLERY4_TITLE || g4.title || '';
+        document.getElementById('cfg-gallery4-url').value = currentRawSettings.GALLERY4_URL ?? (g4.url || '');
+        document.getElementById('cfg-gallery4-cat').value = currentRawSettings.GALLERY4_CAT ?? (g4.category || '');
+        document.getElementById('cfg-gallery4-title').value = currentRawSettings.GALLERY4_TITLE ?? (g4.title || '');
 
-        document.getElementById('cfg-gallery5-url').value = currentRawSettings.GALLERY5_URL || g5.url || '';
-        document.getElementById('cfg-gallery5-cat').value = currentRawSettings.GALLERY5_CAT || g5.category || '';
-        document.getElementById('cfg-gallery5-title').value = currentRawSettings.GALLERY5_TITLE || g5.title || '';
+        document.getElementById('cfg-gallery5-url').value = currentRawSettings.GALLERY5_URL ?? (g5.url || '');
+        document.getElementById('cfg-gallery5-cat').value = currentRawSettings.GALLERY5_CAT ?? (g5.category || '');
+        document.getElementById('cfg-gallery5-title').value = currentRawSettings.GALLERY5_TITLE ?? (g5.title || '');
 
         // PINs
         document.getElementById('cfg-admin-pin').value = '';
         document.getElementById('cfg-reception-pin').value = '';
+
+        window.InvitationDesignEditor?.load(currentRawSettings);
 
         // Validate and show feedback for all photo inputs
         validateAllPhotoInputs();
@@ -1815,5 +1818,6 @@
     checkAuth();
   </script>
   <script src="assets/js/dashboard-improvements.js"></script>
+  <script src="assets/js/dashboard-design.js"></script>
 </body>
 </html>

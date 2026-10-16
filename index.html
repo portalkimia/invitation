@@ -198,111 +198,37 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="invitation-story.css">
 </head>
 <body class="bg-[#FAF7F2] text-slate-800 font-sans antialiased selection:bg-gold-200 selection:text-gold-900 min-h-screen relative overflow-x-hidden">
 
   <!-- ==================== FLOATING FLOWER PETALS CANVAS ==================== -->
   <canvas id="petals-canvas" aria-hidden="true"></canvas>
 
-  <!-- ==================== COVER SCREEN (SPLASH ENVELOPE) ==================== -->
-  <div id="cover-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#FAF7F2] bg-pattern px-4">
-    <div class="max-w-md w-full text-center p-8 rounded-3xl bg-white/85 backdrop-blur-md shadow-2xl border border-gold-200 relative overflow-hidden">
-      <!-- Decorative floral corners -->
-      <div class="absolute -top-10 -left-10 w-28 h-28 bg-gold-100 rounded-full blur-2xl opacity-70 animate-float"></div>
-      <div class="absolute -bottom-10 -right-10 w-28 h-28 bg-gold-200 rounded-full blur-2xl opacity-70 animate-float" style="animation-delay: -2s;"></div>
 
-      <!-- Optional Couple Cover Photo or Fallback Icon -->
-      <div id="cover-photo-container" class="w-24 h-24 mx-auto rounded-full border-2 border-gold-300 overflow-hidden mb-4 shadow-md hidden transform transition-transform duration-500 hover:scale-105">
-        <img id="cover-photo" class="w-full h-full object-cover" alt="Foto Pengantin">
-      </div>
-      <div id="cover-icon-container" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold-50 border border-gold-200 text-gold-700 mb-6 shadow-inner animate-float">
-        <i data-lucide="mail-open" class="w-8 h-8"></i>
-      </div>
-
-      <p class="text-xs uppercase tracking-[0.3em] text-gold-700 font-semibold mb-2">The Wedding of</p>
-      <h1 id="cover-couple-title" class="font-serif text-4xl sm:text-5xl text-slate-900 mb-6 font-bold tracking-tight">Romeo & Juliet</h1>
-
-      <div class="my-6 p-4 rounded-2xl bg-gold-50/70 border border-gold-200/80 shadow-xs">
-        <p class="text-xs text-slate-500 mb-1">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
-        <h2 id="cover-guest-name" class="font-serif text-2xl font-bold text-slate-800">Tamu Undangan</h2>
-        <p id="cover-guest-code" class="text-xs text-gold-700 font-medium mt-1 tracking-wider"></p>
-      </div>
-
-      <p class="text-xs text-slate-500 italic mb-6">
-        Tanpa mengurangi rasa hormat, kami mengundang Anda untuk hadir dalam momen bahagia pernikahan kami.
-      </p>
-
-      <button id="btn-open-invitation" type="button" onclick="openInvitation()" class="shimmer-btn animate-pulse-glow w-full py-3.5 px-6 rounded-full gold-gradient text-white font-medium tracking-wide shadow-lg hover:shadow-gold-300/50 hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 cursor-pointer relative z-10">
-        <i data-lucide="heart" class="w-4 h-4 fill-white animate-bounce"></i>
-        <span>Buka Undangan</span>
-      </button>
-    </div>
+  <aside class="desktop-scene" data-scene="desktop" aria-label="Pernikahan kami"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden><div class="scene-content"><div class="cover-monogram couple-monogram">R & J</div><p class="eyebrow">The Wedding of</p><h2 id="desktop-couple" class="script-title">Romeo & Juliet</h2><p id="desktop-date"></p><p class="cover-guest-label">Kepada Yth. Bapak/Ibu/Saudara/i</p><p id="desktop-guest">Tamu Undangan</p></div></aside>
+  <div id="cover-screen" class="fixed inset-0 scene" data-scene="cover"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden>
+    <div class="cover-top scene-content"><div class="cover-monogram couple-monogram">R & J</div></div>
+    <div class="cover-bottom"><p class="eyebrow">Wedding Invitation</p><h1 id="cover-couple-title" class="script-title cover-names">Romeo & Juliet</h1><p class="cover-guest-label">Kepada Yth. Bapak/Ibu/Saudara/i</p><h2 id="cover-guest-name" class="cover-guest">Tamu Undangan</h2><p id="cover-guest-code"></p><p class="cover-note">Dengan penuh kebahagiaan, kami mengundang Anda untuk menjadi bagian dari hari istimewa kami.</p><button id="btn-open-invitation" type="button" onclick="openInvitation()"><i data-lucide="mail-open" class="w-4 h-4"></i>Buka Undangan</button></div>
+    <div class="cover-hidden-media" aria-hidden="true"><div id="cover-photo-container"><img id="cover-photo" alt=""></div><div id="cover-icon-container"></div></div>
   </div>
-
-  <!-- ==================== MAIN INVITATION CONTENT ==================== -->
-  <main class="max-w-2xl mx-auto px-4 py-8 space-y-16">
-
-    <!-- HERO HEADER -->
-    <section class="text-center pt-8 pb-4 relative">
-      <div class="reveal reveal-down delay-100 inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-4">
-        Official Wedding Invitation
-      </div>
-      <h2 id="hero-couple-title" class="reveal reveal-zoom delay-200 font-serif text-5xl sm:text-6xl text-slate-900 font-bold mb-3 tracking-tight">Romeo & Juliet</h2>
-      <p id="hero-event-date" class="reveal reveal-up delay-300 text-slate-600 font-medium tracking-wider text-sm sm:text-base">Minggu, 25 Oktober 2026</p>
-      
-      <!-- Botanical Divider -->
-      <div class="reveal reveal-zoom delay-300 flex items-center justify-center space-x-4 my-6 text-gold-400">
-        <div class="h-[1px] w-16 bg-gold-300"></div>
-        <i data-lucide="flower-2" class="w-5 h-5 text-gold-600 animate-float"></i>
-        <div class="h-[1px] w-16 bg-gold-300"></div>
-      </div>
-
-      <p class="reveal reveal-up delay-400 text-slate-600 text-sm max-w-lg mx-auto leading-relaxed italic px-4">
-        "<span id="hero-quote-text">Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.</span>"
-        <br><span id="hero-quote-source" class="font-semibold text-xs text-gold-800 not-italic mt-1 block">— QS. Ar-Rum: 21</span>
-      </p>
-    </section>
-
-    <!-- COUPLE PROFILE -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <!-- Groom Card -->
-      <div class="reveal reveal-left delay-100 couple-card bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
-        <div class="w-28 h-28 mx-auto rounded-full bg-gold-100 border-2 border-gold-300 flex items-center justify-center text-gold-700 mb-4 shadow-sm overflow-hidden">
-          <img id="groom-photo" class="couple-card-img w-full h-full object-cover hidden" alt="Foto Mempelai Pria">
-          <div id="groom-icon" class="flex items-center justify-center">
-            <i data-lucide="user" class="w-14 h-14"></i>
-          </div>
-        </div>
-        <h3 id="groom-name" class="font-serif text-2xl font-bold text-slate-900 mb-1">Romeo Montague</h3>
-        <p id="groom-bio" class="text-xs text-slate-500 mb-3">Putra dari Bpk. Montague & Ibu Montague</p>
-        <span class="inline-block px-3 py-1 rounded-full bg-gold-50 text-gold-700 text-[11px] font-semibold border border-gold-200">
-          Mempelai Pria
-        </span>
-      </div>
-
-      <!-- Bride Card -->
-      <div class="reveal reveal-right delay-200 couple-card bg-white rounded-3xl p-6 text-center border border-gold-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
-        <div class="w-28 h-28 mx-auto rounded-full bg-gold-100 border-2 border-gold-300 flex items-center justify-center text-gold-700 mb-4 shadow-sm overflow-hidden">
-          <img id="bride-photo" class="couple-card-img w-full h-full object-cover hidden" alt="Foto Mempelai Wanita">
-          <div id="bride-icon" class="flex items-center justify-center">
-            <i data-lucide="user" class="w-14 h-14"></i>
-          </div>
-        </div>
-        <h3 id="bride-name" class="font-serif text-2xl font-bold text-slate-900 mb-1">Juliet Capulet</h3>
-        <p id="bride-bio" class="text-xs text-slate-500 mb-3">Putri dari Bpk. Capulet & Ibu Capulet</p>
-        <span class="inline-block px-3 py-1 rounded-full bg-gold-50 text-gold-700 text-[11px] font-semibold border border-gold-200">
-          Mempelai Wanita
-        </span>
-      </div>
-    </section>
-
+  <main id="invitation-main" inert>
+    <section id="hero-scene" class="scene hero-scene"><div id="hero-slides" class="hero-slides"></div><div class="hero-shade"></div><div class="hero-copy"><p class="eyebrow reveal reveal-up">The Wedding of</p><h2 id="hero-couple-title" tabindex="-1" class="script-title reveal reveal-up delay-200">Romeo & Juliet</h2><p id="hero-event-date" class="reveal reveal-up delay-300"></p></div><img id="hero-foreground" class="hero-foreground" alt="" hidden><p class="scroll-hint">SCROLL TO DISCOVER</p></section>
+    <section id="quote-scene" class="scene quote-scene" data-scene="quote"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden><div class="scene-content"><div class="couple-monogram quote-monogram reveal reveal-zoom">R & J</div><h3 class="script-title scene-title reveal reveal-up delay-100">We Found Love</h3><p class="quote-copy reveal reveal-up delay-200"><span id="hero-quote-text"></span><span id="hero-quote-source" class="quote-source"></span></p><span class="fine-divider reveal reveal-zoom"></span></div></section>
+    <section id="couple-scene" class="scene couple-scene" data-scene="couple"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden><div class="scene-content"><div class="couple-intro reveal reveal-up"><strong>Assalamu’alaikum Wr. Wb.</strong>Dengan memohon rahmat dan rida Allah SWT, kami bermaksud menyelenggarakan pernikahan kami.</div><article class="profile profile-groom">
+  <div class="profile-portrait reveal reveal-left"><div class="portrait-inner"><img id="groom-photo" class="hidden" alt="Foto mempelai pria"><div id="groom-icon" class="flex"><i data-lucide="user" class="w-16 h-16"></i></div></div><img class="profile-frame-overlay" alt="" hidden></div>
+  <div class="profile-copy"><span class="profile-label reveal reveal-up delay-100">Mempelai Pria</span><h3 id="groom-name" class="reveal reveal-up delay-200"></h3><p id="groom-bio" class="reveal reveal-up delay-300"></p></div>
+</article><div class="couple-ampersand reveal reveal-zoom">&</div><article class="profile profile-bride">
+  <div class="profile-portrait reveal reveal-right"><div class="portrait-inner"><img id="bride-photo" class="hidden" alt="Foto mempelai wanita"><div id="bride-icon" class="flex"><i data-lucide="user" class="w-16 h-16"></i></div></div><img class="profile-frame-overlay" alt="" hidden></div>
+  <div class="profile-copy"><span class="profile-label reveal reveal-up delay-100">Mempelai Wanita</span><h3 id="bride-name" class="reveal reveal-up delay-200"></h3><p id="bride-bio" class="reveal reveal-up delay-300"></p></div>
+</article></div></section>
     <!-- ==================== OUR LOVE STORY (KISAH PERJALANAN CINTA) ==================== -->
-    <section id="love-story-section" class="reveal reveal-up space-y-6">
+    <section id="love-story-section" class="scene" data-scene="story"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden>
       <div class="text-center">
         <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
           Kisah Kami
         </div>
-        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Perjalanan Cinta</h3>
+        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Our Journey</h3>
         <p class="text-xs text-slate-500 italic max-w-md mx-auto">
           "Setiap kisah cinta itu indah, namun kisah cinta kami adalah yang paling kami syukuri."
         </p>
@@ -315,24 +241,8 @@
       </div>
     </section>
 
-    <!-- ==================== PRE-WEDDING PHOTO GALLERY ==================== -->
-    <section id="gallery-section" class="reveal reveal-up space-y-6">
-      <div class="text-center">
-        <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
-          Memori Bahagia
-        </div>
-        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Galeri Foto Pre-Wedding</h3>
-        <p class="text-xs text-slate-500">Ketuk foto untuk melihat dalam resolusi penuh</p>
-      </div>
-
-      <!-- Gallery Grid Container -->
-      <div id="gallery-container" class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
-        <!-- Rendered via JavaScript -->
-      </div>
-    </section>
-
     <!-- COUNTDOWN TIMER -->
-    <section class="reveal reveal-up bg-white rounded-3xl p-6 sm:p-8 text-center border border-gold-200 shadow-md">
+    <section id="countdown-section" class="scene text-center" data-scene="events">
       <h3 class="font-serif text-2xl font-bold text-slate-900 mb-2">Menuju Hari Bahagia</h3>
       <p id="countdown-date-label" class="text-xs text-slate-500 mb-6">Minggu, 25 Oktober 2026</p>
 
@@ -366,9 +276,9 @@
     </section>
 
     <!-- EVENT ITINERARY & VENUE -->
-    <section class="space-y-6">
+    <section id="events-section" class="scene space-y-6" data-scene="events">
       <div class="reveal reveal-up text-center">
-        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Waktu & Tempat Acara</h3>
+        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Wedding Event</h3>
         <p class="text-xs text-slate-500">Rangkaian acara pernikahan kami</p>
       </div>
 
@@ -408,6 +318,22 @@
             </a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRE-WEDDING PHOTO GALLERY ==================== -->
+    <section id="gallery-section" class="scene" data-scene="gallery"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden>
+      <div class="text-center">
+        <div class="inline-block px-4 py-1.5 rounded-full bg-gold-100 border border-gold-200 text-gold-800 text-xs font-semibold tracking-widest uppercase mb-2">
+          Memori Bahagia
+        </div>
+        <h3 class="font-serif text-3xl font-bold text-slate-900 mb-1">Our Gallery</h3>
+        <p class="text-xs text-slate-500">Ketuk foto untuk melihat dalam resolusi penuh</p>
+      </div>
+
+      <!-- Gallery Grid Container -->
+      <div id="gallery-container" class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+        <!-- Rendered via JavaScript -->
       </div>
     </section>
 
@@ -505,7 +431,7 @@
     </section>
 
     <!-- ==================== RSVP FORM ==================== -->
-    <section class="reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+    <section id="rsvp-section" data-scene="rsvp" class="scene reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-6">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-3">
           <i data-lucide="calendar-check" class="w-6 h-6"></i>
@@ -594,7 +520,7 @@
     </section>
 
     <!-- ==================== DIGITAL ENVELOPE / WEDDING GIFT ==================== -->
-    <section class="reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
+    <section id="gift-section" data-scene="gift" class="scene reveal reveal-up delay-100 bg-white rounded-3xl p-6 sm:p-8 border border-gold-200 shadow-md">
       <div class="text-center mb-6">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-100 text-gold-700 mb-3">
           <i data-lucide="gift" class="w-6 h-6"></i>
@@ -629,6 +555,7 @@
       <p class="mt-4 text-[11px] text-slate-400">Wedding Web App • Built with ❤️</p>
     </footer>
 
+<section id="closing-scene" class="scene closing-scene" data-scene="closing"><img class="scene-ornament-top" alt="" hidden><img class="scene-ornament-bottom" alt="" hidden><div class="scene-content"><img id="closing-photo" class="closing-photo reveal reveal-zoom" alt="Foto penutup pengantin" hidden><p class="reveal reveal-up">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.</p><h3 class="script-title closing-names reveal reveal-up delay-200" id="closing-couple"></h3><p class="reveal reveal-up delay-300">Terima kasih atas doa dan restunya.</p></div></section>
   </main>
 
   <!-- ==================== FLOATING MUSIC & AUDIO CONTROLLER ==================== -->
@@ -676,6 +603,7 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/improvements.js"></script>
+  <script src="assets/js/design-shared.js"></script>
   <script>
     function safeCreateIcons() {
       try {
@@ -1576,5 +1504,6 @@
     setTimeout(() => lucide.createIcons(), 300);
   </script>
   <script src="assets/js/guest-improvements.js"></script>
+  <script src="assets/js/story-layout.js"></script>
 </body>
 </html>

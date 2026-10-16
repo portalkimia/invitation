@@ -84,3 +84,15 @@ node tools/verify-backend.cjs
 ```
 
 Pemeriksaan memakai Sheets/Drive simulasi dalam memori. Tidak menghubungi backend aktif atau mengubah data acara. Mencakup akses per peran, kolom lama/baru, impor duplikat, RSVP/kehadiran, check-in berulang, upload yang diulang, kuota kamera, album, dan perubahan PIN.
+# Studio Desain Undangan
+
+Di **Dashboard → Pengaturan Acara → Studio Desain Undangan**, atur warna, background per bagian, dua foto pembuka tambahan, ornamen atas/bawah, ornamen depan hero, bingkai profil PNG transparan, foto penutup, posisi foto, dan animasi.
+
+Foto Sampul / Prewedding menjadi foto utama layar penuh. Foto profil, tiga cerita, dan lima foto galeri memakai kolom foto masing-masing. Jika foto utama kosong, foto galeri pertama menjadi pembuka. Background bagian yang kosong mengikuti background utama. PNG transparan dipakai sebagai lapisan di atas background/foto.
+
+Tempel URL gambar langsung atau link Google Drive dengan akses lihat publik. Tidak ada foto atau ilustrasi yang disalin dari situs referensi. Warna krem dan bingkai sederhana menjadi tampilan awal sampai desain sendiri diisi.
+
+**Pratinjau desain** membuka undangan ponsel di dashboard tanpa menyimpan perubahan. Tombol **Simpan Semua Pengaturan** menerbitkan desain. Data desain disimpan sebagai `DESIGN_JSON` di Settings melalui sesi admin yang sudah tersedia; backend tidak memerlukan deployment baru. Pratinjau memblokir pengiriman RSVP dan perubahan data tamu.
+
+Susunan undangan mengikuti alur cover, hero, kutipan, profil berselang, scrapbook cerita, hitung mundur, acara, galeri, fitur tamu, dan penutup. Animasi mendukung preferensi pengurangan gerakan pada perangkat.
+
