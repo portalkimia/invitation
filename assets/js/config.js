@@ -24,8 +24,7 @@ const WEDDING_CONFIG = {
         : 'https://portalkimia.github.io/invitation/pocket-cam.html'),
 
   // Security Access PINs
-  ADMIN_PIN: '1234',      // PIN to unlock dashboard.html
-  RECEPTION_PIN: '5678',  // PIN to unlock reception.html
+  // Staff PINs live only in the backend Settings sheet.
 
   // Couple Information & Photos
   couple: {
