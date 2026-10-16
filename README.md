@@ -1,171 +1,86 @@
-# 💍 Zero-Cost Wedding Web App (GitHub Pages + Google Apps Script + Google Drive)
+# Wedding App
 
-A zero-cost, static wedding web application ready for GitHub Pages hosting, powered by a single unified Google Apps Script (`Code.gs`), Google Sheets (`Guests` & `PocketLogs` tabs), and Google Drive storage.
+Undangan digital dengan pengelolaan tamu, meja resepsi, Pocket Camera, dan album bersama. Frontend HTML/JavaScript, backend Google Apps Script, database Google Sheets, dan penyimpanan foto Google Drive.
 
----
+## Alur penggunaan
 
-## 🌟 Fitur Utama
+1. Admin membuka dashboard.html, mengatur acara, memasukkan daftar tamu, dan membagikan tautan pribadi melalui WhatsApp.
+2. Tamu membuka index.html?code=G001&to=Nama, membaca undangan, mengisi RSVP, menyimpan QR, dan menambahkan jadwal resepsi ke kalender.
+3. Petugas membuka reception.html, memindai QR atau memilih kode/nama dari daftar, lalu mengisi jumlah orang yang benar-benar datang. Foto kedatangan opsional.
+4. Tamu yang sudah check-in membuka pocket-cam.html dari tautan atau QR resepsi dan menggunakan kuota 18 foto.
+5. Admin memilih foto melalui tombol Kelola album tamu. Foto yang disetujui muncul pada bagian Momen dari Tamu di undangan.
 
-1. **Undangan Digital Utama (`index.html`)**:
-   - Halaman utama ketika tamu membuka alamat website (`https://portalkimia.github.io/invitation/` atau `?code=G001&to=Nama%20Tamu`).
-   - Tampilan mobile-first responsif, elegan & bernuansa pernikahan (cream/gold/vintage floral).
-   - **Check-in Digital Pass**: Barcode/QR Code unik per tamu (`qrcodejs`) yang dapat langsung disimpan/diunduh tamu untuk discan di meja resepsi.
-   - **Hitung Mundur Dinamis**: Countdown waktu acara yang tersinkronisasi otomatis dari database Google Sheets / `config.js`.
-   - **Konfirmasi Kehadiran (RSVP)**: Status kehadiran, jumlah tamu (pax), dan ucapan/doa restu yang tersinkronisasi langsung ke Google Sheets.
-   - **Amplop Digital**: Salin nomor rekening/e-wallet 1-klik dengan konfirmasi toast.
-   - **Music Player Otomatis**: Memutar background music pernikahan secara otomatis atau via floating play/pause button.
-   - **Redirect Alias (`invitation.html`)**: Memastikan tautan lama yang menyertakan `invitation.html` otomatis diteruskan ke `index.html` dengan parameter query utuh.
+## Fitur
 
-2. **18-Shot Retro Pocket Camera (`pocket-cam.html`) - Smart Attendance Lock**:
-   - Kamera sekali pakai vintage retro 35mm (desain disposable camera klasik).
-   - **Smart Dynamic Lock (Opsi A)**: Tamu belum bisa mengambil foto sebelum hadir di acara resepsi (mencegah kuota habis terpakai sebelum hari H). Kunci otomatis terbuka setelah usher melakukan check-in di meja resepsi.
-   - Membatasi kuota maksimal 18 jepretan foto per tamu dengan auto-rollback kuota jika terjadi gangguan sinyal/koneksi saat upload.
-   - Mengunggah foto ke Google Drive sebagai `[Nama_Tamu]_Moment_[01..18].jpg` dan mencatat riwayat di tab `PocketLogs`.
-   - Menampilkan rol film galeri foto sesi tersebut (`renderReel`).
+- Undangan responsif: profil mempelai, jadwal, lokasi, kisah cinta, galeri, musik, RSVP, ucapan, amplop digital, dan alamat hadiah.
+- Kalender Google dan unduhan .ics mengikuti tanggal/jam resepsi dengan pengenalan WIB/WITA/WIT. Jika rentang jam tidak tersedia, digunakan waktu countdown dan durasi tiga jam.
+- Daftar tamu: impor CSV/teks, normalisasi nomor Indonesia, pemeriksaan kode/nomor duplikat, edit nama/nomor/kelompok, filter kelompok, dan ekspor semua tamu ke CSV.
+- Status WhatsApp: belum dibuka, WhatsApp dibuka, dan terkirim dikonfirmasi admin. Membuka WhatsApp tidak otomatis mengirim pesan. Status terkirim dapat dibatalkan.
+- Jumlah undangan check-in, orang menurut RSVP, dan orang yang benar-benar datang dicatat terpisah. Admin dapat memperbaiki jumlah aktual melalui edit tamu.
+- Pemindaian QR berulang tidak menimpa jumlah orang maupun waktu check-in pertama. Percobaan ulang memakai ID permintaan yang sama.
+- Meja resepsi menyimpan check-in dan foto dalam antrean IndexedDB. Kehadiran disinkronkan terlebih dahulu; foto diproses terpisah. Panel menampilkan antrean dan kegagalan sinkronisasi.
+- Pocket Camera memeriksa kuota dan kehadiran di server. Foto/antrean disimpan di IndexedDB, upload diulang dengan ID foto yang sama, dan setiap foto dapat diunduh ke HP.
+- Album bersama: foto baru menunggu persetujuan. Admin dapat menayangkan atau menyembunyikan foto. Album menampilkan hingga 500 foto terbaru sesuai status.
 
-3. **Meja Resepsi Usher Scanner (`reception.html`)**:
-   - Akses via link terdedikasi dan dilindungi PIN keamanan resepsi (`5678`), tersimpan aman di browser dengan auto re-verifikasi jika PIN diganti di database.
-   - **Barcode / QR Scanner**: Pemindaian kamera langsung via `html5-qrcode` (dengan tombol ganti kamera depan/belakang) + pencarian kode manual.
-   - **Check-in Otomatis Tamu Walk-in**: Mendukung pengeditan nama tamu langsung di layar; jika tamu belum terdaftar di database, sistem langsung otomatis mendaftarkannya ke sheet `Guests`.
-   - **WebRTC Check-in Camera**: Mengambil foto kedatangan tamu (dengan tombol pembalik kamera) dan upload non-blocking ke Google Drive.
-   - **QR Pocket Camera**: Menampilkan QR Code instan berparameter unlock untuk di-scan oleh tamu begitu check-in berhasil.
+## Memasang atau memperbarui deployment
 
-4. **Admin Dashboard & WhatsApp Sender (`dashboard.html`)**:
-   - Akses via link terdedikasi dan dilindungi PIN keamanan admin (`1234`), tersimpan aman di browser dengan auto re-verifikasi jika PIN diganti di database.
-   - Ringkasan live statistik: Total Tamu, Undangan Terkirim, Tamu Hadir, Pax RSVP, dan Foto Drive.
-   - **Tab Pengaturan Acara**: Form lengkap untuk mengubah nama pengantin, tanggal akad & resepsi, nomor rekening amplop digital, hingga PIN admin/resepsi tanpa perlu mengedit kode HTML/JS. Data tersimpan ke tab `Settings` di Google Sheets.
-   - **Import Tamu Massal**: Input teks/CSV fleksibel dengan auto-generate kode tamu `G001..G999`.
-   - **1-Click WhatsApp Sender**: Generator pesan undangan personal dengan template dinamis dan pelacakan status pengiriman di Google Sheets.
+Frontend dan backend versi ini perlu dipasang bersama. Perubahan di Desktop belum memperbarui situs yang sudah terbit.
 
----
+1. Siapkan Google Spreadsheet dan dua folder Drive: foto kedatangan dan foto Pocket Camera.
+2. Buka Apps Script dari Spreadsheet, lalu gunakan seluruh isi backend/Code.gs. Backend tetap berada dalam satu berkas.
+3. Isi CONFIG.CHECKIN_FOLDER_ID dan CONFIG.POCKET_FOLDER_ID. Untuk script yang terikat ke Spreadsheet, SPREADSHEET_ID boleh kosong.
+4. Jalankan setupDatabase dari editor Apps Script untuk menyiapkan/merapikan tab. Fungsi ini juga tersedia melalui menu Spreadsheet dan tombol dashboard setelah login.
+5. Buat/perbarui deployment Web app, dijalankan sebagai pemilik, dengan akses Anyone. Untuk deployment lama: Manage deployments → Edit → New version → Deploy agar URL /exec tetap sama.
+6. Isi GAS_WEB_APP_URL di assets/js/config.js. Publikasikan halaman HTML dan seluruh folder assets ke hosting, misalnya GitHub Pages.
+7. Masuk ke dashboard dan atur informasi acara serta PIN. PIN awal backend: admin 1234 dan resepsi 5678. PIN aktif selanjutnya berada di tab Settings.
 
-## 📁 Struktur Berkas
+Kolom tambahan berada di sebelah kanan data lama:
 
+| Tab | Kolom tambahan |
+| --- | --- |
+| Guests | L actualPax, M checkInRequestId, N waOpenedAt, O group |
+| PocketLogs | F requestId, G moderation, H uploadStatus, I leaseUntil |
+
+Jangan menggeser kolom lama atau memakai kolom tambahan untuk data lain. Check-in lama tanpa jumlah aktual ditampilkan sebagai jumlah belum tercatat. Angka RSVP tidak otomatis dianggap sebagai jumlah orang hadir. Foto lama menunggu persetujuan sebelum ditampilkan. Status WhatsApp lama dipertahankan dan dapat dikoreksi melalui pembatalan status.
+
+## Login dan akses
+
+- PIN diperiksa backend. Browser menyimpan token sesi bertanda tangan selama 12 jam; PIN tidak disimpan sebagai sesi browser atau dikirim dalam pengaturan publik.
+- Pengaturan, impor/edit tamu, konfirmasi WhatsApp, dan moderasi album memerlukan sesi admin. Check-in dan foto kedatangan memerlukan sesi admin/resepsi.
+- Mengubah PIN membatalkan token lama untuk peran tersebut pada permintaan berikutnya. Dashboard yang mengubah PIN admin mendapat token pengganti.
+- Kolom PIN kosong mempertahankan PIN. PIN baru terdiri atas 4–12 angka.
+- Tautan/kode pribadi diperlukan untuk RSVP dan kamera. Halaman kamera umum menyediakan input kode tanpa memublikasikan daftar tamu dan nomor HP.
+
+## Saat koneksi terputus
+
+Masuk dan muat daftar tamu ketika masih tersambung. Selama halaman resepsi sudah terbuka, petugas dapat terus mencatat ketika jaringan terputus. Sesi resepsi yang masih berlaku dapat memakai daftar lokal; login baru tetap memerlukan koneksi.
+
+Status Tercatat di perangkat berarti kehadiran belum tersimpan di server. QR kamera tersedia setelah check-in tersinkron. Antrean dicoba lagi saat jaringan pulih, secara berkala, atau lewat Sinkronkan sekarang. Login kembali jika sesi habis/PIN berubah; antrean tetap tersimpan.
+
+Penyimpanan lokal terikat pada browser, profil, dan alamat situs. Jangan menghapus data browser ketika masih ada antrean. Membuka situs pertama kali tanpa koneksi belum didukung. Kamera memerlukan HTTPS/localhost dan izin kamera.
+
+## Impor tamu
+
+Contoh CSV:
+
+```csv
+Nama,No_HP,Kategori,Kelompok
+Budi Santoso,081234567890,VIP,Teman kantor
+"Ayu, dr.",081234567891,Reguler,Keluarga wanita
 ```
-wedding-app/
-├── assets/
-│   ├── images/             # Folder foto cover, pengantin, dan background
-│   ├── audio/              # Folder lagu pernikahan (.mp3)
-│   ├── js/
-│   │   ├── config.js       # Konfigurasi acara, PIN, rekening, template WA, dan GAS URL
-│   │   └── api.js          # CORS fetch, normalisasi HP, kompresi canvas, audio Web API, PIN auth
-│   └── css/                # Custom CSS styling
-├── backend/
-│   └── Code.gs             # Unified Google Apps Script (Setup DB, LockService, DriveApp, Settings)
-├── index.html              # Undangan Digital Utama Tamu (Ticket QR, Countdown, RSVP, Amplop Digital)
-├── invitation.html         # Redirect Helper (Mengalihkan link lama invitation.html ke index.html)
-├── pocket-cam.html         # 18-Shot Retro Pocket Camera dengan Smart Attendance Lock (Opsi A)
-├── reception.html          # Meja Resepsi Usher Scanner & Walk-in Check-in Foto
-├── dashboard.html          # Admin Portal, Pengaturan Acara Dinamis, & 1-Click WhatsApp Sender
-└── README.md
+
+Tanpa judul kolom: Nama,Nomor_HP,Kategori,Kelompok. Kode dapat disertakan sebagai kolom pertama: G001,Nama,Nomor_HP,Kategori,Kelompok. Kategori: Reguler, VIP, VVIP, Keluarga; kelompok bebas. Tanda kutip CSV, titik koma, dan tab didukung. CSV hasil ekspor dapat diimpor lagi untuk data identitas; impor tidak menimpa RSVP atau kehadiran.
+
+## Kustomisasi
+
+Tab pengaturan dashboard mengubah acara, rekening, foto, cerita, galeri, musik, dan PIN. Konfigurasi dasar/URL backend berada di assets/js/config.js. Media lokal berada di assets/images/ dan assets/audio/, lalu dirujuk melalui path relatif atau URL media.
+
+Musik mulai diputar setelah Buka Undangan ditekan. Akses foto dan kapasitas upload mengikuti izin Drive serta kuota akun Google.
+
+## Pemeriksaan lokal
+
+```powershell
+node tools/verify-backend.cjs
 ```
 
----
-
-## 🚀 Panduan Setup & Deployment (100% Gratis)
-
-### Langkah 1: Siapkan Google Drive & Google Sheets
-1. Buka [Google Drive](https://drive.google.com).
-2. Buat 1 Google Spreadsheet baru, beri nama misalnya: `Database Undangan Romeo Juliet`.
-3. Buat 2 Folder baru di Google Drive Anda:
-   - Folder 1: `Foto Check-in Tamu` (Salin Folder ID dari URL di browser)
-   - Folder 2: `Foto Pocket Cam Tamu` (Salin Folder ID dari URL di browser)
-
-### Langkah 2: Pasang Google Apps Script
-1. Di Google Spreadsheet Anda, klik menu **Extensions (Ekstensi)** > **Apps Script**.
-2. Hapus seluruh isi default, lalu salin dan tempel kode dari berkas [`backend/Code.gs`](file:///C:/Users/Tito/.gemini/antigravity/scratch/wedding-app/backend/Code.gs).
-3. Di bagian atas `backend/Code.gs`, isi `CONFIG`:
-   ```javascript
-   const CONFIG = {
-     CHECKIN_FOLDER_ID: 'ID_FOLDER_CHECKIN_ANDA',
-     POCKET_FOLDER_ID: 'ID_FOLDER_POCKET_ANDA',
-     SPREADSHEET_ID: '' // Kosongkan jika script dibuat dari Extensions Spreadsheet
-   };
-   ```
-4. Klik tombol **Deploy (Terapkan)** > **New deployment (Penerapan baru)**.
-   - Pilih jenis: **Web app (Aplikasi Web)**.
-   - Execute as: **Me (Saya)**.
-   - Who has access: **Anyone (Siapa saja)**.
-5. Klik **Deploy**, beri izin otorisasi Google, lalu salin **Web app URL** (berakhiran `/exec`).
-
-### Langkah 3: Konfigurasi Frontend
-1. Buka berkas [`assets/js/config.js`](file:///C:/Users/Tito/Desktop/wedding-app/assets/js/config.js).
-2. URL Web App Apps Script dan GitHub Pages Anda sudah terpasang:
-   ```javascript
-   GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyu6oRsL1CbppQHf-v2EPoJcjaivYKtdQDHyju0HO5TyODo1GPuPYTg0Ts4dwLvCGX_-A/exec',
-   BASE_INVITE_URL: 'https://portalkimia.github.io/invitation/index.html',
-   ```
-3. Sesuaikan nama kedua mempelai, tanggal acara, rekening bank, alamat kado jika diperlukan.
-
-### Langkah 4: Publikasikan ke GitHub Pages
-1. Push atau upload seluruh berkas dari folder `C:\Users\Tito\Desktop\wedding-app` ke repositori GitHub `portalkimia/invitation`.
-2. Di repositori GitHub Anda, buka **Settings** > **Pages**.
-3. Di bagian **Build and deployment** > **Source**, pilih `Deploy from a branch` (`main` / `/(root)`).
-4. Klik **Save**. Undangan Anda dapat diakses di:
-   `https://portalkimia.github.io/invitation/index.html`
-
----
-
-## 🎨 Panduan Kustomisasi Foto, Background & Lagu
-
-Semua pengaturan media dapat diatur langsung di berkas [`assets/js/config.js`](file:///C:/Users/Tito/Desktop/wedding-app/assets/js/config.js):
-
-### 1. Memasukkan Foto (Cover & Profil Pengantin)
-- Siapkan foto berformat `.jpg`, `.jpeg`, atau `.png` (rekomendasi rasio 1:1 persegi atau kompresi ringan).
-- Masukkan file foto ke folder: `assets/images/`
-  - Contoh: `assets/images/cover.jpg` (Foto prewedding sampul cover)
-  - Contoh: `assets/images/groom.jpg` (Foto mempelai pria)
-  - Contoh: `assets/images/bride.jpg` (Foto mempelai wanita)
-- Buka `assets/js/config.js`, lalu isi jalurnya pada objek `couple`:
-  ```javascript
-  couple: {
-    coverPhoto: 'assets/images/cover.jpg',
-    groom: {
-      name: 'Romeo Montague',
-      photo: 'assets/images/groom.jpg',
-      ...
-    },
-    bride: {
-      name: 'Juliet Capulet',
-      photo: 'assets/images/bride.jpg',
-      ...
-    }
-  }
-  ```
-  *(Anda juga bisa menggunakan link foto online langsung, misalnya link Google Drive publik atau Unsplash/Imgur).*
-
-### 2. Memasukkan Background (Latar Belakang Undangan)
-- Masukkan gambar background/motif tekstur ke folder `assets/images/bg.jpg`.
-- Buka `assets/js/config.js` dan isi:
-  ```javascript
-  event: {
-    ...
-    backgroundImage: 'assets/images/bg.jpg',
-  }
-  ```
-
-### 3. Memasukkan Lagu & Musik yang Otomatis Diputar
-- **Autoplay Browser Modern**: Sesuai kebijakan browser modern (Google Chrome, Safari iOS, Samsung Internet, Edge), audio dilarang berputar otomatis dengan suara keras sebelum pengunjung melakukan interaksi pertama (*user gesture*).
-- Oleh karena itu, aplikasi ini secara pintar memutar lagu tepat saat tamu mengklik tombol **"Buka Undangan"** di halaman sampul (*cover screen*). Begitu amplop terbuka, lagu otomatis mengalun dengan mulus tanpa terblokir oleh browser.
-- **Cara Mengganti Lagu**:
-  - Salin berkas musik `.mp3` ke folder `assets/audio/wedding-song.mp3` (atau gunakan link URL MP3 online langsung).
-  - Buka `assets/js/config.js`, atur bagian `music`:
-    ```javascript
-    music: {
-      audioUrl: 'assets/audio/wedding-song.mp3',
-      title: 'Judul Lagu Pernikahan'
-    }
-    ```
-  - Tamu juga dapat menjeda (*pause*) atau memutar kembali musik kapan saja melalui tombol melayang di pojok kanan bawah.
-
----
-
-## 🔒 Sistem Keamanan PIN & Auto-Login
-
-Aplikasi ini menggunakan sistem **Persistent Auto-Login dengan Validasi Database**:
-1. **Auto-Login Cepat**: Begitu pengguna berhasil memasukkan PIN (baik di `dashboard.html` maupun `reception.html`), PIN akan tersimpan di browser sehingga di kemudian hari dapat langsung masuk tanpa harus mengetik PIN berulang kali.
-2. **Keamanan Real-Time (Ubah PIN di Database)**:
-   - Di Google Sheets, terdapat tab **`Settings`** dengan isi:
-     - `ADMIN_PIN`: `1234` (PIN akses Dashboard)
-     - `RECEPTION_PIN`: `5678` (PIN akses Meja Resepsi)
-   - Jika Anda mengubah PIN di tab `Settings` Google Sheets tersebut (misalnya diubah menjadi `8888`), maka sesi perangkat yang menyimpan PIN lama otomatis ditolak/dihapus, dan pengguna akan diminta memasukkan PIN yang baru.
+Pemeriksaan memakai Sheets/Drive simulasi dalam memori. Tidak menghubungi backend aktif atau mengubah data acara. Mencakup akses per peran, kolom lama/baru, impor duplikat, RSVP/kehadiran, check-in berulang, upload yang diulang, kuota kamera, album, dan perubahan PIN.

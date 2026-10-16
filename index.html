@@ -675,6 +675,7 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/improvements.js"></script>
   <script>
     function safeCreateIcons() {
       try {
@@ -768,7 +769,7 @@
 
     // 1. Parse URL Parameters (?code=G001&to=Nama%20Tamu)
     const urlParams = new URLSearchParams(window.location.search);
-    const guestCodeParam = (urlParams.get('code') || 'G001').toUpperCase();
+    const guestCodeParam = (urlParams.get('code') || WeddingApi.getGuestSession()?.code || '').toUpperCase();
     const guestNameParam = urlParams.get('to') || 'Tamu Undangan';
 
     // Store in LocalStorage for seamless pocket-cam recognition
@@ -1107,7 +1108,7 @@
 
     // Generate Scannable QR Code
     const qrContainer = document.getElementById('qrcode');
-    if (qrContainer && typeof QRCode !== 'undefined') {
+    if (qrContainer && guestCodeParam && typeof QRCode !== 'undefined') {
       qrContainer.innerHTML = '';
       try {
         new QRCode(qrContainer, {
@@ -1379,6 +1380,7 @@
       const status = document.querySelector('input[name="rsvpStatus"]:checked').value;
       const pax = document.getElementById('rsvp-pax').value;
       const wishes = document.getElementById('rsvp-wishes').value;
+      if (!guestCodeParam) { alert('Buka tautan undangan pribadi yang berisi kode tamu untuk mengirim RSVP.'); return; }
       const guestName = document.getElementById('rsvp-name-input').value;
 
       btnSubmitRsvp.disabled = true;
@@ -1522,8 +1524,7 @@
 
     // ==================== POCKET CAMERA SMART DYNAMIC LOCK (OPTION A) ====================
     const unlockKey = 'wedding_cam_unlocked_' + guestCodeParam;
-    const isLocalUnlocked = (typeof localStorage !== 'undefined') && localStorage.getItem(unlockKey) === 'true';
-    const isParamUnlocked = urlParams.get('unlock') === 'true';
+
 
     function setPocketCamUnlockedUI() {
       const lockedSection = document.getElementById('pocket-cam-locked');
@@ -1533,18 +1534,12 @@
 
       const camBtn = document.getElementById('btn-open-pocket-cam');
       if (camBtn) {
-        camBtn.href = `pocket-cam.html?code=${encodeURIComponent(guestCodeParam)}&to=${encodeURIComponent(guestNameParam)}&unlock=true`;
+        camBtn.href = `pocket-cam.html?code=${encodeURIComponent(guestCodeParam)}&to=${encodeURIComponent(guestNameParam)}`;
       }
       lucide.createIcons();
     }
 
-    if (isLocalUnlocked || isParamUnlocked) {
-      if (typeof localStorage !== 'undefined') localStorage.setItem(unlockKey, 'true');
-      setPocketCamUnlockedUI();
-    } else {
-      // Check status with backend automatically without error alert
-      checkUnlockStatus(false);
-    }
+    if (guestCodeParam) checkUnlockStatus(false);
 
     async function checkUnlockStatus(showToastOnFail = true) {
       const icon = document.getElementById('check-unlock-icon');
@@ -1580,5 +1575,6 @@
     // Re-render Lucide icons after dynamic injection
     setTimeout(() => lucide.createIcons(), 300);
   </script>
+  <script src="assets/js/guest-improvements.js"></script>
 </body>
 </html>

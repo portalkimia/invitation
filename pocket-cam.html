@@ -108,7 +108,7 @@
         <i data-lucide="camera" class="w-7 h-7"></i>
       </div>
       <h2 class="text-xl font-bold text-white mb-1">Identifikasi Tamu</h2>
-      <p class="text-xs text-stone-400 mb-4">Pilih nama Anda untuk mulai menggunakan 18 jepretan Pocket Camera</p>
+      <p class="text-xs text-stone-400 mb-4">Masukkan kode undangan untuk menggunakan Pocket Camera</p>
 
       <div class="space-y-3 text-left">
         <div>
@@ -210,8 +210,8 @@
             <i data-lucide="check-check" class="w-6 h-6"></i>
           </div>
           <h3 class="font-marker text-2xl text-amber-400 mb-1">FILM HABIS!</h3>
-          <p class="text-xs text-stone-300 leading-relaxed mb-4">
-            Semua 18 jepretan Anda telah diunggah ke Google Drive Romeo & Juliet. Terima kasih telah mengabadikan momen ini!
+          <p id="exhausted-subtext" class="text-xs text-stone-300 leading-relaxed mb-4">
+            Semua 18 jepretan Anda telah diunggah ke Google Drive. Terima kasih telah mengabadikan momen ini!
           </p>
           <button id="btn-view-roll-completed" class="py-2 px-4 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs">
             Lihat Roll Foto Saya
@@ -285,6 +285,7 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/improvements.js"></script>
   <script>
     lucide.createIcons();
 
@@ -295,8 +296,42 @@
     let cameraStream = null;
     let currentFacing = 'environment'; // environment or user
     const localReelPhotos = []; // { shotNumber, dataUrl, timestamp }
+    let uploadQueue = []; // { id, shotNumber, code, name, photoBase64, mimeType, retries, timestamp }
+    let isQueueProcessing = false;
+    let isCapturing = false;
     let coupleShortGroom = 'Romeo';
     let coupleShortBride = 'Juliet';
+
+    // Offline & Session Persistence Helpers
+    let cameraSaveChain = Promise.resolve();
+    async function loadCameraState() {
+      const id = 'camera_' + currentGuest.code;
+      const saved = await WeddingStore.get(id);
+      if (saved) {
+        uploadQueue = saved.queue || [];
+        localReelPhotos.splice(0, localReelPhotos.length, ...(saved.reel || []));
+      } else {
+        try {
+          uploadQueue = JSON.parse(localStorage.getItem('wedding_cam_queue_' + currentGuest.code) || '[]');
+          localReelPhotos.splice(0, localReelPhotos.length, ...JSON.parse(localStorage.getItem('wedding_cam_reel_' + currentGuest.code) || '[]'));
+        } catch (_) { uploadQueue = []; localReelPhotos.length = 0; }
+      }
+      for (const item of uploadQueue) {
+        if (!item.id) item.id = WeddingApi.newId('shot');
+        const photo = localReelPhotos.find(photo => photo.shotNumber === item.shotNumber);
+        if (photo && !photo.id) photo.id = item.id;
+      }
+      await persistCameraState();
+      localStorage.removeItem('wedding_cam_queue_' + currentGuest.code);
+      localStorage.removeItem('wedding_cam_reel_' + currentGuest.code);
+    }
+    function persistCameraState() {
+      const record = { id: 'camera_' + currentGuest.code, queue: JSON.parse(JSON.stringify(uploadQueue)), reel: JSON.parse(JSON.stringify(localReelPhotos)) };
+      cameraSaveChain = cameraSaveChain.catch(() => {}).then(() => WeddingStore.put(record));
+      return cameraSaveChain;
+    }
+    const saveQueueToStorage = persistCameraState;
+    const saveReelToStorage = persistCameraState;
 
     function syncCoupleSettings(settings) {
       if (!settings) return;
@@ -339,7 +374,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const codeParam = urlParams.get('code');
       const nameParam = urlParams.get('to');
-      const unlockParam = urlParams.get('unlock') === 'true';
+
 
       if (codeParam) {
         currentGuest = { code: codeParam.toUpperCase(), name: nameParam || 'Tamu Undangan' };
@@ -348,12 +383,6 @@
         const session = WeddingApi.getGuestSession();
         if (session && session.code) {
           currentGuest = session;
-        }
-      }
-
-      if (currentGuest && unlockParam) {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('wedding_cam_unlocked_' + currentGuest.code, 'true');
         }
       }
 
@@ -366,46 +395,9 @@
 
     // Modal for selecting guest when opening generic standee QR
     async function showGuestSelectionModal() {
-      guestIdModal.classList.remove('hidden');
-      guestIdModal.classList.add('flex');
-
-      const resultsContainer = document.getElementById('guest-search-results');
-      try {
-        const res = await WeddingApi.postToGas('listGuests');
-        let guests = res.guests || [];
-        if (guests.length === 0 && res.mock) {
-          guests = [
-            { code: 'G001', name: 'Budi Santoso' },
-            { code: 'G002', name: 'Siti Rahma' },
-            { code: 'G003', name: 'dr. Andi Wijaya' }
-          ];
-        }
-
-        renderGuestSearchResults(guests);
-
-        document.getElementById('guest-search-input').addEventListener('input', (e) => {
-          const q = e.target.value.toLowerCase().trim();
-          const filtered = guests.filter(g => (g.name || '').toLowerCase().includes(q) || (g.code || '').toLowerCase().includes(q));
-          renderGuestSearchResults(filtered);
-        });
-      } catch (e) {
-        resultsContainer.innerHTML = `<p class="text-xs text-rose-400 py-2">Gagal memuat daftar tamu.</p>`;
-      }
-    }
-
-    function renderGuestSearchResults(list) {
-      const resultsContainer = document.getElementById('guest-search-results');
-      if (list.length === 0) {
-        resultsContainer.innerHTML = `<p class="text-xs text-stone-500 py-2 text-center">Nama tidak ditemukan.</p>`;
-        return;
-      }
-
-      resultsContainer.innerHTML = list.slice(0, 15).map(g => `
-        <button onclick="selectGuest('${g.code}', '${encodeURIComponent(g.name)}')" class="w-full text-left py-2 px-3 rounded-lg hover:bg-stone-800 flex items-center justify-between text-xs text-stone-200">
-          <span class="font-semibold">${g.name}</span>
-          <span class="font-mono text-[10px] text-amber-400 bg-stone-900 px-1.5 py-0.5 rounded border border-stone-700">${g.code}</span>
-        </button>
-      `).join('');
+      guestIdModal.classList.remove('hidden'); guestIdModal.classList.add('flex');
+      document.getElementById('guest-search-input').parentElement.hidden = true;
+      document.getElementById('guest-search-results').textContent = 'Buka tautan undangan pribadi atau masukkan kode undangan Anda di bawah.';
     }
 
     window.selectGuest = function(code, rawName) {
@@ -433,39 +425,22 @@
 
     // Option A: Verification & Lock Enforcement
     async function verifyGuestUnlockAndSetup() {
-      const unlockKey = 'wedding_cam_unlocked_' + currentGuest.code;
-      const isLocallyUnlocked = (typeof localStorage !== 'undefined') && localStorage.getItem(unlockKey) === 'true';
-
-      if (isLocallyUnlocked) {
-        hideCamLockModal();
-        setupGuestCamera();
-        return;
-      }
-
-      // Check attendance status in Google Sheets
-      const recheckIcon = document.getElementById('recheck-cam-icon');
-      if (recheckIcon) recheckIcon.classList.add('animate-spin');
-
+      const icon = document.getElementById('recheck-cam-icon'); icon?.classList.add('animate-spin');
       try {
-        const res = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
-        if (res && res.success && res.guest) {
-          if (res.guest.attendedAt) {
-            if (typeof localStorage !== 'undefined') {
-              localStorage.setItem(unlockKey, 'true');
-            }
-            hideCamLockModal();
-            setupGuestCamera(res.guest.pocketPhotoCount);
-            return;
-          }
+        const result = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
+        if (result.success && result.guest?.attendedAt) {
+          currentGuest.name = result.guest.name;
+          WeddingApi.saveGuestSession(currentGuest.code, currentGuest.name);
+          await WeddingStore.put({ id: 'attendance_' + currentGuest.code, verified: true, count: result.guest.pocketPhotoCount || 0 });
+          hideCamLockModal(); await setupGuestCamera(result.guest.pocketPhotoCount); return;
         }
-      } catch (err) {
-        console.warn('Verify lock error:', err);
-      } finally {
-        if (recheckIcon) recheckIcon.classList.remove('animate-spin');
-      }
-
-      // Not attended yet -> Block with Cam Lock Modal
-      showCamLockModal();
+        // An attendance previously verified by the server can be used during a connection loss.
+        const cached = result.networkError ? await WeddingStore.get('attendance_' + currentGuest.code) : null;
+        if (cached?.verified) { hideCamLockModal(); await setupGuestCamera(cached.count); return; }
+        showCamLockModal();
+      } catch (error) {
+        stopCamera(); alert('Kamera belum siap: ' + error.message); showCamLockModal();
+      } finally { icon?.classList.remove('animate-spin'); }
     }
 
     function showCamLockModal() {
@@ -493,13 +468,17 @@
     async function setupGuestCamera(preloadedCount = null) {
       headerGuestInfo.textContent = `${currentGuest.name} (${currentGuest.code})`;
 
+      // Load cached offline reel & pending upload queue from storage
+      await loadCameraState();
+      renderReel();
+
       if (preloadedCount !== null && !isNaN(preloadedCount)) {
         pocketPhotoCount = Number(preloadedCount);
       } else {
         // Fetch latest guest count from GAS
         try {
           const res = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
-          if (res.success && res.guest) {
+          if (res && res.success && res.guest) {
             pocketPhotoCount = Number(res.guest.pocketPhotoCount || 0);
           }
         } catch (e) {
@@ -507,8 +486,17 @@
         }
       }
 
+      // If local reel has more photos than server knows about, adopt the higher count
+      const totalLocalShots = Math.max(localReelPhotos.length, pocketPhotoCount, ...localReelPhotos.map(photo => Number(photo.shotNumber) || 0));
+      pocketPhotoCount = Math.min(MAX_SHOTS, totalLocalShots);
+
       updateFilmCounter();
       startWebRtcCamera();
+
+      // If there are pending un-uploaded photos in queue, resume background processing immediately
+      if (uploadQueue.length > 0) {
+        processUploadQueue();
+      }
     }
 
     function updateFilmCounter() {
@@ -522,6 +510,7 @@
         btnShutter.classList.add('opacity-40', 'cursor-not-allowed');
         filmExhaustedOverlay.classList.remove('hidden');
         filmExhaustedOverlay.classList.add('flex');
+        updateExhaustedSubtext();
       } else {
         btnShutter.disabled = false;
         btnShutter.classList.remove('opacity-40', 'cursor-not-allowed');
@@ -561,125 +550,229 @@
       startWebRtcCamera();
     });
 
-    // 5. Shutter Action & Upload Flow
-    let isUploading = false;
+    // 5. Shutter Action & Background Upload Queue Flow
     btnShutter.addEventListener('click', async () => {
-      if (pocketPhotoCount >= MAX_SHOTS || isUploading) return;
-
-      // Mechanical sound & Screen Flash
-      WeddingApi.playShutterSound();
-      flashOverlay.classList.remove('screen-flash');
-      void flashOverlay.offsetWidth; // Trigger reflow
-      flashOverlay.classList.add('screen-flash');
-
-      // Capture frame to canvas
-      camCanvas.width = camVideo.videoWidth || 1280;
-      camCanvas.height = camVideo.videoHeight || 960;
-      const ctx = camCanvas.getContext('2d');
-      ctx.drawImage(camVideo, 0, 0, camCanvas.width, camCanvas.height);
-
-      // ===== Retro 35mm Date Stamp & Dynamic Couple Watermark =====
-      const w = camCanvas.width;
-      const h = camCanvas.height;
-      const barH = Math.max(48, Math.round(h * 0.085));
-
-      // 1. Subtle dark gradient bar at bottom for high legibility
-      const grad = ctx.createLinearGradient(0, h - barH, 0, h);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.45)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, h - barH, w, barH);
-
-      // 2. Retro 35mm Quartz Date Stamp (Classic Orange/Amber LED glow) on bottom-right
-      const now = new Date();
-      const yy = String(now.getFullYear()).slice(-2);
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const dateStamp = `'${yy} ${mm} ${dd}`;
-
-      const dateFontSize = Math.max(16, Math.round(w * 0.024));
-      ctx.save();
-      ctx.font = `bold ${dateFontSize}px "Courier New", monospace`;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.shadowColor = 'rgba(255, 140, 0, 0.85)';
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = '#FFA000';
-      ctx.fillText(dateStamp, w - Math.round(w * 0.035), h - Math.round(barH * 0.28));
-      ctx.restore();
-
-      // 3. Dynamic Couple & Guest Watermark on bottom-left
-      const guestNameStr = (currentGuest && currentGuest.name) ? currentGuest.name : 'Tamu Undangan';
-      const watermarkText = `The Wedding of ${coupleShortGroom} & ${coupleShortBride} • Shot by ${guestNameStr}`;
-      const watermarkFontSize = Math.max(12, Math.round(w * 0.016));
-      ctx.save();
-      ctx.font = `600 ${watermarkFontSize}px sans-serif`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      ctx.shadowBlur = 4;
-      ctx.fillText(watermarkText, Math.round(w * 0.035), h - Math.round(barH * 0.28));
-      ctx.restore();
-
-      const rawDataUrl = camCanvas.toDataURL('image/jpeg', 0.85);
-
-      // Decrement shot counter immediately (Optimistic UI)
-      pocketPhotoCount++;
-      updateFilmCounter();
-
-      // Compress JPEG
-      const compressedDataUrl = await WeddingApi.compressImage(rawDataUrl, 1280, 0.75);
-
-      // Save to local reel
-      localReelPhotos.unshift({
-        shotNumber: pocketPhotoCount,
-        dataUrl: compressedDataUrl,
-        timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-      });
-      renderReel();
-
-      // Upload in background to Google Drive
-      uploadShotToDrive(compressedDataUrl, pocketPhotoCount);
-    });
-
-    async function uploadShotToDrive(photoBase64, shotNum) {
-      isUploading = true;
-      uploadStatusText.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Mengunggah foto #${shotNum} ke Drive...`;
+      if (pocketPhotoCount >= MAX_SHOTS || isCapturing) return;
+      if (!cameraStream || camVideo.readyState < 2 || !camVideo.videoWidth) {
+        uploadStatusText.textContent = 'Kamera belum siap. Izinkan akses kamera dan tunggu gambar muncul.';
+        return;
+      }
+      isCapturing = true;
 
       try {
-        const payload = {
-          code: currentGuest.code,
-          name: (currentGuest && currentGuest.name) ? currentGuest.name : '',
-          photoBase64: photoBase64,
-          mimeType: 'image/jpeg'
-        };
+        // Mechanical sound & Screen Flash
+        WeddingApi.playShutterSound();
+        flashOverlay.classList.remove('screen-flash');
+        void flashOverlay.offsetWidth; // Trigger reflow
+        flashOverlay.classList.add('screen-flash');
 
-        const res = await WeddingApi.postToGas('uploadPocketPhoto', payload);
-        if (res.success || res.mock) {
-          uploadStatusText.innerHTML = `Foto #${shotNum} tersimpan di album Drive!`;
-        } else {
-          // Failure: roll back quota and remove optimistic photo from local reel
-          if (pocketPhotoCount > 0) pocketPhotoCount--;
-          localReelPhotos.shift();
-          updateFilmCounter();
-          renderReel();
-          const reason = res && res.error ? ` (${res.error})` : '';
-          uploadStatusText.innerHTML = `<span class="text-rose-400">Gagal mengunggah foto #${shotNum}${reason}. Kuota dikembalikan, silakan coba lagi.</span>`;
+        // Capture frame to canvas
+        camCanvas.width = camVideo.videoWidth || 1280;
+        camCanvas.height = camVideo.videoHeight || 960;
+        const ctx = camCanvas.getContext('2d');
+        ctx.drawImage(camVideo, 0, 0, camCanvas.width, camCanvas.height);
+
+        // ===== Retro 35mm Date Stamp & Dynamic Couple Watermark =====
+        const w = camCanvas.width;
+        const h = camCanvas.height;
+        const barH = Math.max(48, Math.round(h * 0.085));
+
+        // 1. Subtle dark gradient bar at bottom for high legibility
+        const grad = ctx.createLinearGradient(0, h - barH, 0, h);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.45)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, h - barH, w, barH);
+
+        // 2. Retro 35mm Quartz Date Stamp (Classic Orange/Amber LED glow) on bottom-right
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const dateStamp = `'${yy} ${mm} ${dd}`;
+
+        const dateFontSize = Math.max(16, Math.round(w * 0.024));
+        ctx.save();
+        ctx.font = `bold ${dateFontSize}px "Courier New", monospace`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.shadowColor = 'rgba(255, 140, 0, 0.85)';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#FFA000';
+        ctx.fillText(dateStamp, w - Math.round(w * 0.035), h - Math.round(barH * 0.28));
+        ctx.restore();
+
+        // 3. Dynamic Couple & Guest Watermark on bottom-left
+        const guestNameStr = (currentGuest && currentGuest.name) ? currentGuest.name : 'Tamu Undangan';
+        const watermarkText = `The Wedding of ${coupleShortGroom} & ${coupleShortBride} • Shot by ${guestNameStr}`;
+        const watermarkFontSize = Math.max(12, Math.round(w * 0.016));
+        ctx.save();
+        ctx.font = `600 ${watermarkFontSize}px sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(watermarkText, Math.round(w * 0.035), h - Math.round(barH * 0.28));
+        ctx.restore();
+
+        const rawDataUrl = camCanvas.toDataURL('image/jpeg', 0.85);
+
+        // Capture is confirmed after durable storage succeeds.
+
+        // Compress JPEG (~150KB - 250KB for fast transfer)
+        const compressedDataUrl = await WeddingApi.compressImage(rawDataUrl, 1280, 0.75);
+
+        const id = WeddingApi.newId('shot');
+        pocketPhotoCount++;
+        localReelPhotos.unshift({ id, shotNumber: pocketPhotoCount, dataUrl: compressedDataUrl,
+          timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), uploaded: false });
+        uploadQueue.push({ id, shotNumber: pocketPhotoCount, code: currentGuest.code, name: currentGuest.name,
+          photoBase64: compressedDataUrl, mimeType: 'image/jpeg', retries: 0 });
+        try { await persistCameraState(); }
+        catch (error) {
+          uploadQueue = uploadQueue.filter(item => item.id !== id);
+          localReelPhotos.splice(localReelPhotos.findIndex(photo => photo.id === id), 1);
+          pocketPhotoCount--;
+          WeddingApi.download(compressedDataUrl, 'foto-cadangan.jpg', 'image/jpeg');
+          alert('Penyimpanan perangkat penuh atau tidak tersedia. Simpan foto cadangan yang diunduh sebelum mengambil foto berikutnya.');
+          return;
         }
+        updateFilmCounter(); renderReel();
+
+        // Trigger queue processor in background
+        processUploadQueue();
       } catch (err) {
-        console.error('Upload error:', err);
-        // Network error: roll back quota and remove optimistic photo from local reel
-        if (pocketPhotoCount > 0) pocketPhotoCount--;
-        localReelPhotos.shift();
-        updateFilmCounter();
-        renderReel();
-        uploadStatusText.innerHTML = `<span class="text-rose-400">Koneksi terganggu (${err.message || 'Error'}). Kuota dikembalikan, silakan coba lagi.</span>`;
+        console.error('Capture error:', err);
       } finally {
-        isUploading = false;
+        // Quick 500ms debounce to prevent accidental double-tap while letting user shoot smoothly
+        setTimeout(() => {
+          isCapturing = false;
+        }, 500);
+      }
+    });
+
+    // Background Sequential Queue Worker with Exponential Backoff & Auto-Retry
+    async function processUploadQueue() {
+      if (isQueueProcessing) return;
+      if (!uploadQueue || uploadQueue.length === 0) return;
+
+      isQueueProcessing = true;
+
+      try {
+      while (uploadQueue.length > 0 && navigator.onLine) {
+        const item = uploadQueue.find(item => !item.failed);
+        if (!item) break;
+        const queueTotal = uploadQueue.length;
+
+        // Friendly live status for guest
+        if (queueTotal === 1) {
+          uploadStatusText.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan foto #${item.shotNumber} ke Drive...`;
+        } else {
+          uploadStatusText.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan foto #${item.shotNumber} <span class="text-amber-400 font-mono">(${queueTotal} antrean)</span>...`;
+        }
+        updateExhaustedSubtext();
+        renderReel();
+
+        try {
+          const payload = {
+            code: item.code,
+            name: item.name,
+            photoBase64: item.photoBase64,
+            mimeType: item.mimeType || 'image/jpeg',
+            requestId: item.id
+          };
+
+          const res = await WeddingApi.postToGas('uploadPocketPhoto', payload);
+
+          if (res && (res.success || res.mock)) {
+            // Success! Remove from queue and save state
+            uploadQueue.splice(uploadQueue.indexOf(item), 1);
+            const savedPhoto = localReelPhotos.find(photo => photo.id === item.id);
+            if (savedPhoto) { savedPhoto.uploaded = true; savedPhoto.url = res.photoUrl; }
+            await saveQueueToStorage();
+
+            const remaining = uploadQueue.length;
+            if (remaining === 0) {
+              uploadStatusText.innerHTML = `<span class="text-emerald-400 font-semibold">✨ Foto #${item.shotNumber} & semua rol tersimpan di Drive!</span>`;
+            } else {
+              uploadStatusText.innerHTML = `<span class="text-emerald-400 font-semibold">✅ Foto #${item.shotNumber} tersimpan!</span> <span class="text-stone-400 text-[10px]">(${remaining} antrean tersisa)</span>`;
+            }
+            updateExhaustedSubtext();
+            renderReel();
+
+            // Polite 300ms pause between sequential uploads to avoid Google rate limit spikes
+            await new Promise(r => setTimeout(r, 300));
+          } else {
+            const reason = (res && res.error) ? res.error : 'Server sibuk';
+            item.lastError = reason;
+            if (res?.permanent) { item.failed = true; await saveQueueToStorage(); renderReel(); }
+            else await handleQueueRetry(item, reason);
+          }
+        } catch (err) {
+          await handleQueueRetry(item, err.message || 'Koneksi terganggu');
+        }
+      }
+
+      } finally {
+        isQueueProcessing = false;
+        updateExhaustedSubtext();
+        renderReel();
       }
     }
+
+    async function handleQueueRetry(item, reason) {
+      item.retries = (item.retries || 0) + 1;
+      await saveQueueToStorage();
+
+      const maxRetries = 5;
+      if (item.retries <= maxRetries) {
+        // Exponential backoff + random jitter (e.g. ~2s, ~4s, ~7s, ~11s, max 15s)
+        const base = Math.min(14000, Math.pow(1.7, item.retries) * 1200);
+        const jitter = Math.random() * 800;
+        const delay = Math.round(base + jitter);
+        const sec = Math.max(1, Math.round(delay / 1000));
+
+        uploadStatusText.innerHTML = `<span class="text-amber-300">⚠️ Jaringan padat, mencoba ulang foto #${item.shotNumber} dlm ${sec}s (${item.retries}/${maxRetries})...</span>`;
+        await new Promise(r => setTimeout(r, delay));
+      } else {
+        // Exceeded 5 quick retries: give 20s cooling period but KEEP the photo safe in phone storage!
+        uploadStatusText.innerHTML = `<span class="text-rose-400">⚠️ Foto #${item.shotNumber} aman di HP. Menunggu koneksi lebih lancar...</span>`;
+        await new Promise(r => setTimeout(r, 20000));
+        item.retries = 2; // Soft reset so it will continue attempting
+        await saveQueueToStorage();
+      }
+    }
+
+    function updateExhaustedSubtext() {
+      const exhaustedSubtext = document.getElementById('exhausted-subtext');
+      if (!exhaustedSubtext) return;
+
+      if (uploadQueue.length > 0) {
+        exhaustedSubtext.innerHTML = `18 jepretan Anda selesai! <br><span class="text-amber-400 font-semibold">Sedang menyelaraskan ${uploadQueue.length} foto terakhir ke Drive...</span><br><span class="text-[11px] text-stone-400">Harap jangan menutup browser hingga selesai.</span>`;
+      } else {
+        const coupleText = `${coupleShortGroom} & ${coupleShortBride}`;
+        exhaustedSubtext.innerHTML = `Semua 18 jepretan Anda telah aman tersimpan di Google Drive ${coupleText}. Terima kasih telah mengabadikan momen ini!`;
+      }
+    }
+
+    // Auto-resume sync when internet reconnects
+    window.addEventListener('online', () => {
+      if (uploadQueue.length > 0 && !isQueueProcessing) {
+        uploadStatusText.innerHTML = `<span class="text-emerald-400">Sinyal pulih, melanjutkan sinkronisasi ke Drive...</span>`;
+        processUploadQueue();
+      }
+    });
+
+    // Warn user before leaving page if there are still photos uploading
+    window.addEventListener('beforeunload', (e) => {
+      if (uploadQueue.length > 0) {
+        e.preventDefault();
+        e.returnValue = 'Ada foto yang sedang diunggah ke Google Drive. Yakin ingin keluar?';
+        return e.returnValue;
+      }
+    });
 
     // 6. Film Reel Gallery Modal
     const reelModal = document.getElementById('reel-modal');
@@ -703,21 +796,31 @@
     document.getElementById('btn-back-to-cam').addEventListener('click', closeReel);
 
     function renderReel() {
-      if (localReelPhotos.length === 0) {
-        reelGrid.innerHTML = `<p class="col-span-3 text-center text-xs text-stone-500 py-8">Belum ada foto yang diambil pada sesi ini.</p>`;
-        return;
+      reelGrid.replaceChildren();
+      if (!localReelPhotos.length) { reelGrid.textContent = 'Belum ada foto pada perangkat ini.'; return; }
+      for (const photo of localReelPhotos) {
+        const pending = uploadQueue.find(item => item.id ? item.id === photo.id : item.shotNumber === photo.shotNumber);
+        const card = document.createElement('div'); card.className = 'rounded-xl bg-stone-800 border border-stone-700 overflow-hidden';
+        const image = document.createElement('img'); image.src = photo.dataUrl; image.alt = 'Foto #' + photo.shotNumber;
+        image.className = 'aspect-square object-cover w-full';
+        const status = document.createElement('p'); status.className = 'p-2 text-[10px] text-amber-300';
+        status.textContent = pending ? (pending.failed ? 'Perlu tindakan: ' + (pending.lastError || 'Upload tertunda') : 'Menunggu upload') : photo.uploaded ? 'Tersimpan di Drive' : 'Salinan di perangkat';
+        const save = document.createElement('button'); save.textContent = 'Simpan ke HP'; save.className = 'm-2 mt-0 text-[10px] text-white underline';
+        save.onclick = () => WeddingApi.download(photo.dataUrl, 'wedding-' + currentGuest.code + '-' + photo.shotNumber + '.jpg', 'image/jpeg');
+        card.append(image, status, save);
+        if (pending?.failed) {
+          const retry = document.createElement('button'); retry.textContent = 'Coba lagi'; retry.className = 'm-2 text-[10px] text-amber-300 underline';
+          retry.onclick = async () => { pending.failed = false; pending.retries = 0; await persistCameraState(); renderReel(); processUploadQueue(); };
+          card.append(retry);
+        }
+        reelGrid.append(card);
       }
-
-      reelGrid.innerHTML = localReelPhotos.map(photo => `
-        <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-800 border border-stone-700 shadow-md group">
-          <img src="${photo.dataUrl}" class="w-full h-full object-cover">
-          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 text-right">
-            <span class="font-lcd text-amber-400 text-xs font-bold">#${String(photo.shotNumber).padStart(2, '0')}</span>
-          </div>
-        </div>
-      `).join('');
     }
 
+    const retryUploads = document.createElement('button');
+    retryUploads.textContent = 'Coba sinkronkan foto'; retryUploads.className = 'text-xs text-amber-400 underline my-2';
+    retryUploads.onclick = async () => { uploadQueue.forEach(item => { item.failed = false; item.retries = 0; }); await persistCameraState(); processUploadQueue(); };
+    uploadStatusText.parentElement.append(retryUploads);
     // Initialize
     initGuest();
   </script>
