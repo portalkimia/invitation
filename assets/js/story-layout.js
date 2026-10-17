@@ -74,6 +74,8 @@
     document.body.classList.add('story-layout'); document.body.style.backgroundImage = 'none';
     const root = document.documentElement;
     Object.entries(design.colors).forEach(([key, value]) => root.style.setProperty('--' + key, value));
+    const paper = design.colors.paper.slice(1);
+    root.style.setProperty('--scene-tint', `rgba(${parseInt(paper.slice(0,2),16)},${parseInt(paper.slice(2,4),16)},${parseInt(paper.slice(4,6),16)},${design.backgroundWash})`);
     root.style.setProperty('--reveal-duration', design.motion.duration + 'ms');
     document.body.classList.toggle('motion-off', motionOff());
     const pair = $('hero-couple-title').textContent;

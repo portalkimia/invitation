@@ -49,6 +49,7 @@
     const input = field(grid, 'focal.' + key, title, 'number'); input.min = 0; input.max = 100;
   });
   const shade = field(grid, 'heroShade', 'Kepekatan lapisan gelap foto (0–0,8)', 'number'); shade.min = 0; shade.max = .8; shade.step = .05;
+  const wash = field(grid, 'backgroundWash', 'Lapisan warna di atas background (0–0,98)', 'number', 'Naikkan agar tulisan lebih mudah dibaca di atas foto. Nilai 0 menampilkan background tanpa lapisan.'); wash.min = 0; wash.max = .98; wash.step = .02;
   const duration = field(grid, 'motion.duration', 'Durasi kemunculan (milidetik)', 'number'); duration.min = 400; duration.max = 1800; duration.step = 100;
   field(grid, 'motion.enabled', 'Aktifkan animasi kemunculan', 'checkbox'); field(grid, 'motion.parallax', 'Aktifkan gerak lembut foto saat digulir', 'checkbox');
   grid = group('Bagian yang ditampilkan', 'Sembunyikan bagian yang belum ingin digunakan.');

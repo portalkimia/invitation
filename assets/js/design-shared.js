@@ -24,7 +24,8 @@
       heroForeground: media(data.heroForeground), profileFrame: media(data.profileFrame), closingPhoto: media(data.closingPhoto),
       focal: Object.fromEntries(['hero', 'groom', 'bride', 'closing'].map(key => [key, number(data.focal?.[key], 50, 0, 100)])),
       motion: { enabled: data.motion?.enabled !== false, parallax: data.motion?.parallax !== false, duration: number(data.motion?.duration, 1100, 400, 1800) },
-      heroShade: number(data.heroShade, 0.3, 0, 0.8)
+      heroShade: number(data.heroShade, 0.3, 0, 0.8),
+      backgroundWash: number(data.backgroundWash, 0, 0, 0.98)
     };
   }
   function gallery(raw) {
