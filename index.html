@@ -350,17 +350,23 @@
         </div>
 
         <h3 class="font-serif text-2xl font-bold text-slate-900 mb-1" id="ticket-guest-name">Nama Tamu</h3>
-        <div class="flex items-center justify-center space-x-2 text-xs font-semibold text-gold-800 mb-4">
+        <div id="ticket-code-row" class="flex items-center justify-center space-x-2 text-xs font-semibold text-gold-800 mb-4">
           <span>KODE TAMU:</span>
           <span id="ticket-guest-code" class="px-2 py-0.5 rounded bg-gold-50 border border-gold-200 tracking-widest font-mono">G001</span>
         </div>
 
         <!-- QR Code Container -->
-        <div class="p-4 bg-white rounded-2xl border-2 border-dashed border-gold-200 inline-block shadow-inner mb-4">
+        <p id="qr-ticket-status" role="status" class="text-xs text-slate-600 leading-relaxed mb-4" hidden></p>
+        <form id="guest-code-form" class="space-y-3 mb-5" hidden>
+          <label for="guest-code-entry" class="block text-xs font-semibold text-slate-700">Sudah menerima kode tamu?</label>
+          <input id="guest-code-entry" name="guestCode" required maxlength="64" autocomplete="off" autocapitalize="characters" placeholder="Kode dari undangan Anda" class="w-full px-4 py-3 rounded-xl border border-gold-200 text-sm text-center bg-white">
+          <button id="btn-open-guest-code" type="submit" class="px-5 py-3 rounded-full bg-gold-700 text-white text-xs">Buka undangan saya</button>
+        </form>
+        <div id="qr-ticket-frame" class="p-4 bg-white rounded-2xl border-2 border-dashed border-gold-200 inline-block shadow-inner mb-4">
           <div id="qrcode" class="flex justify-center"></div>
         </div>
 
-        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+        <p id="qr-ticket-instructions" class="text-xs text-slate-500 leading-relaxed mb-4">
           Tunjukkan QR Code ini kepada penerima tamu (usher) di lokasi acara untuk proses kehadiran cepat & membuka akses 18 jepretan Pocket Camera.
         </p>
 
@@ -1036,6 +1042,21 @@
 
     // Generate Scannable QR Code
     const qrContainer = document.getElementById('qrcode');
+    const qrStatus = document.getElementById('qr-ticket-status');
+    const qrFrame = document.getElementById('qr-ticket-frame');
+    const saveQrButton = document.getElementById('btn-save-qr');
+    function showQrUnavailable(message) {
+      qrStatus.textContent = message; qrStatus.hidden = false;
+      qrFrame.hidden = true; saveQrButton.hidden = true;
+      document.getElementById('qr-ticket-instructions').hidden = true;
+    }
+    if (!guestCodeParam) {
+      document.getElementById('ticket-code-row').hidden = true;
+      document.getElementById('guest-code-form').hidden = false;
+      showQrUnavailable('Anda sedang membuka undangan umum. QR check-in tersedia pada tautan undangan pribadi yang dikirim oleh pengantin.');
+    } else if (typeof QRCode === 'undefined') {
+      showQrUnavailable('QR belum dapat dimuat. Muat ulang halaman, atau tunjukkan kode tamu di atas kepada petugas resepsi.');
+    }
     if (qrContainer && guestCodeParam && typeof QRCode !== 'undefined') {
       qrContainer.innerHTML = '';
       try {
@@ -1049,8 +1070,22 @@
         });
       } catch (e) {
         console.warn('QRCode generation warning:', e);
+        showQrUnavailable('QR belum dapat dibuat. Muat ulang halaman, atau tunjukkan kode tamu di atas kepada petugas resepsi.');
       }
     }
+    document.getElementById('guest-code-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const code = document.getElementById('guest-code-entry').value.trim().toUpperCase();
+      const button = document.getElementById('btn-open-guest-code');
+      if (!code) return;
+      button.disabled = true; button.textContent = 'Memeriksa kode…';
+      try {
+        const result = await WeddingApi.postToGas('getGuest', { code });
+        if (!result.success || !result.guest) { qrStatus.textContent = result.error || 'Kode belum ditemukan. Periksa kode pada undangan Anda.'; return; }
+        const url = new URL(location.href); url.searchParams.set('code', code); url.searchParams.set('to', result.guest.name || 'Tamu Undangan'); url.hash = 'guest-ticket'; location.assign(url.href);
+      } catch (_) { qrStatus.textContent = 'Kode belum dapat diperiksa. Periksa koneksi lalu coba lagi.'; }
+      finally { button.disabled = false; button.textContent = 'Buka undangan saya'; }
+    });
 
     // Save QR to Phone Gallery
     document.getElementById('btn-save-qr').addEventListener('click', () => {

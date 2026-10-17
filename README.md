@@ -88,7 +88,9 @@ Pemeriksaan memakai Sheets/Drive simulasi dalam memori. Tidak menghubungi backen
 
 Di **Dashboard → Pengaturan Acara → Studio Desain Undangan**, atur warna, background per bagian, dua foto pembuka tambahan, ornamen atas/bawah, ornamen depan hero, bingkai profil PNG transparan, foto penutup, posisi foto, dan animasi.
 
-Foto Sampul / Prewedding menjadi foto utama layar penuh. Foto profil, tiga cerita, dan lima foto galeri memakai kolom foto masing-masing. Jika foto utama kosong, foto galeri pertama menjadi pembuka. Background bagian yang kosong mengikuti background utama. PNG transparan dipakai sebagai lapisan di atas background/foto.
+Foto Sampul / Prewedding menjadi foto utama layar penuh. Foto profil dan tiga cerita memakai kolom foto masing-masing. Di bagian **Galeri Foto Pre-Wedding**, gunakan **+ Tambah foto galeri**, isi URL, judul, dan kategori, lalu atur urutan atau hapus foto sesuai kebutuhan. Galeri mendukung hingga 50 foto; daftar disimpan sebagai `GALLERY_JSON` dan lima foto awal tetap disalin ke kolom lama untuk kompatibilitas. Total JSON dibatasi 45.000 karakter agar muat dalam satu sel Settings. Jika foto utama kosong, foto galeri pertama menjadi pembuka. Background bagian yang kosong mengikuti background utama. PNG transparan dipakai sebagai lapisan di atas background/foto.
+
+QR check-in muncul pada tautan pribadi yang berisi kode tamu, misalnya `index.html?code=KODE_TAMU&to=NAMA_TAMU`, yang disalin atau dibagikan dari daftar tamu dashboard. Undangan umum menampilkan penjelasan serta formulir untuk memasukkan kode yang sudah diterima; kode diperiksa sebelum undangan pribadi dibuka. Jika pembuat QR gagal dimuat, kode tamu tetap dapat ditunjukkan kepada petugas.
 
 Tempel URL gambar langsung atau link Google Drive dengan akses lihat publik. Tidak ada foto atau ilustrasi yang disalin dari situs referensi. Warna krem dan bingkai sederhana menjadi tampilan awal sampai desain sendiri diisi.
 
