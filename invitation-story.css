@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&display=swap');
+.story-layout .scene:not(.hero-scene),.story-layout .desktop-scene{background-image:linear-gradient(var(--scene-tint,transparent),var(--scene-tint,transparent)),var(--scene-image),radial-gradient(ellipse at 15% 10%,#fff8 0,transparent 65%)}
 :root{--paper:#eee6d8;--ink:#443b32;--accent:#92734e;--reveal-duration:1100ms}
 html{scroll-behavior:smooth}body.story-layout{background:var(--paper);color:var(--ink)}body.story-layout:not(.invitation-open){overflow:hidden}
 .story-layout .font-serif,.story-layout h3,.story-layout h4{font-family:'Cormorant Garamond',serif}.script-title{font-family:'Great Vibes',cursive!important;font-weight:400!important;line-height:1.35}
