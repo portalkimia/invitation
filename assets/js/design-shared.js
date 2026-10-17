@@ -15,7 +15,8 @@
     const color = (value, fallback) => /^#[a-f\d]{6}$/i.test(value || '') ? value : fallback;
     const number = (value, fallback, min, max) => Number.isFinite(Number(value)) ? Math.min(max, Math.max(min, Number(value))) : fallback;
     return {
-      version: 1,
+      version: 2,
+      sections: Object.fromEntries(['quote','story','gallery','rsvp','gift','album','camera'].map(key => [key, data.sections?.[key] !== false])),
       colors: { paper: color(data.colors?.paper, '#eee6d8'), ink: color(data.colors?.ink, '#443b32'), accent: color(data.colors?.accent, '#92734e') },
       backgrounds: Object.fromEntries(scenes.map(key => [key, media(data.backgrounds?.[key])])),
       ornaments: { top: media(data.ornaments?.top), bottom: media(data.ornaments?.bottom) },

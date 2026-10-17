@@ -32,7 +32,7 @@ async function receptionJobs() {
   return (await WeddingStore.all()).filter(record => record.kind === 'reception-job').sort((a, b) => a.createdAt - b.createdAt);
 }
 function cacheReceptionGuest(guest) {
-  const allowed = ['code', 'name', 'rsvpStatus', 'pax', 'category', 'attendedAt', 'actualPax', 'checkInRequestId'];
+  const allowed = ['code', 'name', 'rsvpStatus', 'pax', 'category', 'attendedAt', 'actualPax', 'checkInRequestId', 'inviteToken', 'checkedInBy'];
   const cached = Object.fromEntries(allowed.map(key => [key, guest[key] ?? '']));
   ReceptionState.guests.set(cached.code, cached); return cached;
 }
@@ -81,6 +81,7 @@ window.handleGuestIdentified = async function(rawCode) {
     if (byName.length === 1) code = byName[0].code;
     if (!/^[A-Z0-9_-]{1,40}$/i.test(code)) { alert('Pilih kode tamu dari daftar, atau masukkan kode dengan huruf dan angka.'); return; }
     code = code.toUpperCase();
+    if (!window.ReceptionOps?.operator()) { alert('Isi nama petugas dan meja penerima terlebih dahulu.'); return; }
     await stopQrScanner();
     const jobs = await receptionJobs();
     const pending = jobs.find(job => job.code === code);
@@ -92,10 +93,12 @@ window.handleGuestIdentified = async function(rawCode) {
       else if (response.notFound) guest = null;
       else if (!response.networkError) throw new Error(response.error || 'Identitas tamu belum dapat dibaca.');
     }
+    if (!guest && !pending && !window.ReceptionOps?.walkInCode(code)) { alert('Kode tidak terdaftar. Periksa kembali atau gunakan Tambah tamu walk-in.'); await startQrScanner(); return; }
     currentGuest = guest || { code, name: '', category: 'Reguler', pax: 1 };
     ReceptionState.currentRequest = pending?.id || null;
     if (pending || guest?.attendedAt) {
       if (pending) {
+        currentGuest.actualPax = pending.actualPax;
         currentGuest.name = pending.name;
         ReceptionState.currentStatus = pending.phase === 'checkin' ? 'pending' : 'saved';
       } else ReceptionState.currentStatus = 'duplicate';
@@ -113,13 +116,14 @@ window.handleGuestIdentified = async function(rawCode) {
     capturedPhotoBase64 = null; btnConfirm.disabled = false; btnConfirm.textContent = 'Konfirmasi & Simpan';
     photoPreview.classList.add('hidden'); photoVideo.classList.remove('hidden');
     reviewControls.classList.add('hidden'); captureControls.classList.remove('hidden');
-    await startPhotoCamera();
+    if (window.ReceptionOps?.quick()) window.ReceptionOps.showQuick(); else await startPhotoCamera();
   } catch (error) { alert(error.message); step2.classList.add('hidden'); step1.classList.remove('hidden'); await originalReceptionScanner(); }
   finally { ReceptionState.lookupBusy = false; }
 };
 
 window.saveCheckIn = async function(photoBase64) {
   if (btnConfirm.disabled) return;
+  if (!window.ReceptionOps?.operator()) { alert('Isi nama petugas dan meja terlebih dahulu.'); return; }
   const name = document.getElementById('checkin-guest-name').value.trim();
   const input = document.getElementById('checkin-actual-pax');
   if (!name) { alert('Isi nama tamu terlebih dahulu.'); return; }
@@ -129,7 +133,7 @@ window.saveCheckIn = async function(photoBase64) {
     const jobs = await receptionJobs();
     if (jobs.some(job => job.code === currentGuest.code)) throw new Error('Tamu ini sudah berada dalam antrean.');
     const job = { id: WeddingApi.newId('checkin'), kind: 'reception-job', phase: 'checkin',
-      code: currentGuest.code, name, actualPax: Number(input.value), photoBase64: photoBase64 || '', createdAt: Date.now() };
+      code: currentGuest.code, name, actualPax: Number(input.value), photoBase64: photoBase64 || '', createdAt: Date.now(), operator: window.ReceptionOps.operator(), walkIn: !!window.ReceptionOps.walkInCode(currentGuest.code) };
     await WeddingStore.put(job);
     currentGuest.name = name; currentGuest.actualPax = job.actualPax;
     ReceptionState.currentRequest = job.id; ReceptionState.currentStatus = 'pending';
@@ -144,7 +148,7 @@ async function flushReceptionCheckIns() {
   ReceptionState.checkInBusy = true;
   try {
     for (const job of (await receptionJobs()).filter(job => job.phase === 'checkin')) {
-      const result = await WeddingApi.postToGas('checkIn', { code: job.code, name: job.name, actualPax: job.actualPax, requestId: job.id });
+      const result = await WeddingApi.postToGas('checkIn', { code: job.code, name: job.name, actualPax: job.actualPax, requestId: job.id, operator: job.operator || window.ReceptionOps?.operator() || 'Petugas lama', walkIn: job.walkIn === true });
       if (!result.success) {
         job.error = result.error; await WeddingStore.put(job);
         if (result.networkError || result.authRequired) break;
@@ -184,7 +188,7 @@ window.showStep3Success = function() {
   const status = ReceptionState.currentStatus;
   const pending = status === 'pending';
   const title = step3.querySelector('h2');
-  title.textContent = pending ? 'Tercatat di perangkat' : status === 'duplicate' ? 'Tamu sudah check-in' : 'Check-in tersimpan!';
+  title.textContent = pending ? 'Tercatat di perangkat' : status === 'duplicate' ? 'Sudah check-in — jangan hitung ulang' : 'Check-in tersimpan!';
   document.getElementById('success-guest-greeting').textContent = `${currentGuest.name} · ${currentGuest.actualPax || '?'} orang${currentGuest.attendedAt ? ' · ' + new Date(currentGuest.attendedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}`;
   document.getElementById('pocket-qrcode').parentElement.classList.toggle('hidden', pending);
   const description = step3.querySelector('p.leading-relaxed');

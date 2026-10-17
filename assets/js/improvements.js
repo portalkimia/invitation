@@ -28,7 +28,7 @@
     const payload = { ...data, action };
     if (saved && saved.expiresAt > Date.now()) payload.sessionToken = saved.token;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), action.includes('Photo') ? 90000 : 25000);
+    const timer = setTimeout(() => controller.abort(), action.includes('Photo') || action === 'uploadDesignMedia' ? 90000 : 25000);
     try {
       const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload), signal: controller.signal });

@@ -6,7 +6,7 @@
   const fields = new Map();
   const make = (tag, cls, text) => { const node = document.createElement(tag); node.className = cls || ''; if (text) node.textContent = text; return node; };
   const section = make('section', 'bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5'); section.id = 'design-editor';
-  section.append(make('h3', 'font-bold text-lg', 'Studio Desain Undangan'), make('p', 'text-sm text-slate-600', 'Atur tampilan setiap bagian tanpa mengubah susunan undangan. Gunakan URL gambar langsung atau link Google Drive yang dapat dilihat siapa saja. Background kosong mengikuti background utama; ornamen PNG transparan memberi efek berlapis.'));
+  section.append(make('h3', 'font-bold text-lg', 'Studio Desain Undangan'), make('p', 'text-sm text-slate-600', 'Atur tampilan setiap bagian tanpa mengubah susunan undangan. Upload foto melalui tombol di setiap kolom, atau gunakan URL gambar langsung/Google Drive publik. Background kosong mengikuti background utama; ornamen PNG transparan memberi efek berlapis.'));
   const guide = make('div', 'rounded-xl bg-amber-50 p-4 text-xs text-amber-900');
   guide.textContent = 'Urutan: cover → foto pembuka → kutipan → profil mempelai → cerita → hitung mundur → acara → galeri → RSVP dan ucapan → penutup. Foto utama, profil, cerita, dan galeri tetap diatur pada kolom foto masing-masing di bawah.'; section.append(guide);
   function group(title, hint, open = false) {
@@ -51,9 +51,11 @@
   const shade = field(grid, 'heroShade', 'Kepekatan lapisan gelap foto (0–0,8)', 'number'); shade.min = 0; shade.max = .8; shade.step = .05;
   const duration = field(grid, 'motion.duration', 'Durasi kemunculan (milidetik)', 'number'); duration.min = 400; duration.max = 1800; duration.step = 100;
   field(grid, 'motion.enabled', 'Aktifkan animasi kemunculan', 'checkbox'); field(grid, 'motion.parallax', 'Aktifkan gerak lembut foto saat digulir', 'checkbox');
+  grid = group('Bagian yang ditampilkan', 'Sembunyikan bagian yang belum ingin digunakan.');
+  for (const [key, title] of Object.entries({ quote:'Kutipan', story:'Perjalanan cinta', gallery:'Galeri', rsvp:'RSVP dan ucapan', gift:'Amplop digital dan hadiah', album:'Album tamu', camera:'Pocket Camera' })) field(grid, 'sections.' + key, title, 'checkbox');
   const bar = make('div', 'flex flex-wrap items-center gap-3');
   const open = make('button', 'rounded-xl bg-stone-800 text-white py-3 px-5 text-xs', 'Pratinjau desain'); open.type = 'button';
-  const hint = make('p', 'text-xs text-slate-500', 'Gunakan tombol Simpan Semua Pengaturan untuk menerbitkan perubahan.'); bar.append(open, hint); section.append(bar); form.prepend(section);
+  const hint = make('p', 'text-xs text-slate-500', 'Gunakan tombol Terbitkan Pengaturan untuk menerbitkan perubahan.'); bar.append(open, hint); section.append(bar); form.prepend(section);
 
   // The original five inputs remain as compatibility fields for the existing controller.
   const legacyGallery = document.getElementById('cfg-gallery1-url').closest('div.bg-white');
@@ -144,7 +146,7 @@
       input.updatePreview?.();
     }); loadGallery(pending); loaded = true;
   }
-  window.InvitationDesignEditor = { load, read };
+  window.InvitationDesignEditor = { load, read, collect: previewSettings, openPreview: () => open.click(), gallery: readGallery };
   load(typeof currentRawSettings !== 'undefined' ? currentRawSettings : {});
   const originalSave = WeddingApi.saveSettings;
   WeddingApi.saveSettings = function (settings) {
