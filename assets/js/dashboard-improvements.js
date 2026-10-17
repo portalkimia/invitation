@@ -123,7 +123,7 @@ window.addEventListener('wedding:auth-required', () => {
   WeddingApi.clearStoredPin('admin');
   mainContent.classList.add('hidden'); authModal.classList.remove('hidden');
   authLoading.classList.add('hidden'); authForm.classList.remove('hidden');
-  authError.textContent = 'Sesi berakhir atau PIN berubah. Silakan masuk kembali.';
+  authError.textContent = 'Sesi login telah berakhir demi keamanan. Silakan masukkan PIN admin Anda kembali.';
   authError.classList.remove('hidden');
   if (guestEditor.open) guestEditor.close(); if (albumDialog.open) albumDialog.close();
 });

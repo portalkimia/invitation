@@ -1,7 +1,7 @@
 /* Shared session, durable storage, and safe display utilities. */
 (() => {
-  const role = /dashboard\.html$/.test(location.pathname) ? 'admin' :
-    /reception\.html$/.test(location.pathname) ? 'reception' : null;
+  const role = /dashboard/i.test(location.pathname) ? 'admin' :
+    /reception/i.test(location.pathname) ? 'reception' : null;
   const sessionKey = name => 'wedding_session_v2_' + name;
   const readSession = name => {
     try { return JSON.parse(localStorage.getItem(sessionKey(name)) || 'null'); }
