@@ -1,5 +1,20 @@
 # Wedding App
 
+## Peningkatan operasional v3 (17 Oktober 2026)
+
+- **Desain:** tombol Upload / potong foto pada kolom gambar, pratinjau potongan asli/4:5/1:1/16:9, zoom dan geser titik fokus, kompres maksimal 1600 px. PNG mempertahankan transparansi. Gambar diunggah melalui sesi admin ke subfolder `WeddingDesign` pada folder foto yang sudah dikonfigurasi. Upload memasukkan URL ke draf; penerbitan tetap terpisah.
+- **Draf:** otomatis tersimpan di browser tanpa PIN. Draf server disimpan terpisah pada sheet `DesignDraft`; muat draf dan pratinjau sebelum **Terbitkan Pengaturan**. Backup JSON pengaturan terbit dapat diunduh dan dipulihkan ke draf. Backup tidak memuat PIN, token sesi, daftar tamu, atau foto. Daftar tamu tetap diekspor lewat CSV.
+- **Bagian undangan:** sakelar kutipan, cerita, galeri, RSVP/ucapan, hadiah, album tamu, dan kamera pada Studio Desain.
+- **Resepsi:** isi nama petugas dan meja/pintu, lalu buka scanner. Identitas dicatat pada Guests kolom P (`checkedInBy`); memakai sesi petugas yang ada, bukan akun/password terpisah. Mode cepat melewati kamera foto dan tetap meminta konfirmasi jumlah orang. Lensa scanner dan foto dapat dipilih setelah izin kamera. Kode tidak terdaftar ditolak; **Tambah tamu walk-in** membuat kode baru secara sengaja.
+- **QR:** tautan personal baru dan QR memakai token HMAC yang tidak dapat diturunkan dari kode berurutan. Kode tetap tersedia untuk pencarian petugas. **LEGACY_GUEST_ACCESS** awalnya tetap aktif agar undangan yang sudah dikirim tidak terputus. Setelah membagikan ulang tautan dari dashboard terbaru, nonaktifkan akses kode dan terbitkan. Token salah selalu ditolak, sekalipun akses lama masih aktif. Token tidak ditambahkan ke pengaturan publik; tersedia bagi petugas/admin terautentikasi dan tautan tamu yang bersangkutan.
+- **Kartu undangan:** tamu dapat menyimpan gambar berisi nama, jadwal, lokasi, dan QR; tombol **QR saya** tersedia setelah undangan pribadi dibuka.
+- **Kamera:** pilih potongan mengikuti layar, tegak 4:5, atau persegi. Indikator memisahkan foto di HP, menunggu unggah, sudah diunggah, dan perlu tindakan. Peringatan tampil pada tiga foto terakhir. Kuota 1–100 foto **per undangan**, jadwal mulai/tutup diatur pada Penerbitan & operasional. Jadwal kosong berarti tanpa batas tanggal setelah check-in. Jadwal tutup juga membatasi unggahan baru; unduh salinan HP jika belum sempat tersinkron. Upload yang telah dicatat server memakai ID yang sama ketika dicoba ulang.
+- **Hari acara:** panel jumlah undangan/orang hadir, daftar RSVP hadir yang belum datang, kedatangan terakhir beserta petugas, foto menunggu moderasi (500 terbaru), antrean server, koneksi dan waktu respons. Antrean browser hanya dapat dilihat pada perangkat tersebut; antrean offline perangkat lain belum diketahui server.
+- **Simulasi:** buka `reception.html?simulation=true`. Tamu `SIM001`–`SIM003`, walk-in, antrean, dan pencatatan disimpan dalam ruang lokal tersendiri. Seluruh panggilan API diganti dengan simulasi; tidak membuat kehadiran atau upload produksi. Scanner opsional diaktifkan lewat tombol, dan QR kamera mengarah ke mode demo. Reset hanya membersihkan data simulasi.
+- **Kesiapan:** checklist hari acara serta kalkulator jumlah maksimum foto dan kebutuhan penyimpanan. Ini perkiraan, bukan hasil uji beban atau jaminan kapasitas Apps Script. Ukuran foto, jumlah tamu, jaringan venue, dan kuota akun perlu diperiksa untuk acara yang sebenarnya.
+
+Frontend dan backend v3 harus diterbitkan bersama. Backend memperluas Guests ke kolom P saat dibaca; kolom sebelumnya tetap di posisi yang sama. Pengaturan kuota/jadwal dan akses lama mengikuti nilai aktif atau default yang dijelaskan di atas.
+
 Undangan digital dengan pengelolaan tamu, meja resepsi, Pocket Camera, dan album bersama. Frontend HTML/JavaScript, backend Google Apps Script, database Google Sheets, dan penyimpanan foto Google Drive.
 
 ## Alur penggunaan

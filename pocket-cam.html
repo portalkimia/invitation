@@ -86,6 +86,7 @@
     .camera-running #camera-demo-banner>div{margin-top:0}
     @media(max-height:600px){#camera-shell{min-height:340px;gap:7px;padding:8px}#camera-plate{display:none}#camera-frame{min-height:150px}#btn-shutter{width:56px;height:56px}#btn-shutter>div{width:40px;height:40px}#camera-demo-banner p{display:none}}
   </style>
+<meta name="referrer" content="no-referrer">
 </head>
 <body class="camera-page bg-stone-900 text-stone-100 font-sans antialiased min-h-screen flex flex-col select-none overflow-x-hidden">
 
@@ -325,7 +326,8 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
-  <script src="assets/js/improvements.js"></script>
+  <script src="assets/js/improvements.js?v=20261017-ops3"></script>
+  <script src="assets/js/operations-shared.js?v=20261017-ops3"></script>
   <script>
     lucide.createIcons();
 
@@ -343,7 +345,8 @@
     // 1. State Management
     let currentGuest = null;
     let pocketPhotoCount = 0;
-    const MAX_SHOTS = 18;
+    let MAX_SHOTS = 18;
+    let cameraWindow = { start: "", end: "" };
     let cameraStream = null;
     let currentFacing = 'environment'; // environment or user
     let cameraStarting = false;
@@ -395,6 +398,7 @@
 
     function syncCoupleSettings(settings) {
       if (!settings) return;
+      if (!isCameraDemo) { const policy = WeddingApi.cameraPolicy(settings); MAX_SHOTS = policy.quota; cameraWindow = policy; }
       if (settings.GROOM_SHORT) coupleShortGroom = settings.GROOM_SHORT;
       else if (settings.couple?.groom?.shortName) coupleShortGroom = settings.couple.groom.shortName;
 
@@ -414,6 +418,7 @@
     WeddingApi.getSettings().then(live => {
       if (live && Object.keys(live).length > 0) {
         syncCoupleSettings(live);
+        updateFilmCounter();
       }
     }).catch(e => console.warn('Sync couple settings error:', e));
 
@@ -503,6 +508,7 @@
       try {
         const result = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
         if (result.success && result.guest?.attendedAt) {
+          if (result.camera) { MAX_SHOTS = result.camera.quota; cameraWindow = result.camera; }
           currentGuest.name = result.guest.name;
           WeddingApi.saveGuestSession(currentGuest.code, currentGuest.name);
           await WeddingStore.put({ id: 'attendance_' + currentGuest.code, verified: true, count: result.guest.pocketPhotoCount || 0 });
@@ -522,7 +528,7 @@
       const modal = document.getElementById('cam-locked-modal');
       document.getElementById('locked-guest-name').textContent = currentGuest.name || 'Tamu Undangan';
       document.getElementById('locked-guest-code').textContent = `Kode: ${currentGuest.code}`;
-      document.getElementById('btn-back-to-invitation').href = `index.html?code=${encodeURIComponent(currentGuest.code)}&to=${encodeURIComponent(currentGuest.name)}`;
+      document.getElementById('btn-back-to-invitation').href = WeddingApi.buildInviteUrl(currentGuest.code, currentGuest.name);
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       lucide.createIcons();
@@ -760,6 +766,7 @@
     // 5. Shutter Action & Background Upload Queue Flow
     btnShutter.addEventListener('click', async () => {
       if (pocketPhotoCount >= MAX_SHOTS || isCapturing) return;
+      if (!isCameraDemo && !window.cameraWindowOpen()) return;
       if (!cameraStream || camVideo.readyState < 2 || !camVideo.videoWidth) {
         uploadStatusText.textContent = isCameraDemo ? 'Klik Aktifkan kamera demo, izinkan akses kamera, lalu tunggu gambar muncul.' : 'Kamera belum siap. Izinkan akses kamera dan tunggu gambar muncul.';
         return;
@@ -967,10 +974,10 @@
       }
 
       if (uploadQueue.length > 0) {
-        exhaustedSubtext.innerHTML = `18 jepretan Anda selesai! <br><span class="text-amber-400 font-semibold">Sedang menyelaraskan ${uploadQueue.length} foto terakhir ke Drive...</span><br><span class="text-[11px] text-stone-400">Harap jangan menutup browser hingga selesai.</span>`;
+        exhaustedSubtext.innerHTML = `${MAX_SHOTS} jepretan Anda selesai! <br><span class="text-amber-400 font-semibold">Sedang menyelaraskan ${uploadQueue.length} foto terakhir ke Drive...</span><br><span class="text-[11px] text-stone-400">Harap jangan menutup browser hingga selesai.</span>`;
       } else {
         const coupleText = `${coupleShortGroom} & ${coupleShortBride}`;
-        exhaustedSubtext.innerHTML = `Semua 18 jepretan Anda telah aman tersimpan di Google Drive ${coupleText}. Terima kasih telah mengabadikan momen ini!`;
+        exhaustedSubtext.innerHTML = `Semua ${MAX_SHOTS} jepretan Anda telah aman tersimpan di Google Drive ${coupleText}. Terima kasih telah mengabadikan momen ini!`;
       }
     }
 
@@ -1042,5 +1049,6 @@
     // Initialize
     initGuest();
   </script>
+<script src="assets/js/camera-operations.js?v=20261017-ops3"></script>
 </body>
 </html>

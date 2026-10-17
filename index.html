@@ -199,6 +199,7 @@
     }
   </style>
   <link rel="stylesheet" href="invitation-story.css?v=20261017-rsvp-spacing">
+<meta name="referrer" content="no-referrer">
 </head>
 <body class="bg-[#FAF7F2] text-slate-800 font-sans antialiased selection:bg-gold-200 selection:text-gold-900 min-h-screen relative overflow-x-hidden">
 
@@ -578,7 +579,7 @@
       </button>
     </div>
   </div>
-  <audio id="wedding-audio" loop preload="auto">
+  <audio id="wedding-audio" loop preload="none">
     <!-- Free royalty-free wedding ambient instrumental melody -->
     <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-113824.mp3" type="audio/mp3">
   </audio>
@@ -608,8 +609,9 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
-  <script src="assets/js/improvements.js"></script>
-  <script src="assets/js/design-shared.js?v=20261017-gallery50"></script>
+  <script src="assets/js/improvements.js?v=20261017-ops3"></script>
+  <script src="assets/js/operations-shared.js?v=20261017-ops3"></script>
+  <script src="assets/js/design-shared.js?v=20261017-ops3"></script>
   <script>
     function safeCreateIcons() {
       try {
@@ -1061,7 +1063,7 @@
       qrContainer.innerHTML = '';
       try {
         new QRCode(qrContainer, {
-          text: guestCodeParam,
+          text: WeddingApi.qrPayload(guestCodeParam),
           width: 180,
           height: 180,
           colorDark: "#1E293B",
@@ -1497,7 +1499,7 @@
 
       const camBtn = document.getElementById('btn-open-pocket-cam');
       if (camBtn) {
-        camBtn.href = `pocket-cam.html?code=${encodeURIComponent(guestCodeParam)}&to=${encodeURIComponent(guestNameParam)}`;
+        camBtn.href = WeddingApi.buildInviteUrl(guestCodeParam, guestNameParam).replace(/(index|invitation)\.html/, 'pocket-cam.html');
       }
       lucide.createIcons();
     }
@@ -1550,5 +1552,6 @@
   </script>
   <script src="assets/js/guest-improvements.js"></script>
   <script src="assets/js/story-layout.js"></script>
+<script src="assets/js/guest-operations.js?v=20261017-ops3"></script>
 </body>
 </html>

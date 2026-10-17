@@ -39,6 +39,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta name="referrer" content="no-referrer">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
@@ -810,7 +811,7 @@
             <div class="flex items-center space-x-2 w-full sm:w-auto">
               <button type="submit" id="btn-save-all-settings" class="w-full sm:w-auto py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-all">
                 <i data-lucide="save" class="w-4 h-4"></i>
-                <span>Simpan Semua Pengaturan ke Spreadsheet</span>
+                <span>Terbitkan Pengaturan</span>
               </button>
             </div>
           </div>
@@ -849,8 +850,9 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
-  <script src="assets/js/improvements.js"></script>
-  <script src="assets/js/design-shared.js?v=20261017-gallery50"></script>
+  <script src="assets/js/improvements.js?v=20261017-ops3"></script>
+  <script src="assets/js/operations-shared.js?v=20261017-ops3"></script>
+  <script src="assets/js/design-shared.js?v=20261017-ops3"></script>
   <script>
     lucide.createIcons();
 
@@ -1692,13 +1694,40 @@
       if (hasGPhotos) {
         if (!confirm('⚠️ Perhatian: Tautan Google Foto terdeteksi!\n\nLink dari Google Foto (photos.app.goo.gl) adalah halaman web album, bukan file gambar langsung, sehingga gambar akan gagal dimuat di website undangan.\n\nDisarankan mengupload foto ke Google Drive (bagikan: "Siapa saja yang memiliki link") atau PostImages.org.\n\nTetap ingin menyimpan tautan ini?')) {
           btnSaveAllSettings.disabled = false;
-          btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Simpan Semua Pengaturan ke Spreadsheet</span>`;
+          btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Terbitkan Pengaturan</span>`;
           lucide.createIcons();
           return;
         }
       }
 
-      const settingsPayload = {
+      const settingsPayload = window.collectEventSettings();
+
+      try {
+        const res = await WeddingApi.saveSettings(settingsPayload);
+        if (res && res.success) {
+          if (settingsPayload.ADMIN_PIN) {
+            WeddingApi.saveStoredPin('admin', settingsPayload.ADMIN_PIN);
+          }
+          document.getElementById('cfg-admin-pin').value = '';
+          document.getElementById('cfg-reception-pin').value = '';
+          WeddingApi.playSuccessChime();
+          updateWaTemplatePreview();
+          showToast('🎉 Pengaturan berhasil disimpan ke Google Sheets! Tampilan undangan langsung terupdate.');
+        } else {
+          showToast('Gagal menyimpan: ' + (res?.error || 'Koneksi bermasalah'));
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      } finally {
+        btnSaveAllSettings.disabled = false;
+        btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Terbitkan Pengaturan</span>`;
+        lucide.createIcons();
+      }
+    });
+
+    window.collectEventSettings = function () {
+      const formatImg = WeddingApi.formatImageUrl;
+      return {
         EVENT_TITLE: document.getElementById('cfg-event-title').value.trim(),
         EVENT_DATE_FORMATTED: document.getElementById('cfg-event-date-formatted').value.trim(),
         COUNTDOWN_TARGET: document.getElementById('cfg-countdown-target').value.trim(),
@@ -1790,34 +1819,14 @@
         ADMIN_PIN: document.getElementById('cfg-admin-pin').value.trim(),
         RECEPTION_PIN: document.getElementById('cfg-reception-pin').value.trim()
       };
-
-      try {
-        const res = await WeddingApi.saveSettings(settingsPayload);
-        if (res && res.success) {
-          if (settingsPayload.ADMIN_PIN) {
-            WeddingApi.saveStoredPin('admin', settingsPayload.ADMIN_PIN);
-          }
-          document.getElementById('cfg-admin-pin').value = '';
-          document.getElementById('cfg-reception-pin').value = '';
-          WeddingApi.playSuccessChime();
-          updateWaTemplatePreview();
-          showToast('🎉 Pengaturan berhasil disimpan ke Google Sheets! Tampilan undangan langsung terupdate.');
-        } else {
-          showToast('Gagal menyimpan: ' + (res?.error || 'Koneksi bermasalah'));
-        }
-      } catch (err) {
-        showToast('Error: ' + err.message);
-      } finally {
-        btnSaveAllSettings.disabled = false;
-        btnSaveAllSettings.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>Simpan Semua Pengaturan ke Spreadsheet</span>`;
-        lucide.createIcons();
-      }
-    });
+    };
 
     // Initialize check
     checkAuth();
   </script>
   <script src="assets/js/dashboard-improvements.js"></script>
-  <script src="assets/js/dashboard-design.js?v=20261017-gallery50"></script>
+  <script src="assets/js/dashboard-design.js?v=20261017-ops3"></script>
+<script src="assets/js/dashboard-operations.js?v=20261017-ops3"></script>
+<script src="assets/js/dashboard-media.js?v=20261017-ops3"></script>
 </body>
 </html>

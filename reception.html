@@ -53,6 +53,7 @@
       animation: scanLaser 2s infinite ease-in-out;
     }
   </style>
+<meta name="referrer" content="no-referrer">
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
 
@@ -254,7 +255,7 @@
         </div>
 
         <p class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed mb-6">
-          Arahkan kamera smartphone tamu ke QR di atas untuk mengaktifkan 18 jepretan Pocket Camera di ponsel mereka!
+          Arahkan kamera smartphone tamu ke QR di atas untuk membuka Pocket Camera sesuai kuota yang diatur pengantin!
         </p>
 
         <button id="btn-next-guest" class="w-full py-3.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-xl inline-flex items-center justify-center space-x-2 transition-all">
@@ -280,7 +281,9 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
-  <script src="assets/js/improvements.js"></script>
+  <script src="assets/js/improvements.js?v=20261017-ops3"></script>
+  <script src="assets/js/operations-shared.js?v=20261017-ops3"></script>
+  <script src="assets/js/reception-simulation.js?v=20261017-ops3"></script>
   <script>
     lucide.createIcons();
 
@@ -387,6 +390,8 @@
 
     // 3. Step 1: Start QR Scanner via html5-qrcode
     async function startQrScanner() {
+      if (window.WeddingSimulation && !window.WeddingSimulation.cameraEnabled) return;
+      if (!window.ReceptionOps?.operator()) return;
       try {
         if (!html5QrCode) {
           html5QrCode = new Html5Qrcode("qr-reader");
@@ -398,7 +403,7 @@
         };
 
         await html5QrCode.start(
-          { facingMode: currentFacingMode },
+          (window.receptionLens || { facingMode: currentFacingMode }),
           config,
           onScanSuccess,
           onScanError
@@ -427,7 +432,7 @@
     function onScanSuccess(decodedText) {
       if (!decodedText) return;
       console.log('Scanned QR:', decodedText);
-      handleGuestIdentified(decodedText.trim().toUpperCase());
+      handleGuestIdentified(decodedText.trim());
     }
 
     function onScanError(err) {
@@ -539,7 +544,7 @@
       try {
         photoStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: photoFacingMode, // Toggleable facingMode (environment / user)
+            ...(window.receptionPhotoLens ? { deviceId: { exact: window.receptionPhotoLens } } : { facingMode: photoFacingMode }),
             width: { ideal: 1280 },
             height: { ideal: 720 }
           },
@@ -719,6 +724,7 @@
     // Initialize check
     checkReceptionAuth();
   </script>
-  <script src="assets/js/reception-improvements.js"></script>
+  <script src="assets/js/reception-improvements.js?v=20261017-ops3"></script>
+<script src="assets/js/reception-operations.js?v=20261017-ops3"></script>
 </body>
 </html>
