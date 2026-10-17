@@ -156,6 +156,15 @@
     </div>
   </header>
 
+  <section id="camera-demo-banner" hidden class="mx-4 mt-4 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-center">
+    <h2 class="text-sm font-bold text-amber-300">Mode uji coba kamera</h2>
+    <p class="text-xs text-stone-300 leading-relaxed mt-2">Foto demo disimpan di perangkat ini. Tidak diunggah ke album dan tidak memakai kuota atau mencatat kehadiran tamu.</p>
+    <div class="mt-3 flex flex-wrap justify-center gap-2">
+      <button id="btn-start-demo-camera" type="button" class="py-2 px-4 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs">Aktifkan kamera demo</button>
+      <button id="btn-reset-demo-camera" type="button" class="py-2 px-4 rounded-xl border border-stone-600 text-stone-200 text-xs">Reset roll demo</button>
+    </div>
+  </section>
+
   <!-- ==================== RETRO DISPOSABLE CAMERA BODY ==================== -->
   <main class="flex-1 max-w-sm w-full mx-auto p-4 flex flex-col justify-center">
 
@@ -274,7 +283,7 @@
       </div>
 
       <div class="pt-3 border-t border-stone-800 flex justify-between items-center text-[11px] text-stone-400">
-        <span>Tersimpan otomatis ke Google Drive</span>
+        <span id="reel-storage-note">Tersimpan otomatis ke Google Drive</span>
         <button id="btn-back-to-cam" class="py-1.5 px-3 rounded-lg bg-amber-500 text-stone-950 font-bold">
           Kembali ke Kamera
         </button>
@@ -288,6 +297,17 @@
   <script src="assets/js/improvements.js"></script>
   <script>
     lucide.createIcons();
+
+    const cameraParams = new URLSearchParams(location.search);
+    const isCameraDemo = cameraParams.get('unlock') === 'true' || cameraParams.get('demo') === 'true';
+    const DEMO_CAMERA_STORAGE_KEY = 'demo_camera_v1';
+    // Demo uses its own roll and can read settings only; no guest or upload requests.
+    if (isCameraDemo) {
+      const cameraPost = WeddingApi.postToGas.bind(WeddingApi);
+      WeddingApi.postToGas = (action, data) => ['getSettings', 'ping'].includes(action)
+        ? cameraPost(action, data)
+        : Promise.resolve({ success: false, permanent: true, error: 'Mode uji coba hanya menyimpan foto di perangkat.' });
+    }
 
     // 1. State Management
     let currentGuest = null;
@@ -305,6 +325,12 @@
     // Offline & Session Persistence Helpers
     let cameraSaveChain = Promise.resolve();
     async function loadCameraState() {
+      if (isCameraDemo) {
+        const saved = await WeddingStore.get(DEMO_CAMERA_STORAGE_KEY);
+        uploadQueue = [];
+        localReelPhotos.splice(0, localReelPhotos.length, ...(saved?.reel || []));
+        return;
+      }
       const id = 'camera_' + currentGuest.code;
       const saved = await WeddingStore.get(id);
       if (saved) {
@@ -326,7 +352,7 @@
       localStorage.removeItem('wedding_cam_reel_' + currentGuest.code);
     }
     function persistCameraState() {
-      const record = { id: 'camera_' + currentGuest.code, queue: JSON.parse(JSON.stringify(uploadQueue)), reel: JSON.parse(JSON.stringify(localReelPhotos)) };
+      const record = { id: isCameraDemo ? DEMO_CAMERA_STORAGE_KEY : 'camera_' + currentGuest.code, queue: isCameraDemo ? [] : JSON.parse(JSON.stringify(uploadQueue)), reel: JSON.parse(JSON.stringify(localReelPhotos)) };
       cameraSaveChain = cameraSaveChain.catch(() => {}).then(() => WeddingStore.put(record));
       return cameraSaveChain;
     }
@@ -371,6 +397,14 @@
 
     // 2. Identify Guest: URL param -> LocalStorage -> Identification Modal
     async function initGuest() {
+      if (isCameraDemo) {
+        currentGuest = { code: 'DEMO', name: 'Uji Coba' };
+        document.getElementById('camera-demo-banner').hidden = false;
+        document.getElementById('btn-switch-user').hidden = true;
+        document.getElementById('reel-storage-note').textContent = 'Foto demo hanya tersimpan di perangkat';
+        document.title = 'Uji Coba Pocket Camera';
+        await verifyGuestUnlockAndSetup(); return;
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const codeParam = urlParams.get('code');
       const nameParam = urlParams.get('to');
@@ -425,6 +459,12 @@
 
     // Option A: Verification & Lock Enforcement
     async function verifyGuestUnlockAndSetup() {
+      if (isCameraDemo) {
+        hideCamLockModal();
+        await setupGuestCamera(0);
+        uploadStatusText.textContent = 'Klik Aktifkan kamera demo untuk mulai mencoba.';
+        return;
+      }
       const icon = document.getElementById('recheck-cam-icon'); icon?.classList.add('animate-spin');
       try {
         const result = await WeddingApi.postToGas('getGuest', { code: currentGuest.code });
@@ -491,7 +531,7 @@
       pocketPhotoCount = Math.min(MAX_SHOTS, totalLocalShots);
 
       updateFilmCounter();
-      startWebRtcCamera();
+      if (!isCameraDemo) startWebRtcCamera();
 
       // If there are pending un-uploaded photos in queue, resume background processing immediately
       if (uploadQueue.length > 0) {
@@ -547,14 +587,39 @@
 
     btnFlip.addEventListener('click', () => {
       currentFacing = (currentFacing === 'environment') ? 'user' : 'environment';
+      if (isCameraDemo && !cameraStream) {
+        uploadStatusText.textContent = 'Pilihan kamera diganti. Klik Aktifkan kamera demo untuk mulai.';
+        return;
+      }
       startWebRtcCamera();
     });
+
+    document.getElementById('btn-start-demo-camera').addEventListener('click', async event => {
+      if (!isCameraDemo) return;
+      const button = event.currentTarget; button.disabled = true; button.textContent = 'Mengaktifkan kamera…';
+      try {
+        await startWebRtcCamera();
+        if (cameraStream) uploadStatusText.textContent = 'Mode uji coba • Foto hanya disimpan di perangkat';
+      } finally {
+        button.disabled = false; button.textContent = cameraStream ? 'Aktifkan ulang kamera' : 'Aktifkan kamera demo';
+      }
+    });
+    document.getElementById('btn-reset-demo-camera').addEventListener('click', async () => {
+      if (!isCameraDemo || isCapturing) return;
+      if (!confirm('Hapus foto pada roll demo dan mulai lagi dari 18 jepretan? Unduh foto yang ingin disimpan terlebih dahulu.')) return;
+      const oldPhotos = localReelPhotos.slice(), oldCount = pocketPhotoCount;
+      localReelPhotos.length = 0; pocketPhotoCount = 0;
+      try { await persistCameraState(); }
+      catch (_) { localReelPhotos.push(...oldPhotos); pocketPhotoCount = oldCount; alert('Roll demo belum bisa direset. Coba lagi.'); return; }
+      updateFilmCounter(); renderReel(); uploadStatusText.textContent = 'Roll demo direset • 18 jepretan tersedia';
+    });
+    addEventListener('pagehide', stopCamera);
 
     // 5. Shutter Action & Background Upload Queue Flow
     btnShutter.addEventListener('click', async () => {
       if (pocketPhotoCount >= MAX_SHOTS || isCapturing) return;
       if (!cameraStream || camVideo.readyState < 2 || !camVideo.videoWidth) {
-        uploadStatusText.textContent = 'Kamera belum siap. Izinkan akses kamera dan tunggu gambar muncul.';
+        uploadStatusText.textContent = isCameraDemo ? 'Klik Aktifkan kamera demo, izinkan akses kamera, lalu tunggu gambar muncul.' : 'Kamera belum siap. Izinkan akses kamera dan tunggu gambar muncul.';
         return;
       }
       isCapturing = true;
@@ -605,7 +670,7 @@
 
         // 3. Dynamic Couple & Guest Watermark on bottom-left
         const guestNameStr = (currentGuest && currentGuest.name) ? currentGuest.name : 'Tamu Undangan';
-        const watermarkText = `The Wedding of ${coupleShortGroom} & ${coupleShortBride} • Shot by ${guestNameStr}`;
+        const watermarkText = `${isCameraDemo ? 'DEMO • ' : ''}The Wedding of ${coupleShortGroom} & ${coupleShortBride} • Shot by ${guestNameStr}`;
         const watermarkFontSize = Math.max(12, Math.round(w * 0.016));
         ctx.save();
         ctx.font = `600 ${watermarkFontSize}px sans-serif`;
@@ -628,7 +693,7 @@
         pocketPhotoCount++;
         localReelPhotos.unshift({ id, shotNumber: pocketPhotoCount, dataUrl: compressedDataUrl,
           timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), uploaded: false });
-        uploadQueue.push({ id, shotNumber: pocketPhotoCount, code: currentGuest.code, name: currentGuest.name,
+        if (!isCameraDemo) uploadQueue.push({ id, shotNumber: pocketPhotoCount, code: currentGuest.code, name: currentGuest.name,
           photoBase64: compressedDataUrl, mimeType: 'image/jpeg', retries: 0 });
         try { await persistCameraState(); }
         catch (error) {
@@ -642,7 +707,8 @@
         updateFilmCounter(); renderReel();
 
         // Trigger queue processor in background
-        processUploadQueue();
+        if (isCameraDemo) uploadStatusText.textContent = 'Foto demo #' + pocketPhotoCount + ' tersimpan di perangkat • Buka Roll Foto untuk mengunduh';
+        else processUploadQueue();
       } catch (err) {
         console.error('Capture error:', err);
       } finally {
@@ -655,6 +721,7 @@
 
     // Background Sequential Queue Worker with Exponential Backoff & Auto-Retry
     async function processUploadQueue() {
+      if (isCameraDemo) return;
       if (isQueueProcessing) return;
       if (!uploadQueue || uploadQueue.length === 0) return;
 
@@ -748,6 +815,10 @@
     function updateExhaustedSubtext() {
       const exhaustedSubtext = document.getElementById('exhausted-subtext');
       if (!exhaustedSubtext) return;
+      if (isCameraDemo) {
+        exhaustedSubtext.textContent = '18 foto uji coba tersimpan di perangkat. Unduh dari Roll Foto, atau gunakan Reset roll demo untuk mencoba lagi.';
+        return;
+      }
 
       if (uploadQueue.length > 0) {
         exhaustedSubtext.innerHTML = `18 jepretan Anda selesai! <br><span class="text-amber-400 font-semibold">Sedang menyelaraskan ${uploadQueue.length} foto terakhir ke Drive...</span><br><span class="text-[11px] text-stone-400">Harap jangan menutup browser hingga selesai.</span>`;
@@ -818,6 +889,7 @@
     }
 
     const retryUploads = document.createElement('button');
+    retryUploads.hidden = isCameraDemo;
     retryUploads.textContent = 'Coba sinkronkan foto'; retryUploads.className = 'text-xs text-amber-400 underline my-2';
     retryUploads.onclick = async () => { uploadQueue.forEach(item => { item.failed = false; item.retries = 0; }); await persistCameraState(); processUploadQueue(); };
     uploadStatusText.parentElement.append(retryUploads);
