@@ -21,6 +21,7 @@ Undangan digital dengan pengelolaan tamu, meja resepsi, Pocket Camera, dan album
 - Meja resepsi menyimpan check-in dan foto dalam antrean IndexedDB. Kehadiran disinkronkan terlebih dahulu; foto diproses terpisah. Panel menampilkan antrean dan kegagalan sinkronisasi.
 - Pocket Camera memeriksa kuota dan kehadiran di server. Foto/antrean disimpan di IndexedDB, upload diulang dengan ID foto yang sama, dan setiap foto dapat diunduh ke HP.
 - Uji coba kamera: buka `pocket-cam.html?unlock=true` atau `index.html?unlock=true` lalu pilih **Coba Pocket Camera**. `demo=true` juga didukung. Klik **Aktifkan kamera demo** dan izinkan kamera. Roll demo 18 foto disimpan terpisah di perangkat, dapat diunduh dan direset, tanpa upload, perubahan kehadiran, atau kuota tamu. Foto diberi watermark DEMO. Mode normal tetap memerlukan check-in yang terverifikasi.
+- Area bidik Pocket Camera mengikuti ruang layar HP. Foto dipotong sesuai area yang terlihat pada pratinjau. Menu **Pilih kamera** menampilkan kamera/lensa yang dibagikan browser setelah izin diberikan. Kamera belakang utama diprioritaskan jika nama lensanya dapat dikenali; pilihan manual diingat pada perangkat. Nama/nomor kamera generik tidak dianggap pasti sebagai lensa utama. Kontrol zoom tampil jika didukung kamera/browser.
 - Album bersama: foto baru menunggu persetujuan. Admin dapat menayangkan atau menyembunyikan foto. Album menampilkan hingga 500 foto terbaru sesuai status.
 
 ## Memasang atau memperbarui deployment
