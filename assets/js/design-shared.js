@@ -26,7 +26,13 @@
       heroShade: number(data.heroShade, 0.3, 0, 0.8)
     };
   }
-  window.InvitationDesign = { normalize, media, scenes };
+  function gallery(raw) {
+    let list = raw;
+    if (typeof raw === 'string') { try { list = JSON.parse(raw); } catch (_) { return null; } }
+    if (!Array.isArray(list)) return null;
+    return list.slice(0, 50).filter(photo => photo && media(photo.url)).map(photo => ({ url: media(photo.url), title: String(photo.title || '').slice(0, 120), category: String(photo.category || '').slice(0, 80) }));
+  }
+  window.InvitationDesign = { normalize, media, scenes, gallery };
   const original = WeddingApi.mapSettingsToConfig;
   WeddingApi.mapSettingsToConfig = function (settings, base) {
     const cfg = original.call(this, settings, base);
@@ -39,6 +45,8 @@
     if ([1, 2, 3, 4, 5].some(i => has(`GALLERY${i}_URL`))) {
       cfg.gallery = [1, 2, 3, 4, 5].filter(i => media(settings[`GALLERY${i}_URL`])).map(i => ({ url: media(settings[`GALLERY${i}_URL`]), title: settings[`GALLERY${i}_TITLE`] || `Kenangan ${i}`, category: settings[`GALLERY${i}_CAT`] || '' }));
     }
+    const customGallery = gallery(settings?.GALLERY_JSON);
+    if (customGallery !== null) cfg.gallery = customGallery;
     if ([1, 2, 3].some(i => has(`STORY${i}_TITLE`))) {
       cfg.loveStory = [1, 2, 3].map(i => ({ title: settings[`STORY${i}_TITLE`] || '', description: settings[`STORY${i}_DESC`] || '', date: WeddingApi.cleanTimelineDate(settings[`STORY${i}_DATE`] || ''), tag: settings[`STORY${i}_TAG`] || '', image: media(settings[`STORY${i}_IMG`]) })).filter(s => s.title || s.description || s.image);
     }

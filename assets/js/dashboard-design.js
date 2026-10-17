@@ -55,6 +55,77 @@
   const open = make('button', 'rounded-xl bg-stone-800 text-white py-3 px-5 text-xs', 'Pratinjau desain'); open.type = 'button';
   const hint = make('p', 'text-xs text-slate-500', 'Gunakan tombol Simpan Semua Pengaturan untuk menerbitkan perubahan.'); bar.append(open, hint); section.append(bar); form.prepend(section);
 
+  // The original five inputs remain as compatibility fields for the existing controller.
+  const legacyGallery = document.getElementById('cfg-gallery1-url').closest('div.bg-white');
+  legacyGallery.hidden = true;
+  const galleryEditor = make('section', 'bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4');
+  galleryEditor.id = 'gallery-editor'; legacyGallery.after(galleryEditor);
+  galleryEditor.append(make('h3', 'font-bold text-base', 'Galeri Foto Pre-Wedding'), make('p', 'text-xs text-slate-500', 'Tambahkan hingga 50 foto. Urutan di sini mengikuti urutan tampil di undangan. Gunakan link gambar langsung atau Google Drive dengan akses lihat publik.'));
+  const galleryCount = make('p', 'text-xs font-semibold text-slate-600'); galleryCount.setAttribute('role', 'status');
+  const galleryRows = make('div', 'space-y-4'); galleryRows.id = 'gallery-photo-rows';
+  const addPhoto = make('button', 'rounded-xl bg-indigo-700 text-white py-3 px-5 text-xs', '+ Tambah foto galeri'); addPhoto.type = 'button'; addPhoto.id = 'btn-add-gallery-photo';
+  galleryEditor.append(galleryCount, galleryRows, addPhoto);
+  function readGallery() {
+    return Array.from(galleryRows.children).map(row => ({ url: row.querySelector('[data-gallery="url"]').value.trim(), title: row.querySelector('[data-gallery="title"]').value.trim(), category: row.querySelector('[data-gallery="category"]').value.trim() }));
+  }
+  function syncLegacyGallery() {
+    const rows = readGallery();
+    for (let i = 1; i <= 5; i++) for (const [suffix, key] of [['url', 'url'], ['title', 'title'], ['cat', 'category']]) document.getElementById(`cfg-gallery${i}-${suffix}`).value = rows[i - 1]?.[key] || '';
+    galleryCount.textContent = rows.length + ' / 50 foto'; addPhoto.disabled = rows.length >= 50;
+  }
+  function drawGallery(list) {
+    galleryRows.replaceChildren();
+    list.forEach((photo, index) => {
+      const row = make('article', 'p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3');
+      row.append(make('h4', 'font-semibold text-sm', 'Foto ' + (index + 1)));
+      const inputs = make('div', 'grid grid-cols-1 md:grid-cols-2 gap-3'); row.append(inputs);
+      const preview = make('img', 'rounded-xl w-full max-w-xs'); preview.style.cssText = 'height:140px;object-fit:contain;background:#eee'; preview.alt = 'Pratinjau foto ' + (index + 1); preview.hidden = true;
+      const status = make('p', 'text-xs text-slate-500'); status.setAttribute('role', 'status');
+      let urlInput;
+      for (const [key, label] of [['url', 'URL foto'], ['title', 'Judul foto'], ['category', 'Kategori']]) {
+        const wrap = make('div', key === 'url' ? 'md:col-span-2' : '');
+        const id = `gallery-photo-${index}-${key}`;
+        const caption = make('label', 'block text-xs font-semibold text-slate-600 mb-1', label); caption.htmlFor = id;
+        const input = make('input', 'w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white'); input.id = id; input.type = key === 'url' ? 'url' : 'text'; input.dataset.gallery = key; input.value = photo[key] || '';
+        input.maxLength = key === 'url' ? 2048 : key === 'title' ? 120 : 80;
+        if (key === 'url') { input.required = true; input.placeholder = 'https://…'; urlInput = input; }
+        wrap.append(caption, input); inputs.append(wrap);
+      }
+      const refreshPhoto = () => {
+        const url = InvitationDesign.media(urlInput.value);
+        const albumLink = /photos\.app\.goo\.gl|photos\.google\.com/i.test(urlInput.value);
+        urlInput.setCustomValidity(albumLink ? 'Gunakan link gambar langsung atau Google Drive; link album Google Foto tidak dapat ditampilkan.' : urlInput.value && !url ? 'Gunakan URL gambar dengan awalan https:// atau http://.' : '');
+        preview.hidden = !url || albumLink;
+        status.textContent = albumLink ? 'Link album Google Foto tidak dapat ditampilkan sebagai gambar.' : '';
+        if (url && !albumLink) { preview.onload = () => { preview.hidden = false; status.textContent = 'Gambar berhasil dimuat'; }; preview.onerror = () => { preview.hidden = true; status.textContent = 'Gambar belum bisa dimuat. Periksa URL dan akses berbagi.'; }; preview.src = url; }
+        else preview.removeAttribute('src');
+      };
+      urlInput.addEventListener('change', refreshPhoto);
+      urlInput.addEventListener('input', () => urlInput.setCustomValidity(''));
+      row.append(preview, status);
+      const controls = make('div', 'flex flex-wrap gap-2');
+      const action = (label, text, disabled, handler) => {
+        const button = make('button', 'px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white', text); button.type = 'button'; button.setAttribute('aria-label', label + ' foto ' + (index + 1)); button.disabled = disabled; button.onclick = handler; controls.append(button);
+      };
+      function move(offset) { const rows = readGallery(); [rows[index], rows[index + offset]] = [rows[index + offset], rows[index]]; drawGallery(rows); sendPreview(); }
+      action('Naikkan', '↑ Naik', index === 0, () => move(-1));
+      action('Turunkan', '↓ Turun', index === list.length - 1, () => move(1));
+      action('Hapus', 'Hapus foto', false, () => { const rows = readGallery(); rows.splice(index, 1); drawGallery(rows); sendPreview(); });
+      row.append(controls); galleryRows.append(row); refreshPhoto();
+    });
+    syncLegacyGallery();
+  }
+  function loadGallery(settings) {
+    let list = InvitationDesign.gallery(settings.GALLERY_JSON);
+    if (list === null) {
+      const hasLegacy = [1, 2, 3, 4, 5].some(i => Object.hasOwn(settings, `GALLERY${i}_URL`));
+      list = hasLegacy ? [1, 2, 3, 4, 5].map(i => ({ url: settings[`GALLERY${i}_URL`] || '', title: settings[`GALLERY${i}_TITLE`] || '', category: settings[`GALLERY${i}_CAT`] || '' })).filter(photo => photo.url) : WEDDING_CONFIG.gallery || [];
+    }
+    drawGallery(list);
+  }
+  galleryRows.addEventListener('input', syncLegacyGallery);
+  addPhoto.onclick = () => { const list = readGallery(); if (list.length >= 50) return; list.push({ url: '', title: '', category: '' }); drawGallery(list); galleryRows.lastElementChild.querySelector('input').focus(); };
+
   function read() {
     const data = {};
     fields.forEach((input, path) => {
@@ -71,7 +142,7 @@
       const value = path.split('.').reduce((obj, key) => obj?.[key], d);
       if (input.type === 'checkbox') input.checked = !!value; else input.value = value ?? '';
       input.updatePreview?.();
-    }); loaded = true;
+    }); loadGallery(pending); loaded = true;
   }
   window.InvitationDesignEditor = { load, read };
   load(typeof currentRawSettings !== 'undefined' ? currentRawSettings : {});
@@ -79,7 +150,14 @@
   WeddingApi.saveSettings = function (settings) {
     // Only the full settings form includes event data; saving a WA template must not save drafts.
     const payload = Object.assign({}, settings);
-    if (loaded && Object.hasOwn(payload, 'EVENT_TITLE')) payload.DESIGN_JSON = JSON.stringify(read());
+    if (loaded && Object.hasOwn(payload, 'EVENT_TITLE')) {
+      payload.DESIGN_JSON = JSON.stringify(read());
+      const photos = InvitationDesign.gallery(readGallery()); payload.GALLERY_JSON = JSON.stringify(photos);
+      if (payload.GALLERY_JSON.length > 45000) return Promise.resolve({ success: false, error: 'Total tautan foto terlalu panjang. Gunakan tautan gambar yang lebih pendek atau kurangi jumlah foto.' });
+      for (let i = 1; i <= 5; i++) {
+        payload[`GALLERY${i}_URL`] = photos[i - 1]?.url || ''; payload[`GALLERY${i}_TITLE`] = photos[i - 1]?.title || ''; payload[`GALLERY${i}_CAT`] = photos[i - 1]?.category || '';
+      }
+    }
     return originalSave.call(this, payload);
   };
 
@@ -97,7 +175,7 @@
     Object.entries(map).forEach(([id, key]) => { const input = document.getElementById(id); if (input) settings[key] = input.value.trim(); });
     const metadata = { 'cfg-event-title': 'EVENT_TITLE', 'cfg-event-date-formatted': 'EVENT_DATE_FORMATTED', 'cfg-countdown-target': 'COUNTDOWN_TARGET', 'cfg-groom-bio': 'GROOM_BIO', 'cfg-bride-bio': 'BRIDE_BIO', 'cfg-akad-time': 'AKAD_TIME', 'cfg-akad-venue': 'AKAD_VENUE', 'cfg-akad-address': 'AKAD_ADDRESS', 'cfg-resepsi-time': 'RESEPSI_TIME', 'cfg-resepsi-venue': 'RESEPSI_VENUE', 'cfg-resepsi-address': 'RESEPSI_ADDRESS' };
     Object.entries(metadata).forEach(([id, key]) => { const input = document.getElementById(id); if (input) settings[key] = input.value.trim(); });
-    settings.DESIGN_JSON = JSON.stringify(read()); return settings;
+    settings.DESIGN_JSON = JSON.stringify(read()); settings.GALLERY_JSON = JSON.stringify(InvitationDesign.gallery(readGallery())); return settings;
   }
   function sendPreview() { if (dialog.open) iframe.contentWindow?.postMessage({ type: 'wedding-design-preview', settings: previewSettings() }, location.origin); }
   open.onclick = () => { dialog.showModal(); if (!iframe.src) iframe.src = 'index.html?design-preview=1'; else sendPreview(); };
