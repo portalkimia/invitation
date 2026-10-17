@@ -64,6 +64,13 @@
   function ornament(node, url) { if (!node) return; node.hidden = !url; if (url) node.src = url; else node.removeAttribute('src'); }
   function updateDesign(cfg) {
     design = InvitationDesign.normalize(cfg.design);
+    const visibility = { quote: ['quote-scene'], story: ['love-story-section'], gallery: ['gallery-section'], rsvp: ['rsvp-section'], gift: ['gift-section'], album: ['shared-album-section'], camera: ['pocket-cam-section'] };
+    Object.entries(visibility).forEach(([key, ids]) => ids.forEach(id => {
+      const node = $(id); if (!node) return;
+      if (design.sections[key] === false) node.style.setProperty('display', 'none', 'important'); else node.style.removeProperty('display');
+    }));
+    const wishesSection = $('wishes-container')?.closest('section');
+    if (wishesSection) { if (design.sections.rsvp === false) wishesSection.style.setProperty('display', 'none', 'important'); else wishesSection.style.removeProperty('display'); }
     document.body.classList.add('story-layout'); document.body.style.backgroundImage = 'none';
     const root = document.documentElement;
     Object.entries(design.colors).forEach(([key, value]) => root.style.setProperty('--' + key, value));

@@ -171,6 +171,7 @@
   dialog.append(toolbar, iframe); document.body.append(dialog); close.onclick = () => dialog.close();
   function previewSettings() {
     const settings = Object.fromEntries(Object.entries(pending).filter(([key]) => !/PIN|SECRET|TOKEN|PASSWORD/i.test(key)));
+    if (window.collectEventSettings) Object.assign(settings, Object.fromEntries(Object.entries(window.collectEventSettings()).filter(([key]) => !/PIN|SECRET|TOKEN|PASSWORD/i.test(key))));
     const map = { 'cfg-cover-photo': 'COVER_PHOTO', 'cfg-bg-image': 'BG_IMAGE', 'cfg-groom-photo': 'GROOM_PHOTO', 'cfg-bride-photo': 'BRIDE_PHOTO', 'cfg-groom-name': 'GROOM_NAME', 'cfg-bride-name': 'BRIDE_NAME', 'cfg-groom-short': 'GROOM_SHORT', 'cfg-bride-short': 'BRIDE_SHORT', 'cfg-quote-text': 'QUOTE_TEXT', 'cfg-quote-source': 'QUOTE_SOURCE' };
     for (let i = 1; i <= 3; i++) for (const [suffix, key] of [['title','TITLE'],['desc','DESC'],['date','DATE'],['tag','TAG'],['img','IMG']]) map[`cfg-story${i}-${suffix}`] = `STORY${i}_${key}`;
     for (let i = 1; i <= 5; i++) for (const [suffix, key] of [['url','URL'],['title','TITLE'],['cat','CAT']]) map[`cfg-gallery${i}-${suffix}`] = `GALLERY${i}_${key}`;

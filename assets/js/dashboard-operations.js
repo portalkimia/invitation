@@ -28,6 +28,8 @@
     return clean(s);
   }
   function loadOperationSettings(settings) {
+    const header = document.querySelector('#main-content header p');
+    if (header && settings.EVENT_TITLE) header.textContent = settings.EVENT_TITLE;
     for (const [key,input] of Object.entries(inputs)) {
       if (input.type === 'checkbox') input.checked = String(settings[key] ?? 'true') !== 'false';
       else if (input.type === 'datetime-local') {
@@ -42,9 +44,13 @@
   function restore(settings) {
     for (const [key,value] of Object.entries(clean(settings))) {
       const input = document.getElementById('cfg-' + key.toLowerCase().replaceAll('_','-'));
-      if (input && input.type !== 'password') input.value = value;
+      if (input && input.type !== 'password') {
+        if (input.type === 'datetime-local' && value) { const d = new Date(value); input.value = isNaN(d) ? '' : new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
+        else input.value = value;
+      }
     }
     InvitationDesignEditor.load(settings); form.dispatchEvent(new Event('input',{ bubbles:true }));
+    formLoaded = true;
     status.textContent = 'Draf dimuat. Periksa pratinjau, lalu Terbitkan Pengaturan untuk mengubah situs.';
   }
   const originalSave = WeddingApi.saveSettings;
@@ -59,7 +65,19 @@
     if (result.success && Object.hasOwn(payload,'EVENT_TITLE')) { status.textContent = 'Pengaturan diterbitkan. Draf lokal tetap tersedia.'; currentRawSettings = {...currentRawSettings,...payload}; }
     return result;
   };
-  let draftTimer, dirty = false;
+  let draftTimer, dirty = false, formLoaded = false, loadingForm = null;
+  const originalLoadForm = window.loadEventSettingsForm;
+  window.loadEventSettingsForm = async (force = false) => {
+    if (loadingForm) return loadingForm;
+    if (formLoaded && !force) return;
+    if (force && dirty && !confirm('Muat ulang pengaturan terbit dan ganti perubahan di formulir? Draf browser tetap tersedia.')) return;
+    form.inert = true; status.textContent = 'Memuat pengaturan terbit…';
+    loadingForm = (async () => {
+      try { await originalLoadForm(force); formLoaded = true; dirty = false; status.textContent = 'Pengaturan terbit dimuat. Perubahan berikutnya disimpan sebagai draf.'; }
+      finally { form.inert = false; loadingForm = null; }
+    })();
+    return loadingForm;
+  };
   form.addEventListener('input', () => {
     dirty = true; clearTimeout(draftTimer);
     draftTimer = setTimeout(() => { try { localStorage.setItem(localDraftKey,JSON.stringify({schema:1,savedAt:new Date().toISOString(),settings:collect()})); status.textContent = 'Draf tersimpan di browser ini. Belum diterbitkan.'; } catch (_) {status.textContent = 'Draf lokal belum tersimpan. Gunakan Simpan draf ke server.';} },700);
