@@ -2,6 +2,20 @@
 
 Terverifikasi pada 17 Oktober 2026, zona waktu Asia/Jakarta.
 
+## Operasional v3
+
+- Backend aktif: Apps Script **versi deployment 9**, API **3**, diterapkan 17 Oktober 2026 pukul 22.39 WIB pada URL yang sama. Tidak ada perubahan pemilik atau cakupan akses deployment.
+- Modul awal: `aad4f33df87dceeff259713715b7eafa854ecfec`; halaman awal: `14b4ce64830963ff2d0fc48cf4dce887cc02d66d`; perapian draf/pratinjau: `c353830aba3ae94b5c7cb6cffe93e4677be627ba`.
+- Aset halaman akhir memakai versi URL `20261017-ops3-final`.
+- Fitur: upload/potong/kompres gambar, draf lokal/server dan backup JSON, sakelar bagian, kartu QR, tautan bertoken, identitas petugas, check-in cepat, pemilihan lensa, walk-in eksplisit, simulasi terpisah, panel hari acara, perkiraan kapasitas, bentuk foto dan kebijakan kuota/jadwal kamera.
+- Pengaturan acara yang sedang aktif tidak diganti. Kuota tetap 18 jika belum diatur; jadwal kamera kosong berarti tersedia setelah check-in. Akses tautan kode lama tetap aktif sampai admin menonaktifkannya setelah membagikan ulang tautan baru.
+- Skema menambah Guests kolom P `checkedInBy`. Draf server memakai sheet `DesignDraft`; gambar desain memakai subfolder `WeddingDesign`. Keduanya dibuat saat fitur terkait pertama digunakan.
+- Antrean browser di panel hanya mencakup perangkat ini. Foto moderasi dihitung dari maksimal 500 foto terbaru. Kalkulator penyimpanan adalah perkiraan; tidak menjalankan uji beban.
+- Sumber seluruh skrip telah diperiksa sintaksnya. Halaman dashboard, simulasi, dan kontrol kamera ditinjau melalui browser; panel hari acara berhasil membaca backend API 3. Tidak ada RSVP, check-in, pengiriman WhatsApp, atau upload foto produksi yang dibuat untuk peninjauan ini. Lensa fisik Samsung S25 FE dan alur operasi penuh di venue tetap perlu dicoba pada perangkat sebenarnya.
+- Backup sumber sebelum perubahan berada di `C:\Users\Tito\Desktop\wedding-app-backup-full-improvements\source`.
+
+Bagian di bawah menyimpan riwayat deployment dan pemeriksaan sebelumnya.
+
 - Situs: https://portalkimia.github.io/invitation/index.html
 - Admin: https://portalkimia.github.io/invitation/dashboard.html
 - Resepsi: https://portalkimia.github.io/invitation/reception.html
@@ -16,6 +30,8 @@ Terverifikasi pada 17 Oktober 2026, zona waktu Asia/Jakarta.
 ## Studio desain
 
 ### Mode uji coba kamera
+
+- Perbaikan layar/lensa: area bidik memakai ruang layar HP; pilihan lensa manual dan preferensi lokal per depan/belakang; prioritas otomatis hanya untuk label lensa utama yang dikenali. Zoom memakai kemampuan track jika tersedia. Hasil foto mengikuti potongan area pratinjau. Dukungan lensa S25 FE perlu dicoba pada perangkat karena label/akses lensa mengikuti Chrome dan OS.
 
 - `index.html?unlock=true` menampilkan tautan kamera demo, dan `pocket-cam.html?unlock=true` membukanya langsung. `demo=true` juga didukung.
 - Demo memakai identitas lokal DEMO dan kunci IndexedDB `demo_camera_v1`, bukan sesi tamu atau antrean upload tamu. Hanya permintaan baca pengaturan/ping yang diizinkan dari halaman demo.
@@ -46,7 +62,7 @@ Terverifikasi pada 17 Oktober 2026, zona waktu Asia/Jakarta.
 ## Backend
 
 - Project Apps Script: `1WLghP8nsjZew7RMg9MY3yAtAttZMLt0aas_9gvMX1_-g8JUBkhORDO5K`
-- Versi deployment Apps Script: **7**, API aplikasi versi **2**.
+- Riwayat sebelum operasional v3: versi deployment Apps Script **7**, API aplikasi versi **2**. Versi aktif terkini tercantum pada bagian Operasional v3 di atas.
 - URL tetap: https://script.google.com/macros/s/AKfycbyu6oRsL1CbppQHf-v2EPoJcjaivYKtdQDHyju0HO5TyODo1GPuPYTg0Ts4dwLvCGX_-A/exec
 - Snapshot rollback sebelumnya: Apps Script versi **6**; commit situs sebelumnya `940f9a11417f2697cee821a32b5f6ea3a43769e5`.
 - Database: https://docs.google.com/spreadsheets/d/1IxRvNP3_4cI55agx-oPnUMxeDLTzRXJ8oXTVBT1naSY/edit

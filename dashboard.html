@@ -850,9 +850,9 @@
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/api.js"></script>
-  <script src="assets/js/improvements.js?v=20261017-ops3"></script>
-  <script src="assets/js/operations-shared.js?v=20261017-ops3"></script>
-  <script src="assets/js/design-shared.js?v=20261017-ops3"></script>
+  <script src="assets/js/improvements.js?v=20261017-ops3-final"></script>
+  <script src="assets/js/operations-shared.js?v=20261017-ops3-final"></script>
+  <script src="assets/js/design-shared.js?v=20261017-ops3-final"></script>
   <script>
     lucide.createIcons();
 
@@ -1269,7 +1269,7 @@
       const qrContainer = document.getElementById('modal-qrcode');
       qrContainer.innerHTML = '';
       modalQrInstance = new QRCode(qrContainer, {
-        text: code,
+        text: WeddingApi.qrPayload(code),
         width: 160,
         height: 160,
         colorDark: "#1E293B",
@@ -1825,8 +1825,8 @@
     checkAuth();
   </script>
   <script src="assets/js/dashboard-improvements.js"></script>
-  <script src="assets/js/dashboard-design.js?v=20261017-ops3"></script>
-<script src="assets/js/dashboard-operations.js?v=20261017-ops3"></script>
-<script src="assets/js/dashboard-media.js?v=20261017-ops3"></script>
+  <script src="assets/js/dashboard-design.js?v=20261017-ops3-final"></script>
+<script src="assets/js/dashboard-operations.js?v=20261017-ops3-final"></script>
+<script src="assets/js/dashboard-media.js?v=20261017-ops3-final"></script>
 </body>
 </html>
