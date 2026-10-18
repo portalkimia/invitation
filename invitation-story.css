@@ -17,6 +17,11 @@ html{scroll-behavior:smooth}body.story-layout{background:var(--paper);color:var(
 @media(min-width:1024px){.story-layout #invitation-main{width:440px;max-width:440px;margin:0 0 0 auto;box-shadow:-12px 0 60px #443b3220}.story-layout #cover-screen{left:auto;width:440px}.desktop-scene{position:fixed;inset:0 440px 0 0;display:flex;align-items:center;justify-content:center;text-align:center;padding:50px;isolation:isolate;background-color:var(--paper);background-image:var(--scene-image),radial-gradient(ellipse at 50% 70%,#fff8,transparent 70%);background-size:cover;background-position:center}.desktop-scene:after{content:'';position:absolute;inset:30px;border:1px solid var(--accent);opacity:.4;pointer-events:none}.desktop-scene .cover-monogram{width:180px;font-size:60px;margin-bottom:40px}.desktop-scene h2{font-size:clamp(50px,6vw,86px);margin:20px 0}.desktop-scene .eyebrow{font-size:11px}#desktop-date{font-size:12px;margin-bottom:50px}#desktop-guest{font-family:'Cormorant Garamond',serif;font-size:26px;margin-top:8px}.story-layout #petals-canvas{left:auto;width:440px}.preview-banner{left:auto;width:440px}}
 .story-layout #cover-screen{position:fixed;inset:0;min-height:100svh}
 .story-layout #rsvp-section #rsvp-form{padding:clamp(18px,5vw,24px);border-radius:24px;border:1px solid #ffffff88;box-shadow:0 8px 28px #443b320a}
+/* Let event cards follow their content instead of stretching the footer away. */
+.story-layout #events-section>.grid{gap:24px;align-items:start}
+.story-layout #events-section>.grid>div{min-height:0;padding:52px 24px 24px;justify-content:flex-start}
+.story-layout #events-section>.grid>div>div:last-child{margin-top:20px;padding-top:16px;border-top-color:color-mix(in srgb,var(--accent),transparent 80%)}
+.story-layout #events-section #btn-maps-link{min-height:44px;white-space:normal}
 /* Complete the last row when a wide photo is followed by one unpaired portrait. */
 .gallery-photo:last-child:nth-child(3n+2){grid-column:span 2;aspect-ratio:4/3;border-radius:6px}
 .story-layout #pocket-cam-section{background:#443b32!important;color:#fff;border-radius:24px!important}
