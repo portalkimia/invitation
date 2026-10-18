@@ -263,6 +263,8 @@
                 <button type="button" onclick="insertWaTag('{nama}')" class="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-mono font-medium border border-emerald-200 cursor-pointer">+ {nama}</button>
                 <button type="button" onclick="insertWaTag('{mempelai}')" class="px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-800 font-mono font-medium border border-amber-200 cursor-pointer">+ {mempelai}</button>
                 <button type="button" onclick="insertWaTag('{tanggal}')" class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-800 font-mono font-medium border border-blue-200 cursor-pointer">+ {tanggal}</button>
+                <button type="button" onclick="insertWaTag('{akad_tanggal}')" class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-800 font-mono font-medium border border-blue-200 cursor-pointer">+ {akad_tanggal}</button>
+                <button type="button" onclick="insertWaTag('{resepsi_tanggal}')" class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-800 font-mono font-medium border border-blue-200 cursor-pointer">+ {resepsi_tanggal}</button>
                 <button type="button" onclick="insertWaTag('{tempat}')" class="px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-800 font-mono font-medium border border-purple-200 cursor-pointer">+ {tempat}</button>
                 <button type="button" onclick="insertWaTag('{alamat}')" class="px-2 py-0.5 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-mono font-medium border border-indigo-200 cursor-pointer">+ {alamat}</button>
                 <button type="button" onclick="insertWaTag('{waktu}')" class="px-2 py-0.5 rounded-md bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-mono font-medium border border-cyan-200 cursor-pointer">+ {waktu}</button>
@@ -505,6 +507,11 @@
                   <span>Akad Nikah</span>
                 </h4>
                 <div>
+                  <label for="cfg-akad-date" class="block text-[11px] font-semibold text-slate-600 mb-1">Tanggal Akad</label>
+                  <input type="date" id="cfg-akad-date" aria-describedby="akad-date-help" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <p id="akad-date-help" class="text-[11px] text-slate-500 mt-1">Kosongkan untuk mengikuti Teks Tanggal Ditampilkan.</p>
+                </div>
+                <div>
                   <label class="block text-[11px] font-semibold text-slate-600 mb-1">Waktu Akad</label>
                   <input type="text" id="cfg-akad-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="08:00 - 10:00 WIB">
                 </div>
@@ -528,6 +535,11 @@
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
                   <span>Resepsi Pernikahan</span>
                 </h4>
+                <div>
+                  <label for="cfg-resepsi-date" class="block text-[11px] font-semibold text-slate-600 mb-1">Tanggal Resepsi</label>
+                  <input type="date" id="cfg-resepsi-date" aria-describedby="resepsi-date-help" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white">
+                  <p id="resepsi-date-help" class="text-[11px] text-slate-500 mt-1">Kosongkan untuk mengikuti Teks Tanggal Ditampilkan. Kalender mengikuti tanggal resepsi ini.</p>
+                </div>
                 <div>
                   <label class="block text-[11px] font-semibold text-slate-600 mb-1">Waktu Resepsi</label>
                   <input type="text" id="cfg-resepsi-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white" placeholder="11:00 - 14:00 WIB">
@@ -849,7 +861,7 @@
 
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
-  <script src="assets/js/api.js"></script>
+  <script src="assets/js/api.js?v=20261018-event-dates"></script>
   <script src="assets/js/improvements.js?v=20261017-ops3-final"></script>
   <script src="assets/js/operations-shared.js?v=20261017-ops3-final"></script>
   <script src="assets/js/design-shared.js?v=20261017-garden"></script>
@@ -1551,12 +1563,14 @@
         document.getElementById('cfg-music-url').value = currentRawSettings.MUSIC_URL || cfg.music?.audioUrl || '';
 
         // Akad
+        document.getElementById('cfg-akad-date').value = currentRawSettings.AKAD_DATE || cfg.event?.akadDate || '';
         document.getElementById('cfg-akad-time').value = currentRawSettings.AKAD_TIME || cfg.event?.akadTime || '08:00 - 10:00 WIB';
         document.getElementById('cfg-akad-venue').value = currentRawSettings.AKAD_VENUE || cfg.event?.akadVenue || 'Masjid Agung Al-Azhar';
         document.getElementById('cfg-akad-address').value = currentRawSettings.AKAD_ADDRESS || cfg.event?.akadAddress || '';
         document.getElementById('cfg-akad-note').value = currentRawSettings.AKAD_NOTE || cfg.event?.akadNote || 'Khusus Keluarga & Kerabat Dekat';
 
         // Resepsi
+        document.getElementById('cfg-resepsi-date').value = currentRawSettings.RESEPSI_DATE || cfg.event?.resepsiDate || '';
         document.getElementById('cfg-resepsi-time').value = currentRawSettings.RESEPSI_TIME || cfg.event?.resepsiTime || '11:00 - 14:00 WIB';
         document.getElementById('cfg-resepsi-venue').value = currentRawSettings.RESEPSI_VENUE || cfg.event?.resepsiVenue || 'Grand Ballroom Hotel Mulia Senayan';
         document.getElementById('cfg-resepsi-address').value = currentRawSettings.RESEPSI_ADDRESS || cfg.event?.resepsiAddress || '';
@@ -1750,11 +1764,13 @@
         BG_IMAGE: formatImg(document.getElementById('cfg-bg-image').value.trim()),
         MUSIC_URL: document.getElementById('cfg-music-url').value.trim(),
 
+        AKAD_DATE: document.getElementById('cfg-akad-date').value,
         AKAD_TIME: document.getElementById('cfg-akad-time').value.trim(),
         AKAD_VENUE: document.getElementById('cfg-akad-venue').value.trim(),
         AKAD_ADDRESS: document.getElementById('cfg-akad-address').value.trim(),
         AKAD_NOTE: document.getElementById('cfg-akad-note').value.trim(),
 
+        RESEPSI_DATE: document.getElementById('cfg-resepsi-date').value,
         RESEPSI_TIME: document.getElementById('cfg-resepsi-time').value.trim(),
         RESEPSI_VENUE: document.getElementById('cfg-resepsi-venue').value.trim(),
         RESEPSI_ADDRESS: document.getElementById('cfg-resepsi-address').value.trim(),

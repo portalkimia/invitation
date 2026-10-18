@@ -291,6 +291,7 @@
               <i data-lucide="clock" class="w-5 h-5"></i>
               <span class="font-serif font-bold text-lg text-slate-900">Akad Nikah</span>
             </div>
+            <p id="akad-date" class="event-card-date text-xs font-semibold text-gold-800 mb-2"></p>
             <p id="akad-time" class="text-xs font-semibold text-gold-800 mb-2">08:00 - 10:00 WIB</p>
             <p id="akad-venue" class="text-sm font-bold text-slate-800 mb-1">Masjid Agung Al-Azhar</p>
             <p id="akad-address" class="text-xs text-slate-500 leading-relaxed">Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan</p>
@@ -308,6 +309,7 @@
               <i data-lucide="sparkles" class="w-5 h-5"></i>
               <span class="font-serif font-bold text-lg text-slate-900">Resepsi Pernikahan</span>
             </div>
+            <p id="resepsi-date" class="event-card-date text-xs font-semibold text-gold-800 mb-2"></p>
             <p id="resepsi-time" class="text-xs font-semibold text-gold-800 mb-2">11:00 - 14:00 WIB</p>
             <p id="resepsi-venue" class="text-sm font-bold text-slate-800 mb-1">Grand Ballroom Hotel Mulia Senayan</p>
             <p id="resepsi-address" class="text-xs text-slate-500 leading-relaxed">Jl. Asia Afrika No.6, Gelora, Senayan, Jakarta Pusat</p>
@@ -608,7 +610,7 @@
 
   <!-- Scripts -->
   <script src="assets/js/config.js"></script>
-  <script src="assets/js/api.js"></script>
+  <script src="assets/js/api.js?v=20261018-event-dates"></script>
   <script src="assets/js/improvements.js?v=20261017-ops3-final"></script>
   <script src="assets/js/operations-shared.js?v=20261017-ops3-final"></script>
   <script src="assets/js/design-shared.js?v=20261017-garden"></script>
@@ -812,6 +814,7 @@
       }
 
       // Akad Nikah (supports flat and nested keys)
+      document.getElementById('akad-date').textContent = WeddingApi.formatEventDate(cfg.event?.akadDate || cfg.event?.akad?.date, cfg.event?.dateFormatted);
       const akadTime = cfg.event?.akadTime || cfg.event?.akad?.time;
       const akadVenue = cfg.event?.akadVenue || cfg.event?.akad?.venue;
       const akadAddress = cfg.event?.akadAddress || cfg.event?.akad?.address;
@@ -822,6 +825,7 @@
       if (akadNote) document.getElementById('akad-note').textContent = akadNote;
 
       // Resepsi Pernikahan (supports flat and nested keys)
+      document.getElementById('resepsi-date').textContent = WeddingApi.formatEventDate(cfg.event?.resepsiDate || cfg.event?.reception?.date, cfg.event?.dateFormatted);
       const resepsiTime = cfg.event?.resepsiTime || cfg.event?.reception?.time;
       const resepsiVenue = cfg.event?.resepsiVenue || cfg.event?.reception?.venue;
       const resepsiAddress = cfg.event?.resepsiAddress || cfg.event?.reception?.address;
@@ -1550,7 +1554,7 @@
     // Re-render Lucide icons after dynamic injection
     setTimeout(() => lucide.createIcons(), 300);
   </script>
-  <script src="assets/js/guest-improvements.js"></script>
+  <script src="assets/js/guest-improvements.js?v=20261018-event-dates"></script>
   <script src="assets/js/story-layout.js?v=20261017-garden"></script>
 <script src="assets/js/guest-operations.js?v=20261017-ops3-final"></script>
 </body>
