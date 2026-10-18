@@ -62,6 +62,28 @@
     node.style.setProperty('--scene-image', url ? `url(${JSON.stringify(InvitationDesign.media(url))})` : 'none');
   }
   function ornament(node, url) { if (!node) return; node.hidden = !url; if (url) node.src = url; else node.removeAttribute('src'); }
+  function renderMonogram(cfg) {
+    const initials = ['groom', 'bride'].map(key => {
+      const person = cfg.couple?.[key];
+      return Array.from(String(person?.shortName || cfg.couple?.[key + 'Short'] || person?.name || '').trim())[0]?.toLocaleUpperCase('id-ID') || '';
+    });
+    const svgNode = (tag, attrs) => {
+      const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      return node;
+    };
+    document.querySelectorAll('.couple-monogram').forEach(node => {
+      const svg = svgNode('svg', { viewBox: '0 0 220 220', class: 'wedding-monogram', role: 'img', 'aria-label': 'Monogram ' + initials.filter(Boolean).join(' dan '), focusable: 'false' });
+      svg.append(svgNode('path', { class: 'monogram-ring', d: 'M164 24C206 52 209 135 177 179C148 218 75 213 43 177C9 139 16 57 55 29C85 8 131 8 157 20' }));
+      svg.append(svgNode('path', { class: 'monogram-ring monogram-ring-inner', d: 'M53 44C25 78 28 141 55 172C81 202 139 207 169 175C199 141 199 78 176 47' }));
+      initials.forEach((letter, i) => {
+        const text = svgNode('text', { x: i ? '135' : '83', y: i ? '159' : '143', 'text-anchor': 'middle', class: 'monogram-initial ' + (i ? 'monogram-initial-front' : 'monogram-initial-back') });
+        text.textContent = letter; svg.append(text);
+      });
+      svg.append(svgNode('path', { class: 'monogram-flourish', d: 'M68 178C95 162 133 184 155 170M85 182C108 176 122 185 136 179' }));
+      node.replaceChildren(svg);
+    });
+  }
   function updateDesign(cfg) {
     design = InvitationDesign.normalize(cfg.design);
     const visibility = { quote: ['quote-scene'], story: ['love-story-section'], gallery: ['gallery-section'], rsvp: ['rsvp-section'], gift: ['gift-section'], album: ['shared-album-section'], camera: ['pocket-cam-section'] };
@@ -82,8 +104,7 @@
     $('desktop-couple').textContent = pair; $('closing-couple').textContent = pair;
     $('desktop-date').textContent = cfg.event?.dateFormatted || '';
     $('desktop-guest').textContent = $('cover-guest-name').textContent;
-    const initials = [cfg.couple?.groom, cfg.couple?.bride].map(p => Array.from(p?.shortName || p?.name || '')[0] || '').join(' & ');
-    document.querySelectorAll('.couple-monogram').forEach(node => node.textContent = initials);
+    renderMonogram(cfg);
     document.querySelectorAll('[data-scene]').forEach(node => background(node, design.backgrounds[node.dataset.scene] || cfg.event?.backgroundImage || ''));
     document.querySelectorAll('.scene-ornament-top').forEach(node => ornament(node, design.ornaments.top));
     document.querySelectorAll('.scene-ornament-bottom').forEach(node => ornament(node, design.ornaments.bottom));
