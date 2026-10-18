@@ -1,7 +1,7 @@
 /* Reception calendar entries and an album containing approved photos only. */
 WeddingApi.calendarEvent = function(cfg) {
   const event = cfg.event || {};
-  const date = String(event.countdownTarget || '').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  const date = String(event.resepsiDate || event.reception?.date || event.countdownTarget || '').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
   if (!date) return null;
   const hours = String(event.resepsiTime || event.reception?.time || '').match(/(\d{1,2})[:.](\d{2})\s*[-–—]\s*(\d{1,2})[:.](\d{2})/);
   const label = String(event.resepsiTime || event.reception?.time || '');
@@ -13,7 +13,7 @@ WeddingApi.calendarEvent = function(cfg) {
     end = new Date(`${date}T${hours[3].padStart(2, '0')}:${hours[4]}:00${offset}`);
     if (end <= start) end = new Date(end.getTime() + 86400000);
   } else {
-    const target = String(event.countdownTarget);
+    const target = date + 'T' + (String(event.countdownTarget || '').match(/T(\d{2}:\d{2}(?::\d{2})?)/)?.[1] || '11:00:00');
     start = new Date(/(Z|[+-]\d{2}:\d{2})$/.test(target) ? target : target + offset);
     end = new Date(start.getTime() + 3 * 3600000);
   }
@@ -21,7 +21,7 @@ WeddingApi.calendarEvent = function(cfg) {
   return {
     title: event.title || 'Resepsi Pernikahan', start, end, timeZone,
     location: [event.resepsiVenue || event.reception?.venue, event.resepsiAddress || event.reception?.address].filter(Boolean).join(', '),
-    details: [event.dateFormatted, event.mapsUrl, WeddingApi.buildInviteUrl(guestCodeParam, guestNameParam)].filter(Boolean).join('\n')
+    details: [WeddingApi.formatEventDate(event.resepsiDate || event.reception?.date, event.dateFormatted), event.mapsUrl, WeddingApi.buildInviteUrl(guestCodeParam, guestNameParam)].filter(Boolean).join('\n')
   };
 };
 const calendarStamp = date => date.toISOString().replace(/[-:]|\.\d{3}/g, '');

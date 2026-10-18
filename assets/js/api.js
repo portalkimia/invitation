@@ -156,7 +156,9 @@ const WeddingApi = {
     const groomName = cfg.couple?.groom?.name || raw.GROOM_NAME || groomShort;
     const brideName = cfg.couple?.bride?.name || raw.BRIDE_NAME || brideShort;
     const eventTitle = cfg.event?.title || raw.EVENT_TITLE || `The Wedding of ${couplePair}`;
-    const eventDate = cfg.event?.dateFormatted || raw.EVENT_DATE_FORMATTED || 'Minggu, 25 Oktober 2026';
+    const defaultDate = cfg.event?.dateFormatted || raw.EVENT_DATE_FORMATTED || 'Minggu, 25 Oktober 2026';
+    const akadDate = this.formatEventDate(cfg.event?.akadDate || cfg.event?.akad?.date || raw.AKAD_DATE, defaultDate);
+    const eventDate = this.formatEventDate(cfg.event?.resepsiDate || cfg.event?.reception?.date || raw.RESEPSI_DATE, defaultDate);
 
     const akadTime = cfg.event?.akadTime || cfg.event?.akad?.time || raw.AKAD_TIME || '08:00 - 10:00 WIB';
     const akadVenue = cfg.event?.akadVenue || cfg.event?.akad?.venue || raw.AKAD_VENUE || 'Masjid Agung Al-Azhar';
@@ -197,10 +199,12 @@ const WeddingApi = {
     msg = msg.replace(/\{waktu\}|\{jam\}/gi, mainTime);
     msg = msg.replace(/\{maps\}/gi, mapsUrl);
 
+    msg = msg.replace(/\{akad_tanggal\}/gi, akadDate);
     msg = msg.replace(/\{akad_waktu\}/gi, akadTime);
     msg = msg.replace(/\{akad_tempat\}/gi, akadVenue);
     msg = msg.replace(/\{akad_alamat\}/gi, akadAddress);
 
+    msg = msg.replace(/\{resepsi_tanggal\}/gi, eventDate);
     msg = msg.replace(/\{resepsi_waktu\}/gi, resepsiTime);
     msg = msg.replace(/\{resepsi_tempat\}/gi, resepsiVenue);
     msg = msg.replace(/\{resepsi_alamat\}/gi, resepsiAddress);
@@ -442,6 +446,15 @@ const WeddingApi = {
     }
   },
 
+  // Interpret date-only values in UTC so a guest's time zone cannot shift the day.
+  formatEventDate(value, fallback = '') {
+    const text = String(value || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return fallback;
+    const date = new Date(text + 'T12:00:00Z');
+    if (isNaN(date) || date.toISOString().slice(0, 10) !== text) return fallback;
+    return new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+  },
+
   saveCachedSettings(settings) {
     if (typeof localStorage === 'undefined' || !settings) return;
     try {
@@ -494,11 +507,13 @@ const WeddingApi = {
     if (settings.BRIDE_PHOTO !== undefined && settings.BRIDE_PHOTO !== '') cfg.couple.bride.photo = this.formatImageUrl(settings.BRIDE_PHOTO);
 
     // Akad & Resepsi
+    if (settings.AKAD_DATE !== undefined) cfg.event.akadDate = String(settings.AKAD_DATE || '');
     if (settings.AKAD_TIME) cfg.event.akadTime = settings.AKAD_TIME;
     if (settings.AKAD_VENUE) cfg.event.akadVenue = settings.AKAD_VENUE;
     if (settings.AKAD_ADDRESS) cfg.event.akadAddress = settings.AKAD_ADDRESS;
     if (settings.AKAD_NOTE) cfg.event.akadNote = settings.AKAD_NOTE;
 
+    if (settings.RESEPSI_DATE !== undefined) cfg.event.resepsiDate = String(settings.RESEPSI_DATE || '');
     if (settings.RESEPSI_TIME) cfg.event.resepsiTime = settings.RESEPSI_TIME;
     if (settings.RESEPSI_VENUE) cfg.event.resepsiVenue = settings.RESEPSI_VENUE;
     if (settings.RESEPSI_ADDRESS) cfg.event.resepsiAddress = settings.RESEPSI_ADDRESS;
