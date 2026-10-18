@@ -81,7 +81,9 @@
         text.textContent = letter; svg.append(text);
       });
       svg.append(svgNode('path', { class: 'monogram-flourish', d: 'M68 178C95 162 133 184 155 170M85 182C108 176 122 185 136 179' }));
-      node.replaceChildren(svg);
+      const caption = make('span', 'monogram-caption', initials.filter(Boolean).join(' & '));
+      caption.setAttribute('aria-hidden', 'true');
+      node.replaceChildren(svg, caption);
     });
   }
   function updateDesign(cfg) {
