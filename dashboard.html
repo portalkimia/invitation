@@ -894,6 +894,7 @@
           loadDashboardData();
           return;
         }
+        authSubtitle.textContent = 'Silakan masuk dengan PIN admin.';
         authError.textContent = handoff.error || 'Sesi Wedding Fund tidak dapat digunakan. Silakan masuk dengan PIN admin.';
         authError.classList.remove('hidden');
       }
