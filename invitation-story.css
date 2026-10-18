@@ -39,3 +39,5 @@ html{scroll-behavior:smooth}body.story-layout{background:var(--paper);color:var(
 .monogram-initial{font-family:'Great Vibes',cursive;font-size:140px;font-weight:400;letter-spacing:0;fill:var(--ink)}
 .monogram-initial-front{paint-order:stroke fill;stroke:var(--paper);stroke-width:1.8;stroke-linejoin:round}
 .monogram-flourish{stroke-width:.7;opacity:.8}
+.couple-monogram{position:relative}
+.monogram-caption{position:absolute;top:100%;left:0;width:100%;display:block;margin-top:4px;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;line-height:1.4;letter-spacing:.16em;color:var(--ink);text-align:center}
