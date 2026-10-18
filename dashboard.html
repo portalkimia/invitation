@@ -879,6 +879,24 @@
     const btnSubmitPin = document.getElementById('btn-submit-pin');
 
     async function checkAuth() {
+      const handoffTicket = new URLSearchParams(window.location.hash.slice(1)).get('wf-handoff');
+      if (handoffTicket) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        authModal.classList.remove('hidden');
+        mainContent.classList.add('hidden');
+        authForm.classList.add('hidden');
+        authLoading.classList.remove('hidden');
+        authSubtitle.textContent = 'Menghubungkan sesi Wedding Fund...';
+        const handoff = await WeddingApi.postToGas('exchangeWeddingFundTicket', { ticket: handoffTicket });
+        if (handoff.valid && handoff.sessionToken && WeddingApi.getStoredPin('admin') === handoff.sessionToken) {
+          authModal.classList.add('hidden');
+          mainContent.classList.remove('hidden');
+          loadDashboardData();
+          return;
+        }
+        authError.textContent = handoff.error || 'Sesi Wedding Fund tidak dapat digunakan. Silakan masuk dengan PIN admin.';
+        authError.classList.remove('hidden');
+      }
       const savedPin = WeddingApi.getStoredPin('admin');
 
       if (!savedPin) {
