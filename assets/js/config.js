@@ -28,35 +28,34 @@ const WEDDING_CONFIG = {
 
   // Couple Information & Photos
   couple: {
-    // Optional prewedding/cover photo (e.g. 'assets/images/cover.jpg' or online URL)
-    coverPhoto: '',
+    // Prewedding/cover photo
+    coverPhoto: 'https://images.unsplash.com/photo-1773020933751-2eb621c517dc?auto=format&fit=crop&w=1400&q=80',
     groom: {
-      name: 'Romeo Montague',
-      shortName: 'Romeo',
-      father: 'Bpk. Montague',
-      mother: 'Ibu Montague',
-      bio: 'Putra pertama dari Bpk. Montague & Ibu Montague',
-      // Foto mempelai pria (e.g. 'assets/images/groom.jpg' or online URL)
-      photo: ''
+      name: 'Tito Vanzal, S.Pd',
+      shortName: 'Tito',
+      father: 'Bpk. Bahari Stiok',
+      mother: 'Ibu Maryamah',
+      bio: 'Putra kelima dari Bpk. Bahari Stiok & Ibu Maryamah',
+      photo: 'https://images.unsplash.com/photo-1770217614107-949ac780f22b?auto=format&fit=crop&w=800&q=80'
     },
     bride: {
-      name: 'Juliet Capulet',
-      shortName: 'Juliet',
-      father: 'Bpk. Capulet',
-      mother: 'Ibu Capulet',
-      bio: 'Putri bungsu dari Bpk. Capulet & Ibu Capulet',
-      // Foto mempelai wanita (e.g. 'assets/images/bride.jpg' or online URL)
-      photo: ''
+      name: 'Dhevira Aptia Firmanda, S.Pd',
+      shortName: 'Vira',
+      father: 'Bpk. M. Firul',
+      mother: 'Ibu Suparti',
+      bio: 'Putri bungsu dari Bpk. M. Firul & Ibu Suparti',
+      photo: 'https://images.unsplash.com/photo-1693605975772-afe6965ae876?auto=format&fit=crop&w=800&q=80'
     }
   },
 
   // Event Details & Background
   event: {
-    title: 'Pernikahan Romeo & Juliet',
-    dateFormatted: 'Minggu, 25 Oktober 2026',
-    countdownTarget: '2026-10-25T08:00:00+07:00',
-    // Optional background image for invitation (e.g. 'assets/images/bg.jpg' or online URL)
-    backgroundImage: '',
+    title: 'Pernikahan Tivara & Aurelia',
+    dateFormatted: 'Senin, 25 Oktober 2027',
+    countdownTarget: '2027-10-25T08:00:00+07:00',
+    backgroundImage: 'https://images.unsplash.com/photo-1523454131402-131223cdd00e?auto=format&fit=crop&w=1000&q=80',
+    akadDate: '2027-10-25',
+    resepsiDate: '2027-10-25',
     akadTime: '08:00 - 10:00 WIB',
     akadVenue: 'Masjid Agung Al-Azhar',
     akadAddress: 'Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan',
@@ -97,18 +96,18 @@ const WEDDING_CONFIG = {
     {
       bank: 'BCA',
       accountNumber: '1234567890',
-      holderName: 'Romeo Montague'
+      holderName: 'Tito Vanzal'
     },
     {
       bank: 'Bank Mandiri',
       accountNumber: '9876543210123',
-      holderName: 'Juliet Capulet'
+      holderName: 'Dhevira Aptia'
     }
   ],
 
   // Gift Delivery Address
   giftAddress: {
-    recipient: 'Romeo & Juliet',
+    recipient: 'Tito & Vira',
     phone: '08123456789',
     address: 'Jl. Kebahagiaan No. 10, Kebayoran Baru, Jakarta Selatan, 12180'
   },
@@ -116,24 +115,24 @@ const WEDDING_CONFIG = {
   // Love Story Milestones (Kisah Perjalanan Cinta)
   loveStory: [
     {
-      date: 'September 2021',
+      date: 'Juli 2024',
       title: 'Pertama Kali Bertemu',
       description: 'Tak sengaja bertegur sapa saat menyelesaikan proyek akhir bersama di kampus, berawal dari tatapan malu hingga percakapan hangat yang tak pernah usai.',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80',
       tag: 'Sudut Kampus'
     },
     {
-      date: 'Desember 2023',
+      date: 'Oktober 2025',
       title: 'Memulai Komitmen',
       description: 'Setelah melewati masa persahabatan yang indah, kami sepakat untuk melangkah ke babak baru bersama, saling menjaga dan menguatkan satu sama lain.',
-      image: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1773020933751-2eb621c517dc?auto=format&fit=crop&w=1000&q=80',
       tag: 'Senja Bersama'
     },
     {
-      date: 'November 2025',
+      date: 'April 2026',
       title: 'Momen Lamaran (She Said Yes!)',
       description: 'Di bawah hangatnya cahaya mentari sore dan restu kedua keluarga, sebuah cincin tersemat sebagai simbol janji suci menuju mahligai pernikahan.',
-      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
       tag: 'Bukit Pinus'
     }
   ],
@@ -141,29 +140,29 @@ const WEDDING_CONFIG = {
   // Pre-Wedding Photo Gallery
   gallery: [
     {
-      url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80',
-      title: 'Harmoni di Balutan Sutra',
-      category: 'Potret Elegan'
+      url: 'https://images.unsplash.com/photo-1773020933751-2eb621c517dc?auto=format&fit=crop&w=1000&q=80',
+      title: 'Di Antara Bunga',
+      category: 'Garden Romance'
     },
     {
-      url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&auto=format&fit=crop&q=80',
-      title: 'Gelak Tawa di Bawah Mentari',
-      category: 'Momen Spontan'
+      url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
+      title: 'Langkah Menuju Selamanya',
+      category: 'Hari Bahagia'
     },
     {
-      url: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800&auto=format&fit=crop&q=80',
-      title: 'Simbol Pengikat Janji',
-      category: 'Detail Cincin'
+      url: 'https://images.unsplash.com/photo-1484676681417-64a0ea3475fd?auto=format&fit=crop&w=1000&q=80',
+      title: 'Bunga dan Janji',
+      category: 'Detail Pernikahan'
     },
     {
-      url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&auto=format&fit=crop&q=80',
-      title: 'Tatapan Penuh Ketulusan',
-      category: 'Potret Mempelai'
+      url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1000&q=80',
+      title: 'Dalam Genggaman',
+      category: 'Momen Bersama'
     },
     {
-      url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1000&auto=format&fit=crop&q=80',
-      title: 'Janji di Cakrawala Senja',
-      category: 'Siluet Sunset'
+      url: 'https://images.unsplash.com/photo-1772241824154-ce6e7c985ff9?auto=format&fit=crop&w=1000&q=80',
+      title: 'Hari yang Kita Nantikan',
+      category: 'Potret Pernikahan'
     }
   ],
 

@@ -63,10 +63,14 @@
   }
   function ornament(node, url) { if (!node) return; node.hidden = !url; if (url) node.src = url; else node.removeAttribute('src'); }
   function renderMonogram(cfg) {
-    const initials = ['groom', 'bride'].map(key => {
-      const person = cfg.couple?.[key];
-      return Array.from(String(person?.shortName || cfg.couple?.[key + 'Short'] || person?.name || '').trim())[0]?.toLocaleUpperCase('id-ID') || '';
-    });
+    const groomInitial = Array.from(String(cfg.couple?.groom?.shortName || cfg.couple?.groomShort || cfg.couple?.groom?.name || 'T').trim())[0]?.toLocaleUpperCase('id-ID') || 'T';
+    const brideInitial = Array.from(String(cfg.couple?.bride?.shortName || cfg.couple?.brideShort || cfg.couple?.bride?.name || 'V').trim())[0]?.toLocaleUpperCase('id-ID') || 'V';
+    const initials = [groomInitial, brideInitial];
+
+    const groomShort = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || 'Tito';
+    const brideShort = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || 'Vira';
+    const captionText = `${groomShort} & ${brideShort}`;
+
     const svgNode = (tag, attrs) => {
       const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
       Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
@@ -74,14 +78,38 @@
     };
     document.querySelectorAll('.couple-monogram').forEach(node => {
       const svg = svgNode('svg', { viewBox: '0 0 220 220', class: 'wedding-monogram', role: 'img', 'aria-label': 'Monogram ' + initials.filter(Boolean).join(' dan '), focusable: 'false' });
-      svg.append(svgNode('path', { class: 'monogram-ring', d: 'M164 24C206 52 209 135 177 179C148 218 75 213 43 177C9 139 16 57 55 29C85 8 131 8 157 20' }));
-      svg.append(svgNode('path', { class: 'monogram-ring monogram-ring-inner', d: 'M53 44C25 78 28 141 55 172C81 202 139 207 169 175C199 141 199 78 176 47' }));
-      initials.forEach((letter, i) => {
-        const text = svgNode('text', { x: i ? '135' : '83', y: i ? '159' : '143', 'text-anchor': 'middle', class: 'monogram-initial ' + (i ? 'monogram-initial-front' : 'monogram-initial-back') });
-        text.textContent = letter; svg.append(text);
-      });
-      svg.append(svgNode('path', { class: 'monogram-flourish', d: 'M68 178C95 162 133 184 155 170M85 182C108 176 122 185 136 179' }));
-      const caption = make('span', 'monogram-caption', initials.filter(Boolean).join(' & '));
+
+      // Luxury Concentric Crest Rings (symmetric, elegant, no lines cutting through letters)
+      svg.append(svgNode('circle', { cx: '110', cy: '110', r: '98', class: 'monogram-ring monogram-ring-outer' }));
+      svg.append(svgNode('circle', { cx: '110', cy: '110', r: '92', class: 'monogram-ring monogram-ring-inner' }));
+
+      // 4 Cardinal Diamond Accents
+      svg.append(svgNode('polygon', { points: '110,6 113,12 110,18 107,12', class: 'monogram-accent-dot' }));
+      svg.append(svgNode('polygon', { points: '110,202 113,208 110,214 107,208', class: 'monogram-accent-dot' }));
+      svg.append(svgNode('polygon', { points: '6,110 12,113 18,110 12,107', class: 'monogram-accent-dot' }));
+      svg.append(svgNode('polygon', { points: '202,110 208,113 214,110 208,107', class: 'monogram-accent-dot' }));
+
+      // Groom Initial
+      const textGroom = svgNode('text', { x: '76', y: '117', 'text-anchor': 'middle', class: 'monogram-initial-serif' });
+      textGroom.textContent = groomInitial;
+      svg.append(textGroom);
+
+      // Ampersand
+      const textAmp = svgNode('text', { x: '110', y: '113', 'text-anchor': 'middle', class: 'monogram-ampersand' });
+      textAmp.textContent = '&';
+      svg.append(textAmp);
+
+      // Bride Initial
+      const textBride = svgNode('text', { x: '144', y: '117', 'text-anchor': 'middle', class: 'monogram-initial-serif' });
+      textBride.textContent = brideInitial;
+      svg.append(textBride);
+
+      // Laurel arc below initials
+      svg.append(svgNode('path', { class: 'monogram-crest-flourish', d: 'M68,143 C90,154 130,154 152,143 M86,149 C98,153 122,153 134,149' }));
+      svg.append(svgNode('circle', { cx: '110', cy: '153', r: '2.5', class: 'monogram-accent-dot' }));
+
+      // Clean Sub-Caption
+      const caption = make('span', 'monogram-caption', captionText);
       caption.setAttribute('aria-hidden', 'true');
       node.replaceChildren(svg, caption);
     });

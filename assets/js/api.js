@@ -150,8 +150,8 @@ const WeddingApi = {
     const base = (typeof WEDDING_CONFIG !== 'undefined') ? WEDDING_CONFIG : {};
     const cfg = config || this.mapSettingsToConfig(raw, base);
 
-    const groomShort = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || raw.GROOM_SHORT || 'Romeo';
-    const brideShort = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || raw.BRIDE_SHORT || 'Juliet';
+    const groomShort = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || raw.GROOM_SHORT || 'Tito';
+    const brideShort = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || raw.BRIDE_SHORT || 'Vira';
     const couplePair = `${groomShort} & ${brideShort}`;
     const groomName = cfg.couple?.groom?.name || raw.GROOM_NAME || groomShort;
     const brideName = cfg.couple?.bride?.name || raw.BRIDE_NAME || brideShort;
@@ -228,8 +228,8 @@ const WeddingApi = {
    * Build Google Calendar 1-Click "Add to Calendar" URL
    */
   buildGoogleCalendarUrl(cfg = {}) {
-    const groom = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || 'Romeo';
-    const bride = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || 'Juliet';
+    const groom = cfg.couple?.groom?.shortName || cfg.couple?.groomShort || 'Tito';
+    const bride = cfg.couple?.bride?.shortName || cfg.couple?.brideShort || 'Vira';
     const title = cfg.event?.title || `The Wedding of ${groom} & ${bride}`;
 
     let startDate = new Date();
