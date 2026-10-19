@@ -1,5 +1,15 @@
 # Deployment aktif
 
+## Optimasi unggahan kamera — 19 Oktober 2026
+
+- Backend aktif diperbarui dari versi 10 menjadi **11** pada deployment dan URL yang sama, tanpa perubahan manifest, pemilik atau hak akses. Integrasi login Wedding Fund tetap disertakan.
+- Reservasi lock 1,5 detik, indeks cache dengan pemeriksaan log durable, finalisasi terbatas 10 detik, pemulihan file yang sudah ada, lease 390 detik dan owner token. PocketLogs menambah kolom J attemptToken tanpa menggeser kolom sebelumnya.
+- Halaman pocket-cam.html menghormati retryAfterMs dan menyimpan nextAttemptAt agar pemuatan ulang tidak memicu retry serentak. Sukses memerlukan photoUrl dari server.
+- Uji final 50 klien HTTP × 3 JPEG dummy 250 KB: 150/150 tersimpan; 0 hilang, duplikat, log tertunda atau kesalahan kuota. Replay 50 ID selesai tanpa file tambahan.
+- Median 21,2 detik, p95 103,9 detik, maksimum 133,4 detik; baseline 37,7 / 222,8 / 250,2 detik. Masih ada respons sibuk dan retry. Sukses percobaan pertama 67/150; tidak boleh dianggap unggah 50 pengguna langsung lancar tanpa antrean.
+- 71 pemeriksaan backend dan simulasi controller 50 klien lulus. Uji nyata memakai proyek terpisah, bukan 50 HP atau jaringan venue. Tidak mengubah kuota/kehadiran tamu produksi.
+- Lihat CAMERA-LOAD-TEST.md untuk perbandingan seluruh percobaan dan batas hasil. Bukti run akhir: 20261019150207.
+
 ## Royal Crest Monogram & Sinkronisasi Konfigurasi Live — 19 Oktober 2026
 
 - **Redesain Total Monogram (Royal Crest Emblem)**:

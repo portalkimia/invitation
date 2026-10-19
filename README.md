@@ -1,5 +1,9 @@
 # Wedding App
 
+## Optimasi unggahan kamera (19 Oktober 2026)
+
+Antrean kamera mengikuti waktu tunggu server dan mempertahankan jadwal retry setelah pemuatan ulang. Backend mengurangi pekerjaan di dalam lock dan memulihkan file yang sudah masuk Drive tanpa duplikasi. PocketLogs menambah kolom J attemptToken; jangan gunakan kolom ini untuk data lain. Uji nyata 50 klien berhasil menyimpan 150/150 foto, tetapi unggahan tetap dapat mengantre. Lihat CAMERA-LOAD-TEST.md untuk angka, bukti, dan batas hasil.
+
 ## Peningkatan operasional v3 (17 Oktober 2026)
 
 - **Desain:** tombol Upload / potong foto pada kolom gambar, pratinjau potongan asli/4:5/1:1/16:9, zoom dan geser titik fokus, kompres maksimal 1600 px. PNG mempertahankan transparansi. Gambar diunggah melalui sesi admin ke subfolder `WeddingDesign` pada folder foto yang sudah dikonfigurasi. Upload memasukkan URL ke draf; penerbitan tetap terpisah.
@@ -44,7 +48,7 @@ Undangan digital dengan pengelolaan tamu, meja resepsi, Pocket Camera, dan album
 Frontend dan backend versi ini perlu dipasang bersama. Perubahan di Desktop belum memperbarui situs yang sudah terbit.
 
 1. Siapkan Google Spreadsheet dan dua folder Drive: foto kedatangan dan foto Pocket Camera.
-2. Buka Apps Script dari Spreadsheet, lalu gunakan seluruh isi backend/Code.gs. Backend tetap berada dalam satu berkas.
+2. Buka Apps Script dari Spreadsheet, lalu gunakan seluruh isi backend/Kode.js. Backend tetap berada dalam satu berkas.
 3. Isi CONFIG.CHECKIN_FOLDER_ID dan CONFIG.POCKET_FOLDER_ID. Untuk script yang terikat ke Spreadsheet, SPREADSHEET_ID boleh kosong.
 4. Jalankan setupDatabase dari editor Apps Script untuk menyiapkan/merapikan tab. Fungsi ini juga tersedia melalui menu Spreadsheet dan tombol dashboard setelah login.
 5. Buat/perbarui deployment Web app, dijalankan sebagai pemilik, dengan akses Anyone. Untuk deployment lama: Manage deployments → Edit → New version → Deploy agar URL /exec tetap sama.
@@ -56,7 +60,7 @@ Kolom tambahan berada di sebelah kanan data lama:
 | Tab | Kolom tambahan |
 | --- | --- |
 | Guests | L actualPax, M checkInRequestId, N waOpenedAt, O group |
-| PocketLogs | F requestId, G moderation, H uploadStatus, I leaseUntil |
+| PocketLogs | F requestId, G moderation, H uploadStatus, I leaseUntil, J attemptToken |
 
 Jangan menggeser kolom lama atau memakai kolom tambahan untuk data lain. Check-in lama tanpa jumlah aktual ditampilkan sebagai jumlah belum tercatat. Angka RSVP tidak otomatis dianggap sebagai jumlah orang hadir. Foto lama menunggu persetujuan sebelum ditampilkan. Status WhatsApp lama dipertahankan dan dapat dikoreksi melalui pembatalan status.
 

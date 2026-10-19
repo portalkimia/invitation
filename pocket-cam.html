@@ -884,6 +884,9 @@
       while (uploadQueue.length > 0 && navigator.onLine) {
         const item = uploadQueue.find(item => !item.failed);
         if (!item) break;
+        const waitUntil = Number(item.nextAttemptAt || 0);
+        if (waitUntil > Date.now()) await new Promise(r => setTimeout(r, Math.min(60000, waitUntil - Date.now())));
+        if (!navigator.onLine) break;
         const queueTotal = uploadQueue.length;
 
         // Friendly live status for guest
@@ -906,7 +909,7 @@
 
           const res = await WeddingApi.postToGas('uploadPocketPhoto', payload);
 
-          if (res && (res.success || res.mock)) {
+          if (res && res.success && res.photoUrl) {
             // Success! Remove from queue and save state
             uploadQueue.splice(uploadQueue.indexOf(item), 1);
             const savedPhoto = localReelPhotos.find(photo => photo.id === item.id);
@@ -928,7 +931,7 @@
             const reason = (res && res.error) ? res.error : 'Server sibuk';
             item.lastError = reason;
             if (res?.permanent) { item.failed = true; await saveQueueToStorage(); renderReel(); }
-            else await handleQueueRetry(item, reason);
+            else await handleQueueRetry(item, reason, res?.retryAfterMs);
           }
         } catch (err) {
           await handleQueueRetry(item, err.message || 'Koneksi terganggu');
@@ -942,16 +945,18 @@
       }
     }
 
-    async function handleQueueRetry(item, reason) {
+    async function handleQueueRetry(item, reason, retryAfterMs) {
       item.retries = (item.retries || 0) + 1;
-      await saveQueueToStorage();
+      const advised = Math.min(60000, Math.max(0, Number(retryAfterMs) || 0));
 
       const maxRetries = 5;
       if (item.retries <= maxRetries) {
         // Exponential backoff + random jitter (e.g. ~2s, ~4s, ~7s, ~11s, max 15s)
         const base = Math.min(14000, Math.pow(1.7, item.retries) * 1200);
-        const jitter = Math.random() * 800;
-        const delay = Math.round(base + jitter);
+        const jitter = Math.random() * 1600;
+        const delay = Math.round(Math.max(base, advised) + jitter);
+        item.nextAttemptAt = Date.now() + delay;
+        await saveQueueToStorage();
         const sec = Math.max(1, Math.round(delay / 1000));
 
         uploadStatusText.innerHTML = `<span class="text-amber-300">⚠️ Jaringan padat, mencoba ulang foto #${item.shotNumber} dlm ${sec}s (${item.retries}/${maxRetries})...</span>`;
@@ -959,7 +964,10 @@
       } else {
         // Exceeded 5 quick retries: give 20s cooling period but KEEP the photo safe in phone storage!
         uploadStatusText.innerHTML = `<span class="text-rose-400">⚠️ Foto #${item.shotNumber} aman di HP. Menunggu koneksi lebih lancar...</span>`;
-        await new Promise(r => setTimeout(r, 20000));
+        const delay = Math.max(20000, advised) + Math.round(Math.random() * 1600);
+        item.nextAttemptAt = Date.now() + delay;
+        await saveQueueToStorage();
+        await new Promise(r => setTimeout(r, delay));
         item.retries = 2; // Soft reset so it will continue attempting
         await saveQueueToStorage();
       }
