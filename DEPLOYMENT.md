@@ -1,6 +1,17 @@
 # Deployment aktif
 
+## Cadangan foto ke HP — 20 Oktober 2026
+
+- Tombol Unduh cadangan foto ke HP tersedia pada layar kamera dan membuka Roll Foto & Cadangan.
+- Setiap foto memiliki tombol Unduh foto yang lebih besar. Seluruh foto pada roll perangkat ini juga dapat diunduh dalam satu ZIP, dengan nama file unik dan urutan berdasarkan nomor foto.
+- ZIP dibuat di perangkat dari salinan lokal, tanpa request jaringan, kompresi ulang gambar, atau pemakaian kuota foto. Foto yang belum terkirim ke Drive tetap dapat dicadangkan. Antrean unggahan dan foto lokal dipertahankan.
+- Panel menjelaskan cara membuka/mengekstrak ZIP dan lokasi Unduhan / Files. Tombol ZIP nonaktif jika roll kosong, dan menampilkan progres saat sedang dibuat. Aplikasi tidak menganggap file sudah tersimpan di HP hanya karena unduhan dimulai.
+- Pembaruan hanya pada pocket-cam.html. Backend tetap versi 11. Pemeriksaan dilakukan melalui pembacaan perubahan kode; tidak menambahkan atau menjalankan pengujian otomatis baru untuk perubahan ini.
+
+
 ## Optimasi unggahan kamera — 19 Oktober 2026
+
+- Frontend terbit pada commit 1b9597cc4805c35a87f0972f36c682c8d1053e55. GitHub Pages berhasil: https://github.com/portalkimia/invitation/actions/runs/39275417910. Halaman demo publik terbuka dan ping backend berhasil (HTTP 200, API v3).
 
 - Backend aktif diperbarui dari versi 10 menjadi **11** pada deployment dan URL yang sama, tanpa perubahan manifest, pemilik atau hak akses. Integrasi login Wedding Fund tetap disertakan.
 - Reservasi lock 1,5 detik, indeks cache dengan pemeriksaan log durable, finalisasi terbatas 10 detik, pemulihan file yang sudah ada, lease 390 detik dan owner token. PocketLogs menambah kolom J attemptToken tanpa menggeser kolom sebelumnya.

@@ -290,32 +290,42 @@
         <i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-amber-400"></i>
         <span id="upload-status-text">Kamera siap mengambil momen</span>
       </div>
+      <button id="btn-open-backup" type="button" class="min-h-[44px] px-3 py-2 rounded-xl border border-amber-500/40 text-amber-300 text-xs font-semibold inline-flex items-center justify-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>Unduh cadangan foto ke HP</span>
+      </button>
 
     </div>
 
   </main>
 
   <!-- ==================== FILM REEL DRAWER / MODAL ==================== -->
-  <div id="reel-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-stone-900 rounded-3xl max-w-md w-full p-6 border border-stone-800 shadow-2xl flex flex-col max-h-[85vh]">
-      <div class="flex items-center justify-between pb-3 border-b border-stone-800">
+  <div id="reel-modal" role="dialog" aria-modal="true" aria-labelledby="reel-title" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-stone-900 rounded-3xl max-w-md w-full p-4 sm:p-6 border border-stone-800 shadow-2xl flex flex-col max-h-[85vh] overflow-y-auto">
+      <div class="flex shrink-0 items-center justify-between pb-3 border-b border-stone-800">
         <div>
-          <h3 class="font-bold text-white text-base">Roll Foto Saya</h3>
+          <h3 id="reel-title" class="font-bold text-white text-base">Roll Foto & Cadangan</h3>
           <p class="text-xs text-stone-400"><span id="modal-shots-taken">0</span> dari 18 foto terabadikan</p>
         </div>
-        <button id="btn-close-reel" class="p-1 rounded-lg text-stone-400 hover:text-white">
+        <button id="btn-close-reel" aria-label="Tutup roll foto" class="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-stone-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Gallery Grid -->
-      <div id="reel-grid" class="flex-1 overflow-y-auto py-4 grid grid-cols-3 gap-2">
-        <!-- Thumbnails populated dynamically -->
-        <p class="col-span-3 text-center text-xs text-stone-500 py-8">Belum ada foto yang diambil.</p>
+      <div class="shrink-0 pt-3">
+        <p class="text-xs text-stone-300 leading-relaxed mb-3">Simpan salinan ke HP, termasuk foto yang masih menunggu unggahan. Mengunduh tidak menghapus foto atau menghentikan unggahan.</p>
+        <button id="btn-download-all-photos" type="button" disabled class="w-full min-h-[44px] px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-stone-950 font-bold text-xs">Unduh semua foto (ZIP)</button>
+        <p id="backup-download-status" role="status" aria-live="polite" class="text-[11px] text-stone-400 leading-relaxed mt-2">ZIP berisi foto JPG/PNG. Setelah diunduh, buka ZIP lalu pilih Ekstrak. Untuk satu foto, pilih Unduh foto di bawah gambarnya.</p>
       </div>
 
-      <div class="pt-3 border-t border-stone-800 flex justify-between items-center text-[11px] text-stone-400">
-        <span id="reel-storage-note">Tersimpan otomatis ke Google Drive</span>
+      <!-- Gallery Grid -->
+      <div id="reel-grid" class="flex-1 min-h-0 overflow-y-auto py-4 grid grid-cols-2 gap-3">
+        <!-- Thumbnails populated dynamically -->
+        <p class="col-span-2 text-center text-xs text-stone-500 py-8">Belum ada foto yang diambil.</p>
+      </div>
+
+      <div class="shrink-0 pt-3 border-t border-stone-800 flex gap-3 justify-between items-center text-[11px] text-stone-400">
+        <span id="reel-storage-note">Foto dikirim ke Drive saat tersambung</span>
         <button id="btn-back-to-cam" class="py-1.5 px-3 rounded-lg bg-amber-500 text-stone-950 font-bold">
           Kembali ke Kamera
         </button>
@@ -1009,8 +1019,12 @@
     // 6. Film Reel Gallery Modal
     const reelModal = document.getElementById('reel-modal');
     const reelGrid = document.getElementById('reel-grid');
+    const backupAllButton = document.getElementById('btn-download-all-photos');
+    const backupStatus = document.getElementById('backup-download-status');
+    let isBackupDownloading = false;
 
     document.getElementById('btn-open-reel').addEventListener('click', openReel);
+    document.getElementById('btn-open-backup').addEventListener('click', openReel);
     document.getElementById('btn-view-roll-completed').addEventListener('click', openReel);
 
     function openReel() {
@@ -1027,9 +1041,107 @@
     document.getElementById('btn-close-reel').addEventListener('click', closeReel);
     document.getElementById('btn-back-to-cam').addEventListener('click', closeReel);
 
+    function backupGuestCode() {
+      return String(currentGuest?.code || 'tamu').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60);
+    }
+
+    function backupPhotoBytes(photo) {
+      const match = String(photo.dataUrl || '').match(/^data:image\/(jpeg|png);base64,([A-Za-z0-9+/=\s]+)$/);
+      if (!match) throw new Error('Salinan foto belum tersedia pada perangkat ini.');
+      const binary = atob(match[2].replace(/\s/g, ''));
+      if (!binary.length) throw new Error('Salinan foto kosong.');
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return { bytes, mime: 'image/' + match[1], extension: match[1] === 'png' ? 'png' : 'jpg' };
+    }
+
+    function downloadBackupBlob(blob, name) {
+      const url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = name;
+      document.body.append(link);
+      try { link.click(); }
+      finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); }
+    }
+
+    function downloadPhotoBackup(photo) {
+      try {
+        const { bytes, mime, extension } = backupPhotoBytes(photo);
+        downloadBackupBlob(new Blob([bytes], { type: mime }), 'wedding-' + backupGuestCode() + '-foto-' + photo.shotNumber + '.' + extension);
+        backupStatus.textContent = 'Unduhan foto #' + photo.shotNumber + ' dimulai. Periksa folder Unduhan / Files di HP. Jika browser membuka foto, tekan lama gambar lalu pilih Simpan gambar.';
+      } catch (error) {
+        backupStatus.textContent = 'Foto belum dapat diunduh. ' + error.message;
+      }
+    }
+
+    // Stored ZIP with CRC32; no network request or image recompression.
+    // Format: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+    const backupCrcTable = Uint32Array.from({ length: 256 }, (_, value) => {
+      for (let bit = 0; bit < 8; bit++) value = (value & 1) ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+      return value >>> 0;
+    });
+
+    async function createPhotoBackupZip(photos, code) {
+      if (!photos.length || photos.length >= 65535) throw new Error('Jumlah foto tidak dapat dimasukkan ke ZIP.');
+      const files = [], directory = [], encoder = new TextEncoder();
+      let offset = 0, directorySize = 0;
+      for (let i = 0; i < photos.length; i++) {
+        backupStatus.textContent = 'Menyiapkan cadangan ' + (i + 1) + ' dari ' + photos.length + ' foto…';
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const photo = photos[i], { bytes, extension } = backupPhotoBytes(photo);
+        const shot = Math.max(1, Math.floor(Number(photo.shotNumber) || i + 1));
+        const name = encoder.encode(String(i + 1).padStart(3, '0') + '-wedding-' + code + '-foto-' + shot + '.' + extension);
+        let crc = 0xffffffff;
+        for (let j = 0; j < bytes.length; j++) crc = backupCrcTable[(crc ^ bytes[j]) & 255] ^ (crc >>> 8);
+        crc = (crc ^ 0xffffffff) >>> 0;
+        let date = new Date(photo.timestamp || Date.now());
+        if (!Number.isFinite(date.getTime())) date = new Date();
+        const dosDate = ((Math.max(1980, Math.min(2107, date.getFullYear())) - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+        const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+        const local = new Uint8Array(30 + name.length), h = new DataView(local.buffer);
+        h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+        h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true); h.setUint32(14, crc, true);
+        h.setUint32(18, bytes.length, true); h.setUint32(22, bytes.length, true); h.setUint16(26, name.length, true); local.set(name, 30);
+        const central = new Uint8Array(46 + name.length), c = new DataView(central.buffer);
+        c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+        c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true); c.setUint32(16, crc, true);
+        c.setUint32(20, bytes.length, true); c.setUint32(24, bytes.length, true); c.setUint16(28, name.length, true);
+        c.setUint32(42, offset, true); central.set(name, 46);
+        files.push(local, bytes); directory.push(central);
+        offset += local.length + bytes.length; directorySize += central.length;
+        if (offset + directorySize >= 0xffffffff) throw new Error('Cadangan terlalu besar. Unduh foto satu per satu.');
+      }
+      const end = new Uint8Array(22), e = new DataView(end.buffer);
+      e.setUint32(0, 0x06054b50, true); e.setUint16(8, photos.length, true); e.setUint16(10, photos.length, true);
+      e.setUint32(12, directorySize, true); e.setUint32(16, offset, true);
+      return new Blob([...files, ...directory, end], { type: 'application/zip' });
+    }
+
+    function updateBackupButton() {
+      backupAllButton.disabled = isBackupDownloading || !localReelPhotos.length;
+      backupAllButton.textContent = isBackupDownloading ? 'Menyiapkan ZIP…' : localReelPhotos.length ? 'Unduh semua ' + localReelPhotos.length + ' foto (ZIP)' : 'Unduh semua foto (ZIP)';
+    }
+
+    backupAllButton.addEventListener('click', async () => {
+      if (isBackupDownloading || !localReelPhotos.length) return;
+      const photos = localReelPhotos.slice().sort((a, b) => a.shotNumber - b.shotNumber), code = backupGuestCode();
+      isBackupDownloading = true; updateBackupButton();
+      try {
+        const zip = await createPhotoBackupZip(photos, code);
+        downloadBackupBlob(zip, 'wedding-' + code + '-cadangan.zip');
+        backupStatus.textContent = 'Unduhan ZIP berisi ' + photos.length + ' foto dimulai. Periksa folder Unduhan / Files, lalu buka ZIP dan pilih Ekstrak. Unggahan ke Drive tetap berjalan.';
+      } catch (error) {
+        backupStatus.textContent = 'ZIP belum dapat dibuat. Coba Unduh foto satu per satu. ' + error.message;
+      } finally { isBackupDownloading = false; updateBackupButton(); }
+    });
+
     function renderReel() {
       reelGrid.replaceChildren();
-      if (!localReelPhotos.length) { reelGrid.textContent = 'Belum ada foto pada perangkat ini.'; return; }
+      updateBackupButton();
+      if (!localReelPhotos.length) {
+        const empty = document.createElement('p'); empty.className = 'col-span-2 text-center text-xs text-stone-400 py-6';
+        empty.textContent = 'Belum ada foto pada perangkat ini. Setelah memotret, foto dapat diunduh di sini.';
+        reelGrid.append(empty); return;
+      }
       for (const photo of localReelPhotos) {
         const pending = uploadQueue.find(item => item.id ? item.id === photo.id : item.shotNumber === photo.shotNumber);
         const card = document.createElement('div'); card.className = 'rounded-xl bg-stone-800 border border-stone-700 overflow-hidden';
@@ -1037,8 +1149,11 @@
         image.className = 'aspect-square object-cover w-full';
         const status = document.createElement('p'); status.className = 'p-2 text-[10px] text-amber-300';
         status.textContent = pending ? (pending.failed ? 'Perlu tindakan: ' + (pending.lastError || 'Upload tertunda') : 'Menunggu upload') : photo.uploaded ? 'Tersimpan di Drive' : 'Salinan di perangkat';
-        const save = document.createElement('button'); save.textContent = 'Simpan ke HP'; save.className = 'm-2 mt-0 text-[10px] text-white underline';
-        save.onclick = () => WeddingApi.download(photo.dataUrl, 'wedding-' + currentGuest.code + '-' + photo.shotNumber + '.jpg', 'image/jpeg');
+        const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Unduh foto';
+        save.className = 'block min-h-[44px] m-2 mt-0 px-2 py-2 rounded-lg border border-amber-400/40 bg-amber-400/10 text-xs font-semibold text-amber-200';
+        save.style.width = 'calc(100% - 16px)';
+        save.setAttribute('aria-label', 'Unduh foto nomor ' + photo.shotNumber + ' ke HP');
+        save.onclick = () => downloadPhotoBackup(photo);
         card.append(image, status, save);
         if (pending?.failed) {
           const retry = document.createElement('button'); retry.textContent = 'Coba lagi'; retry.className = 'm-2 text-[10px] text-amber-300 underline';
